@@ -19,15 +19,16 @@ endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories(thirdparty)
-
 set(SOURCES 
     main.cc
-    thirdparty/bcrypt/bcrypt.c
     ${MODEL_SRC}
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+find_package(unofficial-sodium CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE unofficial-sodium::sodium)
+
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
