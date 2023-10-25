@@ -2,10 +2,10 @@
   "rdbms": "mysql",
   "host": "127.0.0.1",
   "port": 3306,
-  "dbname": "testdb",
+  "dbname": "augventure_db",
   "schema": "public",
-  "user": "root",
-  "password": "1",
+  "user": "augventureUser",
+  "password": "augventureUserPassword",
   "tables": [],
   "convert": {
     "enabled": false,

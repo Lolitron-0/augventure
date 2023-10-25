@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>aaaaaaaa</title>
+	</head>
+	<body>
+		<a id="signup" href="#">Sign Up</a>
+
+		<script>
+			document.getElementById("signup").onclick = () => {
+				var xhr = new XMLHttpRequest();
+				var url = "/sign_up";
+				xhr.open("POST", url, true);
+				xhr.setRequestHeader("Content-Type", "application/json");
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState === 4 && xhr.status === 200) {
+						console.log(xhr.responseText);
+					}
+				};
+				var data = JSON.stringify({
+					email: "hey@mail.com",
+					password: "12345",
+                    nickname: "hey",
+				});
+				xhr.send(data);
+			};
+		</script>
+	</body>
+</html>

@@ -22,6 +22,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(SOURCES 
     main.cc
     ${MODEL_SRC}
+    ${FILTER_SRC}
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
