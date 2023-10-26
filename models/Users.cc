@@ -8,7 +8,6 @@
 #include "Users.h"
 #include <drogon/utils/Utilities.h>
 #include <string>
-#include "utils/RequestStructs.h"
 
 using namespace drogon;
 using namespace drogon::orm;

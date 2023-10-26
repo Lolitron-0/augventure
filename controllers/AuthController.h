@@ -19,17 +19,17 @@ namespace augventure {
                 // METHOD_ADD(AuthController::your_method_name, "/{1}/{2}/list", Get); // path is /augventure/AuthController/{arg1}/{arg2}/list
                 // ADD_METHOD_TO(AuthController::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
 
-                ADD_METHOD_TO(AuthController::signUp, "/sign_up", Post, "augventure::filters::UserExistsFilter");
+                ADD_METHOD_TO(AuthController::signup, "/sign_up", Post, "augventure::filters::UserExistsFilter");
+                ADD_METHOD_TO(AuthController::login, "/log_in", Post);
 
             METHOD_LIST_END
                 // your declaration of processing function maybe like this:
                 // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
                 // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
 
-                void signUp(drogon_model::augventure_db::User&& newUser, std::function<void(const HttpResponsePtr&)>&& callback);
+                void signup(drogon_model::augventure_db::User&& newUserData, std::function<void(const HttpResponsePtr&)>&& callback);
+                void login(drogon_model::augventure_db::User&& loginUserData, std::function<void(const HttpResponsePtr&)>&& callback);
 
         };
     }
 }
-
-

@@ -21,15 +21,20 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SOURCES 
     main.cc
+    utils/JWTService.cc
     ${MODEL_SRC}
     ${FILTER_SRC}
 )
+
+include_directories(thirdparty/jwt-cpp/include)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 find_package(unofficial-sodium CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE unofficial-sodium::sodium)
 
+find_package(OpenSSL REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
@@ -81,7 +86,7 @@ target_sources(${PROJECT_NAME}
                ${MODEL_SRC})
 # ##############################################################################
 # uncomment the following line for dynamically loading views 
-# set_property(TARGET ${PROJECT_NAME} PROPERTY ENABLE_EXPORTS ON)
+set_property(TARGET ${PROJECT_NAME} PROPERTY ENABLE_EXPORTS ON)
 
 # ##############################################################################
 

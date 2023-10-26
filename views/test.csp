@@ -5,10 +5,20 @@
 		<title>aaaaaaaa</title>
 	</head>
 	<body>
-		<a id="signup" href="#">Sign Up</a>
+		<label for="nickname">Nickname:</label>
+		<input type="text" id="nickname" name="nickname" /><br /><br />
+
+		<label for="email">Email:</label>
+		<input type="email" id="email" name="email" /><br /><br />
+
+		<label for="password">Password:</label>
+		<input type="password" id="password" name="password" /><br /><br />
+
+		<input type="button" onclick="signupRequest()" value="Sign Up" />
+		<input type="button" onclick="loginRequest()" value="Log In" />
 
 		<script>
-			document.getElementById("signup").onclick = () => {
+			function signupRequest() {
 				var xhr = new XMLHttpRequest();
 				var url = "/sign_up";
 				xhr.open("POST", url, true);
@@ -19,12 +29,33 @@
 					}
 				};
 				var data = JSON.stringify({
-					email: "hey@mail.com",
-					password: "12345",
-                    nickname: "hey",
+					user: {
+						email: document.getElementById("email").value,
+						password: document.getElementById("password").value,
+						nickname: document.getElementById("nickname").value,
+					},
 				});
 				xhr.send(data);
-			};
+			}
+
+			function loginRequest() {
+				var xhr = new XMLHttpRequest();
+				var url = "/log_in";
+				xhr.open("POST", url, true);
+				xhr.setRequestHeader("Content-Type", "application/json");
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState === 4 && xhr.status === 200) {
+						console.log(xhr.responseText);
+					}
+				};
+				var data = JSON.stringify({
+					user: {
+						email: document.getElementById("email").value,
+						password: document.getElementById("password").value,
+					},
+				});
+				xhr.send(data);
+			}
 		</script>
 	</body>
 </html>

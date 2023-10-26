@@ -7,25 +7,15 @@ int main() {
     {
         std::cerr << "Failed to load sodium!";
         abort();
-    }
-
-    std::string pass = "123456";
-    char hashed_password[crypto_pwhash_STRBYTES];
-
-    if (crypto_pwhash_str_verify(hashed_password, "123456", 6) != 0)
-    {
-        std::cout << "wrong\n";
-    }
-    else
-    {
-        std::cout << "correct\n";
-    }
+    } 
 
     drogon::HttpAppFramework::instance().registerHandler("/", [](const drogon::HttpRequestPtr& req,
         std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
             callback(drogon::HttpResponse::newHttpViewResponse("test.csp"));
         });
 
+    drogon::HttpAppFramework::instance().enableSession();
+    
     //Set HTTP listener address and port
     drogon::app().addListener("0.0.0.0", 80);
     //Load config file

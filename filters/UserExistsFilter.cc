@@ -4,7 +4,7 @@
  *
  */
 
-#include "augventure_UserExistsFilter.h"
+#include "UserExistsFilter.h"
 #include "models/Users.h"
 #include <drogon/orm/Mapper.h>
 #include <drogon/drogon.h>
@@ -27,13 +27,12 @@ namespace augventure {
             try
             {
                 mapper.findFutureOne(
-                    Criteria{ "email", CompareOperator::EQ, newUser.getValueOfEmail() } ||
-                    Criteria{ "nickname", CompareOperator::EQ, newUser.getValueOfNickname() }).get();
+                    Criteria{ User::Cols::_email, CompareOperator::EQ, newUser.getValueOfEmail() } ||
+                    Criteria{ User::Cols::_nickname, CompareOperator::EQ, newUser.getValueOfNickname() }).get();
 
                 // failed
                 Json::Value json;
-                json["result"] = "error";
-                json["why"] = "user already exists";
+                json["result"] = "already_exists";
                 auto res = drogon::HttpResponse::newHttpJsonResponse(json);
                 fcb(res);
             }
