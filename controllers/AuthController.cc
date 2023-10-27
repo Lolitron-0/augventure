@@ -8,7 +8,7 @@ namespace augventure
 {
     namespace controllers
     {
-        void AuthController::signup(drogon_model::augventure_db::User&& newUserData, std::function<void(const HttpResponsePtr&)>&& callback)
+        void AuthController::signup(drogon_model::augventure_db::User&& newUserData, drogon::AdviceCallback&& callback)
         {
             using namespace drogon_model::augventure_db;
             using namespace drogon::orm;
@@ -24,8 +24,7 @@ namespace augventure
             // at this point newUserData is only an interface to retrieve input form info
             newUserData.setPasswordHash(hashed_password);
 
-            using cbType = std::function<void(const HttpResponsePtr&)>;
-            auto callbackPtr{ std::make_shared<cbType>(std::forward<cbType>(callback)) };
+            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
             mapper.insert(newUserData,
                 [=](User)
                 {
@@ -44,7 +43,8 @@ namespace augventure
 
         }
 
-        void AuthController::login(drogon_model::augventure_db::User&& loginUserData, std::function<void(const HttpResponsePtr&)>&& callback)
+        void AuthController::login(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback,
+            drogon_model::augventure_db::User&& loginUserData)
         {
             using namespace drogon_model::augventure_db;
             using namespace drogon::orm;
@@ -52,8 +52,7 @@ namespace augventure
             auto dbClient{ drogon::app().getDbClient() };
             Mapper<User> mapper{ dbClient };
 
-            using cbType = std::function<void(const HttpResponsePtr&)>;
-            auto callbackPtr{ std::make_shared<cbType>(std::forward<cbType>(callback)) };
+            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
 
             mapper.findOne(
                 Criteria{ User::Cols::_email, CompareOperator::EQ, loginUserData.getValueOfEmail() },
@@ -68,6 +67,17 @@ namespace augventure
                         auto token = JWTService::generateFromUser(user);
                         json["result"] = "ok";
                         json["token"] = token;
+                        if (req->session()->find("session_token"))
+                        {
+                            req->session()->modify<std::string>("session_token", [token](std::string& oldToken)
+                                {
+                                    oldToken = token;
+                                });
+                        }
+                        else
+                        {
+                            req->session()->insert("session_token", token);
+                        }
                     }
                     else
                     {
@@ -87,6 +97,32 @@ namespace augventure
                     (*callbackPtr)(resp);
                 }
             );
+        }
+
+        void AuthController::currentUserTest(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback)
+        {
+            using namespace drogon_model::augventure_db;
+            using namespace drogon::orm;
+
+            auto dbClient{ drogon::app().getDbClient() };
+            Mapper<User> mapper{ dbClient };
+
+            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
+            auto currentUserId{ JWTService::getUserIdFromJWT(req->session()->get<std::string>("session_token")).value()}; // filter guarantees result
+            mapper.findByPrimaryKey(currentUserId, [=](User currentUser) 
+                {
+                    Json::Value respJson;
+                    respJson["result"] = "ok";
+                    respJson["user"] = currentUser.toJson();
+                    (*callbackPtr)(drogon::HttpResponse::newHttpJsonResponse(respJson));
+                }, 
+                [=](const DrogonDbException& e) 
+                {
+                    auto resp = drogon::HttpResponse::newHttpResponse();
+                    resp->setStatusCode(k400BadRequest);
+                    (*callbackPtr)(resp);
+                });
+            
         }
 
     }

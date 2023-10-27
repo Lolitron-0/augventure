@@ -14,11 +14,15 @@ namespace augventure
     class JWTService
     {
     public:
+        // should be called after config loading
+        static void init();
+
         static std::string generateFromUser(const drogon_model::augventure_db::User& user);
         static std::optional<int> getUserIdFromJWT(const std::string& token);
     private:
-        static const std::string s_Secret;
-        static const int s_SessionDuration;
-        static const jwt::verifier<jwt::default_clock, jwt::traits::kazuho_picojson> s_Verifier;
+        static std::string s_Secret;
+        static int s_SessionDuration;
+        using JWTVerifier = jwt::verifier<jwt::default_clock, jwt::traits::kazuho_picojson>;
+        static std::unique_ptr<JWTVerifier> s_VerifierPtr;
     };
 }

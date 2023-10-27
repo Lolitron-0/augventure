@@ -4,13 +4,21 @@
 namespace augventure
 {
 
-    const std::string JWTService::s_Secret{ drogon::app().getCustomConfig()["jwt-secret"].asString() };
-    const int JWTService::s_SessionDuration{ drogon::app().getCustomConfig()["jwt-sessionDuration"].asInt() };
-    const jwt::verifier<jwt::default_clock, jwt::traits::kazuho_picojson> JWTService::s_Verifier{
-        jwt::verify()
-        .allow_algorithm(jwt::algorithm::hs256{JWTService::s_Secret})
-        .with_issuer("auth0") };
+    std::string JWTService::s_Secret{};
+    int JWTService::s_SessionDuration{};
+    std::unique_ptr<JWTService::JWTVerifier> JWTService::s_VerifierPtr{};
 
+
+    void JWTService::init()
+    {
+        s_Secret = drogon::app().getCustomConfig()["jwt-secret"].asString();
+        s_SessionDuration = drogon::app().getCustomConfig()["jwt-sessionDuration"].asInt();
+        s_VerifierPtr = std::make_unique<JWTVerifier>(
+            jwt::verify()
+            .allow_algorithm(jwt::algorithm::hs256{ JWTService::s_Secret })
+            .with_issuer("auth0")
+        );
+    }
 
     std::string JWTService::generateFromUser(const drogon_model::augventure_db::User& user)
     {
@@ -28,14 +36,13 @@ namespace augventure
         auto decoded = jwt::decode(token);
         try
         {
-            s_Verifier.verify(decoded);
+            s_VerifierPtr->verify(decoded);
         }
         catch (const std::runtime_error& e)
         {
             LOG_TRACE << e.what();
             return std::nullopt;
         }
-        return decoded.get_payload_claim("user").as_integer();
+        return stoi(decoded.get_payload_claim("user").as_string());
     }
-
 }

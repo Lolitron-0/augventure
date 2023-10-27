@@ -21,15 +21,17 @@ namespace augventure {
 
                 ADD_METHOD_TO(AuthController::signup, "/sign_up", Post, "augventure::filters::UserExistsFilter");
                 ADD_METHOD_TO(AuthController::login, "/log_in", Post);
+                ADD_METHOD_TO(AuthController::currentUserTest, "/profile", Get, "augventure::filters::LoginFilter");
 
             METHOD_LIST_END
                 // your declaration of processing function maybe like this:
                 // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
                 // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
 
-                void signup(drogon_model::augventure_db::User&& newUserData, std::function<void(const HttpResponsePtr&)>&& callback);
-                void login(drogon_model::augventure_db::User&& loginUserData, std::function<void(const HttpResponsePtr&)>&& callback);
-
+                void signup(drogon_model::augventure_db::User&& newUserData, drogon::AdviceCallback&& callback);
+                void login(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback,
+                    drogon_model::augventure_db::User&& loginUserData);
+                void currentUserTest(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback);
         };
     }
 }
