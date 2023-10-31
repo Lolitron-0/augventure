@@ -1,8 +1,8 @@
 #include "AuthController.h"
 #include <drogon/orm/Mapper.h>
 #include <sodium.h>
-#include "utils/JWTService.h"
-#include "../plugins/SMTPMail.h"
+#include "plugins/JWTService.h"
+#include "plugins/SMTPMail.h"
 
 namespace augventure
 {
@@ -83,7 +83,7 @@ namespace augventure
                         loginUserData.getValueOfPasswordHash().c_str(),
                         loginUserData.getValueOfPasswordHash().length()) == 0)
                     {
-                        auto token = JWTService::generateFromUser(user);
+                        auto token = drogon::app().getPlugin<plugins::JWTService>()->generateFromUser(user);
                         json["result"] = "ok";
                         json["token"] = token;
                         if (req->session()->find("session_token"))
@@ -127,7 +127,7 @@ namespace augventure
             Mapper<User> mapper{ dbClient };
 
             auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
-            auto currentUserId{ JWTService::getUserIdFromJWT(req->session()->get<std::string>("session_token")).value()}; // filter guarantees result
+            auto currentUserId{ drogon::app().getPlugin<plugins::JWTService>()->getUserIdFromJWT(req->session()->get<std::string>("session_token")).value() }; // filter guarantees result
             mapper.findByPrimaryKey(currentUserId, [=](User currentUser)
                 {
                     Json::Value respJson;
@@ -153,19 +153,20 @@ namespace augventure
             Mapper<User> mapper{ dbClient };
 
 
-            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
-            auto currentUserId{ JWTService::getUserIdFromJWT(req->session()->get<std::string>("session_token")).value() }; // filter guarantees result
+            auto callbackPtr{
+                std::make_shared<drogon::AdviceCallback>(
+                    std::forward<drogon::AdviceCallback>(callback)
+                ) };
+            auto currentUserId{
+                drogon::app().getPlugin<plugins::JWTService>()->getUserIdFromRequest(req).value()
+            }; // filter guarantees result
 
             mapper.findByPrimaryKey(currentUserId, [=](User currentUser)
                 {
-                    Json::Value jsonPasswords { *(req->getJsonObject()) };
+                    Json::Value jsonPasswords{ *(req->getJsonObject()) };
 
-                    char hashedOldPassword[crypto_pwhash_STRBYTES];
                     std::string oldPassword = jsonPasswords["old_password"].asString();
-                    if (crypto_pwhash_str(hashedOldPassword, oldPassword.c_str(), oldPassword.length(),
-                        crypto_pwhash_OPSLIMIT_MODERATE, crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0) { //testing only
-                        std::cerr << "out of memory!\n";
-                    }
+
                     if (crypto_pwhash_str_verify(
                         currentUser.getValueOfPasswordHash().c_str(),
                         oldPassword.c_str(),
@@ -179,8 +180,8 @@ namespace augventure
                         }
                         currentUser.setPasswordHash(hashedNewPassword);
 
-                        Mapper<User> resetMapper{ dbClient };
-                        resetMapper.update(currentUser,
+                        Mapper<User> updateMapper{ dbClient };
+                        updateMapper.update(currentUser,
                             [=](size_t)
                             {
                                 Json::Value respJson;

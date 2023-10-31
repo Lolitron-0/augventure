@@ -21,7 +21,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SOURCES 
     main.cc
-    utils/JWTService.cc
     ${PLUGIN_SRC}
     ${MODEL_SRC}
     ${FILTER_SRC}

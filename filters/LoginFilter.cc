@@ -5,10 +5,11 @@
  */
 
 #include "LoginFilter.h"
-#include "utils/JWTService.h"
+#include "plugins/JWTService.h"
 
 using namespace drogon;
 using namespace augventure::filters;
+using namespace augventure::plugins;
 
 void LoginFilter::doFilter(const HttpRequestPtr &req,
                          FilterCallback &&fcb,
@@ -16,7 +17,7 @@ void LoginFilter::doFilter(const HttpRequestPtr &req,
 {
     const auto tokenOpt{ req->session()->getOptional<std::string>("session_token") };
     if (tokenOpt.has_value() && // have token
-        JWTService::getUserIdFromJWT(tokenOpt.value()).has_value()) //token valid
+        app().getPlugin<JWTService>()->getUserIdFromJWT(tokenOpt.value()).has_value()) //token valid
     {
         //Passed
         fccb();
