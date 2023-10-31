@@ -12,7 +12,6 @@
 #include <drogon/orm/SqlBinder.h>
 #include <drogon/orm/Mapper.h>
 #include <drogon/orm/BaseBuilder.h>
-#include <drogon/drogon.h>
 #ifdef __cpp_impl_coroutine
 #include <drogon/orm/CoroMapper.h>
 #endif
@@ -47,10 +46,10 @@ class Users
         static const std::string _id;
         static const std::string _email;
         static const std::string _password_hash;
-        static const std::string _auth_code;
         static const std::string _nickname;
         static const std::string _pfp_url;
         static const std::string _bio;
+        static const std::string _auth_code;
     };
 
     const static int primaryKeyNumber;
@@ -128,15 +127,6 @@ class Users
     void setPasswordHash(const std::string &pPasswordHash) noexcept;
     void setPasswordHash(std::string &&pPasswordHash) noexcept;
 
-    /**  For column auth_code  */
-    ///Get the value of the column auth_code, returns the default value if the column is null
-    const std::string &getValueOfAuthCode() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getAuthCode() const noexcept;
-    ///Set the value of the column auth_code
-    void setAuthCode(const std::string &pAuthCode) noexcept;
-    void setAuthCode(std::string &&pAuthCode) noexcept;
-
     /**  For column nickname  */
     ///Get the value of the column nickname, returns the default value if the column is null
     const std::string &getValueOfNickname() const noexcept;
@@ -165,6 +155,16 @@ class Users
     void setBio(const std::string &pBio) noexcept;
     void setBio(std::string &&pBio) noexcept;
 
+    /**  For column auth_code  */
+    ///Get the value of the column auth_code, returns the default value if the column is null
+    const std::string &getValueOfAuthCode() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getAuthCode() const noexcept;
+    ///Set the value of the column auth_code
+    void setAuthCode(const std::string &pAuthCode) noexcept;
+    void setAuthCode(std::string &&pAuthCode) noexcept;
+    void setAuthCodeToNull() noexcept;
+
 
     static size_t getColumnNumber() noexcept {  return 7;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
@@ -190,10 +190,10 @@ class Users
     std::shared_ptr<int64_t> id_;
     std::shared_ptr<std::string> email_;
     std::shared_ptr<std::string> passwordHash_;
-    std::shared_ptr<std::string> authCode_;
     std::shared_ptr<std::string> nickname_;
     std::shared_ptr<std::string> pfpUrl_;
     std::shared_ptr<std::string> bio_;
+    std::shared_ptr<std::string> authCode_;
     struct MetaData
     {
         const std::string colName_;
@@ -237,22 +237,23 @@ class Users
         }
         if(dirtyFlag_[3])
         {
-            sql += "auth_code,";
+            sql += "nickname,";
             ++parametersCount;
         }
         if(dirtyFlag_[4])
         {
-            sql += "nickname,";
-            ++parametersCount;
-        }
-        if(dirtyFlag_[5])
-        {
             sql += "pfp_url,";
             ++parametersCount;
         }
+        sql += "bio,";
+        ++parametersCount;
+        if(!dirtyFlag_[5])
+        {
+            needSelection=true;
+        }
         if(dirtyFlag_[6])
         {
-            sql += "bio,";
+            sql += "auth_code,";
             ++parametersCount;
         }
         needSelection=true;
@@ -290,6 +291,10 @@ class Users
             sql.append("?,");
 
         }
+        else
+        {
+            sql +="default,";
+        }
         if(dirtyFlag_[6])
         {
             sql.append("?,");
@@ -304,25 +309,5 @@ class Users
         return sql;
     }
 };
-
-using User = Users;
 } // namespace augventure_db
 } // namespace drogon_model
-
-namespace drogon
-{
-    template <>
-    inline drogon_model::augventure_db::User fromRequest(const HttpRequest& req)
-    {
-        using namespace drogon_model::augventure_db;
-
-        auto json{ req.getJsonObject() };
-
-        if (json)
-        {
-            
-            return User{ (*json)["user"] };
-        }
-        return User{};
-    }
-}

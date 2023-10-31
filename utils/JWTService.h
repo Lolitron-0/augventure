@@ -1,6 +1,6 @@
 #pragma once
 
-#include "models/Users.h"
+#include "models/User.h"
 #include <drogon/drogon.h>
 #undef min
 #undef max

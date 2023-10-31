@@ -2,7 +2,7 @@
 #pragma once
 
 #include <drogon/HttpController.h>
-#include "models/Users.h"
+#include "models/User.h"
 
 using namespace drogon;
 

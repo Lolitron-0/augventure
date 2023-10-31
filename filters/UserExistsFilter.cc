@@ -5,7 +5,7 @@
  */
 
 #include "UserExistsFilter.h"
-#include "models/Users.h"
+#include "models/User.h"
 #include <drogon/orm/Mapper.h>
 #include <drogon/drogon.h>
 
