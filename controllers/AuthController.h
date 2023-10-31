@@ -22,6 +22,7 @@ namespace augventure {
                 ADD_METHOD_TO(AuthController::signup, "/sign_up", Post, "augventure::filters::UserExistsFilter");
                 ADD_METHOD_TO(AuthController::login, "/log_in", Post);
                 ADD_METHOD_TO(AuthController::currentUserTest, "/profile", Get, "augventure::filters::LoginFilter");
+                ADD_METHOD_TO(AuthController::passwordReset, "/password_reset", Post, "augventure::filters::LoginFilter");
 
             METHOD_LIST_END
                 // your declaration of processing function maybe like this:
@@ -32,6 +33,7 @@ namespace augventure {
                 void login(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback,
                     drogon_model::augventure_db::User&& loginUserData);
                 void currentUserTest(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback);
+                void passwordReset(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback);
         };
     }
 }

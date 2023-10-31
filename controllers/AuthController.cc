@@ -125,5 +125,72 @@ namespace augventure
             
         }
 
+        void AuthController::passwordReset(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback)
+        {
+            using namespace drogon_model::augventure_db;
+            using namespace drogon::orm;
+
+            auto dbClient{ drogon::app().getDbClient() };
+            Mapper<User> mapper{ dbClient };
+
+
+            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
+            auto currentUserId{ JWTService::getUserIdFromJWT(req->session()->get<std::string>("session_token")).value() }; // filter guarantees result
+
+            mapper.findByPrimaryKey(currentUserId, [=](User currentUser)
+                {
+                    Json::Value jsonPasswords { *(req->getJsonObject()) };
+
+                    char hashedOldPassword[crypto_pwhash_STRBYTES];
+                    std::string oldPassword = jsonPasswords["old_password"].asString();
+                    if (crypto_pwhash_str(hashedOldPassword, oldPassword.c_str(), oldPassword.length(),
+                        crypto_pwhash_OPSLIMIT_MODERATE, crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0) { //testing only
+                        std::cerr << "out of memory!\n";
+                    }
+                    if (crypto_pwhash_str_verify(
+                        currentUser.getValueOfPasswordHash().c_str(),
+                        oldPassword.c_str(),
+                        oldPassword.length()) == 0)
+                    {
+                        std::string newPassword = jsonPasswords["new_password"].asString();
+                        char hashedNewPassword[crypto_pwhash_STRBYTES];
+                        if (crypto_pwhash_str(hashedNewPassword, newPassword.c_str(), newPassword.length(),
+                            crypto_pwhash_OPSLIMIT_MODERATE, crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0) { //testing only
+                            std::cerr << "out of memory!\n";
+                        }
+                        currentUser.setPasswordHash(hashedNewPassword);
+
+                        Mapper<User> resetMapper{ dbClient };
+                        resetMapper.update(currentUser,
+                            [=](size_t)
+                            {
+                                Json::Value respJson;
+                                respJson["result"] = "ok";
+                                (*callbackPtr)(HttpResponse::newHttpJsonResponse(respJson));
+                            },
+                            [=](const DrogonDbException& e)
+                            {
+                                LOG_TRACE << e.base().what();
+                                auto resp{ HttpResponse::newHttpResponse() };
+                                resp->setStatusCode(k400BadRequest);
+                                (*callbackPtr)(resp);
+                            });
+                    }
+                    else
+                    {
+                        Json::Value respJson;
+                        respJson["result"] = "wrong_old_password";
+                        (*callbackPtr)(drogon::HttpResponse::newHttpJsonResponse(respJson));
+                    }
+                },
+                [=](const DrogonDbException& e)
+                {
+                    auto resp = drogon::HttpResponse::newHttpResponse();
+                    resp->setStatusCode(k400BadRequest);
+                    (*callbackPtr)(resp);
+                });
+
+        }
+
     }
 }

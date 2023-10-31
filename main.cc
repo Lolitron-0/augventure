@@ -14,6 +14,11 @@ int main() {
         std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
             callback(drogon::HttpResponse::newHttpViewResponse("test.csp"));
         });
+
+    drogon::HttpAppFramework::instance().registerHandler("/password_reset_view", [](const drogon::HttpRequestPtr& req,
+        std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
+            callback(drogon::HttpResponse::newHttpViewResponse("PasswordReset.csp"));
+        });
     
     //Set HTTP listener address and port
     drogon::app().addListener("0.0.0.0", 80);

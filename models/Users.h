@@ -314,6 +314,7 @@ namespace drogon
 
         if (json)
         {
+            
             return User{ (*json)["user"] };
         }
         return User{};
