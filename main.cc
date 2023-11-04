@@ -8,16 +8,6 @@ int main() {
         std::cerr << "Failed to load sodium!";
         abort();
     } 
-
-    drogon::HttpAppFramework::instance().registerHandler("/", [](const drogon::HttpRequestPtr& req,
-        std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
-            callback(drogon::HttpResponse::newHttpViewResponse("test.csp"));
-        });
-
-    drogon::HttpAppFramework::instance().registerHandler("/password_reset", [](const drogon::HttpRequestPtr& req,
-        std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
-            callback(drogon::HttpResponse::newHttpViewResponse("PasswordReset.csp"));
-        }, {drogon::Get});
     
     //Set HTTP listener address and port
     drogon::app().addListener("0.0.0.0", 80);

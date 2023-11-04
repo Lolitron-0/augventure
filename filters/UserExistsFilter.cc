@@ -5,7 +5,7 @@
  */
 
 #include "UserExistsFilter.h"
-#include "models/User.h"
+#include "models/Models.h"
 #include <drogon/orm/Mapper.h>
 #include <drogon/drogon.h>
 
@@ -28,7 +28,7 @@ namespace augventure {
             {
                 mapper.findFutureOne(
                     Criteria{ User::Cols::_email, CompareOperator::EQ, newUser.getValueOfEmail() } ||
-                    Criteria{ User::Cols::_nickname, CompareOperator::EQ, newUser.getValueOfNickname() }).get();
+                    Criteria{ User::Cols::_username, CompareOperator::EQ, newUser.getValueOfUsername() }).get();
 
                 // failed
                 Json::Value json;

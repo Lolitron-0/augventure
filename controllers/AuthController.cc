@@ -3,6 +3,7 @@
 #include <sodium.h>
 #include "plugins/JWTService.h"
 #include "plugins/SMTPMail.h"
+#include "utils/Macros.h"
 
 namespace augventure
 {
@@ -43,7 +44,8 @@ namespace augventure
                 "rxjmbaazmwxzfttu",            // User password
                 false                          // Is HTML content
             );
-            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
+
+            auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
             mapper.insert(newUserData,
                 [=](User)
                 {
@@ -71,7 +73,7 @@ namespace augventure
             auto dbClient{ drogon::app().getDbClient() };
             Mapper<User> mapper{ dbClient };
 
-            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
+            auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
 
             mapper.findOne(
                 Criteria{ User::Cols::_email, CompareOperator::EQ, loginUserData.getValueOfEmail() },
@@ -126,8 +128,8 @@ namespace augventure
             auto dbClient{ drogon::app().getDbClient() };
             Mapper<User> mapper{ dbClient };
 
-            auto callbackPtr{ std::make_shared<drogon::AdviceCallback>(std::forward<drogon::AdviceCallback>(callback)) };
-            auto currentUserId{ drogon::app().getPlugin<plugins::JWTService>()->getUserIdFromJWT(req->session()->get<std::string>("session_token")).value() }; // filter guarantees result
+            auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+            auto currentUserId{ CURRENT_USER_ID(req) }; // filter guarantees result
             mapper.findByPrimaryKey(currentUserId, [=](User currentUser)
                 {
                     Json::Value respJson;
@@ -153,13 +155,8 @@ namespace augventure
             Mapper<User> mapper{ dbClient };
 
 
-            auto callbackPtr{
-                std::make_shared<drogon::AdviceCallback>(
-                    std::forward<drogon::AdviceCallback>(callback)
-                ) };
-            auto currentUserId{
-                drogon::app().getPlugin<plugins::JWTService>()->getUserIdFromRequest(req).value()
-            }; // filter guarantees result
+            auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+            auto currentUserId{ CURRENT_USER_ID(req) }; // filter guarantees result
 
             mapper.findByPrimaryKey(currentUserId, [=](User currentUser)
                 {
