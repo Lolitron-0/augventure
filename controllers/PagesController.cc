@@ -7,6 +7,7 @@ namespace augventure
 
         void PagesController::loginSignup(const drogon::HttpRequestPtr& req, drogon::AdviceCallback&& callback)
         {
+            //callback(drogon::HttpResponse::newHttpViewResponse("test.csp"));
             callback(drogon::HttpResponse::newHttpViewResponse("test.csp"));
         }
 

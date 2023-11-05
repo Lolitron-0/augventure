@@ -36,9 +36,9 @@ namespace drogon
 
         auto json{ req.getJsonObject() };
 
-        Json::StreamWriterBuilder wbuilder{};
-        std::string document = Json::writeString(wbuilder, *json);
-        LOG_TRACE << document;
+        //Json::StreamWriterBuilder wbuilder{};
+        //std::string document = Json::writeString(wbuilder, *json);
+        //LOG_TRACE << document;
 
         if (json)
         {

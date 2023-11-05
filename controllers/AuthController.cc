@@ -74,6 +74,15 @@ namespace augventure
             Mapper<User> mapper{ dbClient };
 
             auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+            int32_t ttt;
+            try
+            {
+                ttt =  CURRENT_USER_ID(req) ;
+            }
+            catch (...)
+            {
+
+            }
 
             mapper.findOne(
                 Criteria{ User::Cols::_email, CompareOperator::EQ, loginUserData.getValueOfEmail() },
@@ -111,7 +120,9 @@ namespace augventure
                     const UnexpectedRows* ur = dynamic_cast<const UnexpectedRows*>(&e.base());
                     if (ur)
                     {
-                        // no such user
+                        Json::Value json;
+                        json["result"] = "no_such_user";
+                        (*callbackPtr)(drogon::HttpResponse::newHttpJsonResponse(json));
                     }
                     auto resp = drogon::HttpResponse::newHttpResponse();
                     resp->setStatusCode(k400BadRequest);

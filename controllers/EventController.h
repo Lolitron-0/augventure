@@ -17,7 +17,7 @@ namespace augventure
                 // METHOD_ADD(EventController::get, "/{2}/{1}", Get); // path is /augventure/controllers/EventController/{arg2}/{arg1}
                 // METHOD_ADD(EventController::your_method_name, "/{1}/{2}/list", Get); // path is /augventure/controllers/EventController/{arg1}/{arg2}/list
                 // ADD_METHOD_TO(EventController::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
-                ADD_METHOD_TO(EventController::createEvent, "/events/create", Post, "augventure::filters::LoginFilter");
+                ADD_METHOD_TO(EventController::createEvent, "api/events/create", Post, "augventure::filters::LoginFilter");
 
             METHOD_LIST_END
                 // your declaration of processing function maybe like this:
