@@ -74,15 +74,6 @@ namespace augventure
             Mapper<User> mapper{ dbClient };
 
             auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
-            int32_t ttt;
-            try
-            {
-                ttt =  CURRENT_USER_ID(req) ;
-            }
-            catch (...)
-            {
-
-            }
 
             mapper.findOne(
                 Criteria{ User::Cols::_email, CompareOperator::EQ, loginUserData.getValueOfEmail() },
