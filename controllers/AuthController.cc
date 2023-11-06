@@ -28,7 +28,7 @@ namespace augventure
 
 
             auto auth_code = std::to_string(randombytes_uniform(1000000));
-            auth_code = std::string(6ULL - std::min(6ULL, auth_code.length()), '0') + auth_code;
+            auth_code = std::string(6ULL - std::min((std::size_t)6, auth_code.length()), '0') + auth_code;
 
             newUserData.setAuthCode(auth_code);
 

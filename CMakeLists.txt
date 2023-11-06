@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 project(augventure CXX)
 
 include(CheckIncludeFileCXX)
@@ -30,8 +30,18 @@ include_directories(thirdparty/jwt-cpp/include)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-find_package(unofficial-sodium CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE unofficial-sodium::sodium)
+include(FetchContent)
+
+# Update the commit to point to whatever libsodium-cmake-commit you want to target.
+FetchContent_Declare(Sodium
+    GIT_REPOSITORY https://github.com/robinlinden/libsodium-cmake.git
+    GIT_TAG 99f14233eab1d4f7f49c2af4ec836f2e701c445e # HEAD as of 2022-05-28
+)
+set(SODIUM_DISABLE_TESTS ON)
+FetchContent_MakeAvailable(Sodium)
+
+#find_package(Sodium CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE sodium)
 
 find_package(OpenSSL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
