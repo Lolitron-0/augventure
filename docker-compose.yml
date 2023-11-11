@@ -1,0 +1,27 @@
+services:
+  backend:
+    container_name: augventure-backend
+    build: backend
+    ports:
+      - "80:80"
+    depends_on: 
+      - db
+  db:
+    container_name: augventure-db
+    image: mariadb:latest
+    environment:
+      MARIADB_ROOT_PASSWORD: 1
+      MARIADB_USER: augventureUser
+      MARIADB_PASSWORD: augventureUserPassword
+      MARIADB_DATABASE: augventure_db
+    volumes:
+      - ./db_init/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+  frontend:
+    container_name: augventure-frontend
+    build: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+

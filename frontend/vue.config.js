@@ -4,8 +4,7 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       '^/api/': {
-        "target": "http://localhost:80",
-        "ws": true
+        "target": "http://augventure-backend:80"
       },
     }
   }
