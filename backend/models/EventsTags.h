@@ -19,6 +19,7 @@
 #include <trantor/utils/Logger.h>
 #include <json/json.h>
 #include <string>
+#include <string_view>
 #include <memory>
 #include <vector>
 #include <tuple>

@@ -39,13 +39,11 @@
     {
       "rdbms": "mysql",
       //"host": "127.0.0.1",
-      "host": "db",
+      //"host": "db",
       "port": 3306,
       "dbname": "augventure_db",
       "user": "augventureUser",
       "passwd": "augventureUserPassword",
-      //"user":"root",
-	  //"passwd":"1",
 	  "is_fast": false,
       "number_of_connections": 1,
       "timeout": -1.0,
@@ -150,7 +148,7 @@
     //dynamic_views_output_path: Default by an empty string which means the output path of source 
     //files is the path where the csp files locate. If the path isn't prefixed with /, it is relative 
     //path of the current working directory.
-    "dynamic_views_output_path": "",
+    //"dynamic_views_output_path": "",
     //json_parser_stack_limit: 1000 by default, the maximum number of stack depth when reading a json string by the jsoncpp library.
     "json_parser_stack_limit": 1000,
     //enable_unicode_escaping_in_json: true by default, enable unicode escaping in json.
