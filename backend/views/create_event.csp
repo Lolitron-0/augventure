@@ -29,7 +29,7 @@
 
 			function createEventRequest() {
 				const xhr = new XMLHttpRequest();
-				const url = "/events/create";
+                                const url = "/api/events/create";
 
                 let date = new Date(document.getElementById("start").value);
 
