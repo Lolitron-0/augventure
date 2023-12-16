@@ -22,10 +22,10 @@ namespace augventure
             void shutdown() override;
 
         private:
-            std::string s_Secret;
-            int s_SessionDuration;
+            std::string m_Secret;
+            int m_SessionDuration;
             using JWTVerifier = jwt::verifier<jwt::default_clock, jwt::traits::kazuho_picojson>;
-            std::unique_ptr<JWTVerifier> s_VerifierPtr;
+            std::unique_ptr<JWTVerifier> m_VerifierPtr;
         };
     }
 }

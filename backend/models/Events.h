@@ -50,6 +50,7 @@ class Events
         static const std::string _picture_url;
         static const std::string _start;
         static const std::string _author_id;
+        static const std::string _state;
     };
 
     const static int primaryKeyNumber;
@@ -153,8 +154,17 @@ class Events
     ///Set the value of the column author_id
     void setAuthorId(const uint32_t &pAuthorId) noexcept;
 
+    /**  For column state  */
+    ///Get the value of the column state, returns the default value if the column is null
+    const std::string &getValueOfState() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<std::string> &getState() const noexcept;
+    ///Set the value of the column state
+    void setState(const std::string &pState) noexcept;
+    void setState(std::string &&pState) noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 6;  }
+
+    static size_t getColumnNumber() noexcept {  return 7;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -181,6 +191,7 @@ class Events
     std::shared_ptr<std::string> pictureUrl_;
     std::shared_ptr<::trantor::Date> start_;
     std::shared_ptr<uint32_t> authorId_;
+    std::shared_ptr<std::string> state_;
     struct MetaData
     {
         const std::string colName_;
@@ -192,7 +203,7 @@ class Events
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[6]={ false };
+    bool dirtyFlag_[7]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -239,6 +250,12 @@ class Events
             sql += "author_id,";
             ++parametersCount;
         }
+        sql += "state,";
+        ++parametersCount;
+        if(!dirtyFlag_[6])
+        {
+            needSelection=true;
+        }
         needSelection=true;
         if(parametersCount > 0)
         {
@@ -281,6 +298,15 @@ class Events
         {
             sql.append("?,");
 
+        }
+        if(dirtyFlag_[6])
+        {
+            sql.append("?,");
+
+        }
+        else
+        {
+            sql +="default,";
         }
         if(parametersCount > 0)
         {

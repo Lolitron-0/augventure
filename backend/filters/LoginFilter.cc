@@ -24,7 +24,8 @@ void LoginFilter::doFilter(const HttpRequestPtr &req,
         return;
     }
     // Check failed
-    auto res = drogon::HttpResponse::newHttpResponse();
-    res->setStatusCode(k401Unauthorized);
-    fcb(res);
+    auto response = drogon::HttpResponse::newHttpResponse();
+    response->setStatusCode(k401Unauthorized);
+	response->setBody("not_logged_in");
+    fcb(response);
 }

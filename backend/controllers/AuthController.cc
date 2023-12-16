@@ -2,7 +2,10 @@
 #include "plugins/JWTService.h"
 #include "plugins/SMTPMail.h"
 #include "utils/Macros.h"
+#include <drogon/HttpResponse.h>
+#include <drogon/HttpTypes.h>
 #include <drogon/orm/Mapper.h>
+#include <json/value.h>
 #include <sodium.h>
 
 namespace augventure
@@ -15,8 +18,8 @@ void AuthController::signup(drogon_model::augventure_db::User&& newUserData,
     using namespace drogon_model::augventure_db;
     using namespace drogon::orm;
 
-    auto dbClient{drogon::app().getDbClient()};
-    Mapper<User> mapper{dbClient};
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<User> mapper{ dbClient };
 
     char hashed_password[crypto_pwhash_STRBYTES];
     if (crypto_pwhash_str(hashed_password,
@@ -51,21 +54,19 @@ void AuthController::signup(drogon_model::augventure_db::User&& newUserData,
                                   false                   // Is HTML content
     );
 
-    auto callbackPtr{MAKE_CALLBACK_HEAP_PTR(callback)};
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
     mapper.insert(
         newUserData,
         [=](User)
         {
-            Json::Value respJson;
-            respJson["result"] = "ok";
             LOG_TRACE << "signup : ok";
-            (*callbackPtr)(HttpResponse::newHttpJsonResponse(respJson));
+            (*callbackPtr)(HttpResponse::newHttpResponse(k200OK, CT_NONE));
         },
         [=](const DrogonDbException& e)
         {
             LOG_TRACE << e.base().what();
-            auto resp{HttpResponse::newHttpResponse()};
-            resp->setStatusCode(k400BadRequest);
+            auto resp{ HttpResponse::newHttpResponse(k400BadRequest, CT_TEXT_PLAIN) };
+            resp->setBody("database_exception");
             (*callbackPtr)(resp);
         });
 }
@@ -77,27 +78,28 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
     using namespace drogon_model::augventure_db;
     using namespace drogon::orm;
 
-    auto dbClient{drogon::app().getDbClient()};
-    Mapper<User> mapper{dbClient};
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<User> mapper{ dbClient };
 
-    auto callbackPtr{MAKE_CALLBACK_HEAP_PTR(callback)};
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
 
     mapper.findOne(
-        Criteria{User::Cols::_email, CompareOperator::EQ,
-                 loginUserData.getValueOfEmail()},
+        Criteria{ User::Cols::_email, CompareOperator::EQ,
+                  loginUserData.getValueOfEmail() },
         [=](User user)
         {
-            Json::Value json;
+            auto response{ drogon::HttpResponse::newHttpJsonResponse(
+                Json::Value{}) };
             if (crypto_pwhash_str_verify(
                     user.getValueOfPasswordHash().c_str(),
                     loginUserData.getValueOfPasswordHash().c_str(),
                     loginUserData.getValueOfPasswordHash().length()) == 0)
             {
-                auto token = drogon::app()
-                                 .getPlugin<plugins::JWTService>()
-                                 ->generateFromUser(user);
-                json["result"] = "ok";
-                json["token"] = token;
+                auto token{ drogon::app()
+                                .getPlugin<plugins::JWTService>()
+                                ->generateFromUser(user) };
+                response->setStatusCode(drogon::k200OK);
+                (*response->jsonObject())["token"] = token;
                 if (req->session()->find("session_token"))
                 {
                     req->session()->modify<std::string>(
@@ -111,25 +113,29 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
             }
             else
             {
-                json["result"] = "wrong_password";
+                response->setStatusCode(k401Unauthorized);
+                response->setContentTypeCode(CT_TEXT_PLAIN);
+                response->setBody("wrong_password");
             }
-            LOG_INFO << "login : " << json["result"].asString();
-            (*callbackPtr)(drogon::HttpResponse::newHttpJsonResponse(json));
+            (*callbackPtr)(response);
         },
         [=](const DrogonDbException& e)
         {
-            const UnexpectedRows* ur =
-                dynamic_cast<const UnexpectedRows*>(&e.base());
+            const UnexpectedRows* ur{ dynamic_cast<const UnexpectedRows*>(
+                &e.base()) };
+            auto resp{ drogon::HttpResponse::newHttpResponse() };
+			resp->setContentTypeCode(CT_TEXT_PLAIN);
+            resp->setContentTypeCode(CT_TEXT_PLAIN);
             if (ur)
             {
-                Json::Value json;
-                json["result"] = "no_such_user";
                 LOG_INFO << "login : no_such_user";
-                (*callbackPtr)(drogon::HttpResponse::newHttpJsonResponse(json));
+                resp->setStatusCode(k401Unauthorized);
+                resp->setBody("no_such_user");
+                (*callbackPtr)(resp);
                 return;
             }
-            auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(k400BadRequest);
+            resp->setBody("database_exception");
             (*callbackPtr)(resp);
         });
 }
@@ -140,25 +146,26 @@ void AuthController::currentUserTest(const drogon::HttpRequestPtr& req,
     using namespace drogon_model::augventure_db;
     using namespace drogon::orm;
 
-    auto dbClient{drogon::app().getDbClient()};
-    Mapper<User> mapper{dbClient};
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<User> mapper{ dbClient };
 
-    auto callbackPtr{MAKE_CALLBACK_HEAP_PTR(callback)};
-    auto currentUserId{CURRENT_USER_ID(req)}; // filter guarantees result
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+    auto currentUserId{ CURRENT_USER_ID(req) }; // filter guarantees result
     mapper.findByPrimaryKey(
         currentUserId,
         [=](User currentUser)
         {
-            Json::Value respJson;
-            respJson["result"] = "ok";
-            respJson["user"] = currentUser.toJson();
+            auto response{ drogon::HttpResponse::newHttpJsonResponse(
+                Json::Value{}) };
+            (*response->jsonObject())["user"] = currentUser.toJson();
             LOG_TRACE << "currentUser : ok";
-            (*callbackPtr)(drogon::HttpResponse::newHttpJsonResponse(respJson));
+            (*callbackPtr)(response);
         },
         [=](const DrogonDbException& e)
         {
-            auto resp = drogon::HttpResponse::newHttpResponse();
-            resp->setStatusCode(k400BadRequest);
+            auto resp{ drogon::HttpResponse::newHttpResponse(k400BadRequest,
+                                                             CT_TEXT_PLAIN) };
+            resp->setBody("database_exception");
             (*callbackPtr)(resp);
         });
 }
@@ -169,26 +176,27 @@ void AuthController::passwordReset(const drogon::HttpRequestPtr& req,
     using namespace drogon_model::augventure_db;
     using namespace drogon::orm;
 
-    auto dbClient{drogon::app().getDbClient()};
-    Mapper<User> mapper{dbClient};
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<User> mapper{ dbClient };
 
-    auto callbackPtr{MAKE_CALLBACK_HEAP_PTR(callback)};
-    auto currentUserId{CURRENT_USER_ID(req)}; // filter guarantees result
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+    auto currentUserId{ CURRENT_USER_ID(req) }; // filter guarantees result
 
     mapper.findByPrimaryKey(
         currentUserId,
         [=](User currentUser)
         {
-            Json::Value jsonPasswords{*(req->getJsonObject())};
+            Json::Value jsonPasswords{ *(req->getJsonObject()) };
 
-            std::string oldPassword = jsonPasswords["old_password"].asString();
+            std::string oldPassword{ jsonPasswords["old_password"].asString() };
 
             if (crypto_pwhash_str_verify(
                     currentUser.getValueOfPasswordHash().c_str(),
                     oldPassword.c_str(), oldPassword.length()) == 0)
             {
-                std::string newPassword =
-                    jsonPasswords["new_password"].asString();
+                std::string newPassword{
+                    jsonPasswords["new_password"].asString()
+                };
                 char hashedNewPassword[crypto_pwhash_STRBYTES];
                 if (crypto_pwhash_str(hashedNewPassword, newPassword.c_str(),
                                       newPassword.length(),
@@ -199,36 +207,35 @@ void AuthController::passwordReset(const drogon::HttpRequestPtr& req,
                 }
                 currentUser.setPasswordHash(hashedNewPassword);
 
-                Mapper<User> updateMapper{dbClient};
+                Mapper<User> updateMapper{ dbClient };
                 updateMapper.update(
                     currentUser,
-                    [=](size_t)
-                    {
-                        Json::Value respJson;
-                        respJson["result"] = "ok";
+                    [=](size_t) {
                         (*callbackPtr)(
-                            HttpResponse::newHttpJsonResponse(respJson));
+                            HttpResponse::newHttpResponse(k200OK, CT_NONE));
                     },
                     [=](const DrogonDbException& e)
                     {
                         LOG_TRACE << e.base().what();
-                        auto resp{HttpResponse::newHttpResponse()};
-                        resp->setStatusCode(k400BadRequest);
+                        auto resp{ HttpResponse::newHttpResponse(
+                            k400BadRequest, CT_TEXT_PLAIN) };
+                        resp->setBody("database_exception");
                         (*callbackPtr)(resp);
                     });
             }
             else
             {
-                Json::Value respJson;
-                respJson["result"] = "wrong_old_password";
-                (*callbackPtr)(
-                    drogon::HttpResponse::newHttpJsonResponse(respJson));
+                auto resp{ HttpResponse::newHttpResponse(k401Unauthorized,
+                                                         CT_TEXT_PLAIN) };
+                resp->setBody("wrong_old_password");
+                (*callbackPtr)(resp);
             }
         },
         [=](const DrogonDbException& e)
         {
-            auto resp = drogon::HttpResponse::newHttpResponse();
-            resp->setStatusCode(k400BadRequest);
+            auto resp = drogon::HttpResponse::newHttpResponse(k400BadRequest,
+                                                              CT_TEXT_PLAIN);
+            resp->setBody("database_exception");
             (*callbackPtr)(resp);
         });
 }

@@ -1,28 +1,38 @@
 <!DOCTYPE html>
 <html>
-        <head>
-                <meta charset="UTF-8" />
-                <title>Events</title>
-        </head>
-        <body>
-				
-                <script>
-                        function requestEventList()
-                        {
-                            const xhr = new XMLHttpRequest();
-                            const url = "/api/events";
 
-                            xhr.open("GET", url, true);
-                            xhr.setRequestHeader("Content-Type", "application/json");
-                            xhr.onreadystatechange = function () {
-                                    if (xhr.readyState === 4 && xhr.status === 200) {
-                                            console.log(xhr.responseText);
-                                    }
-                            };
-                            xhr.send();
-                        }
-                        requestEventList();
-                </script>
-        </body>
+<head>
+    <meta charset="UTF-8" />
+    <title>Events</title>
+</head>
+
+<body>
+
+    <script>
+        function requestEventList() {
+            const xhr = new XMLHttpRequest();
+            const url = "/api/events";
+
+            xhr.open("GET", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const events = JSON.parse(xhr.responseText).events
+                    console.log(events)
+                    for (const event of events) {
+                        document.body.innerHTML += `
+                            <p>Title: ${event.title}</p>
+                            <p>Description: ${event.description}</p>
+                            <p>Start: ${event.start}</p>
+                            <hr>
+					        `
+                    }
+                }
+            };
+            xhr.send();
+        }
+        requestEventList();
+    </script>
+</body>
+
 </html>
-

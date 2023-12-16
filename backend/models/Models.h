@@ -23,7 +23,6 @@ namespace drogon
 
         if (json)
         {
-
             return User{ (*json)["user"] };
         }
         return User{};
@@ -42,7 +41,6 @@ namespace drogon
 
         if (json)
         {
-
             return Event{ (*json)["event"] };
         }
         return Event{};

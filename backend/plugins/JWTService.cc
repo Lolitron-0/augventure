@@ -1,5 +1,4 @@
 #include "JWTService.h"
-#include "openssl/hmac.h"
 
 namespace augventure
 {
@@ -7,13 +6,14 @@ namespace augventure
     {
         void JWTService::initAndStart(const Json::Value& config)
         {
-            s_Secret = drogon::app().getCustomConfig()["jwt-secret"].asString();
-            s_SessionDuration = drogon::app().getCustomConfig()["jwt-sessionDuration"].asInt();
-            s_VerifierPtr = std::make_unique<JWTVerifier>(
+            m_Secret = drogon::app().getCustomConfig()["jwt-secret"].asString();
+            m_SessionDuration = drogon::app().getCustomConfig()["jwt-sessionDuration"].asInt();
+            m_VerifierPtr = std::make_unique<JWTVerifier>(
                 jwt::verify()
-                .allow_algorithm(jwt::algorithm::hs256{ JWTService::s_Secret })
+                .allow_algorithm(jwt::algorithm::hs256{ JWTService::m_Secret })
                 .with_issuer("auth0")
             );
+			LOG_INFO << "JWTService: successfully loaded and started";
         }
 
         std::string JWTService::generateFromUser(const drogon_model::augventure_db::User& user) const
@@ -22,9 +22,9 @@ namespace augventure
                 .set_issuer("auth0")
                 .set_type("JWS")
                 .set_issued_at(std::chrono::system_clock::now())
-                .set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{ s_SessionDuration })
+                .set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{ m_SessionDuration })
                 .set_payload_claim("user", jwt::claim{ std::to_string(user.getValueOfId()) })
-                .sign(jwt::algorithm::hs256{ s_Secret });
+                .sign(jwt::algorithm::hs256{ m_Secret });
         }
 
         std::optional<int> JWTService::getUserIdFromJWT(const std::string& token) const
@@ -32,7 +32,7 @@ namespace augventure
             auto decoded = jwt::decode(token);
             try
             {
-                s_VerifierPtr->verify(decoded);
+                m_VerifierPtr->verify(decoded);
             }
             catch (const std::runtime_error& e)
             {
