@@ -65,7 +65,8 @@ void AuthController::signup(drogon_model::augventure_db::User&& newUserData,
         [=](const DrogonDbException& e)
         {
             LOG_TRACE << e.base().what();
-            auto resp{ HttpResponse::newHttpResponse(k400BadRequest, CT_TEXT_PLAIN) };
+            auto resp{ HttpResponse::newHttpResponse(k400BadRequest,
+                                                     CT_TEXT_PLAIN) };
             resp->setBody("database_exception");
             (*callbackPtr)(resp);
         });
@@ -124,7 +125,7 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
             const UnexpectedRows* ur{ dynamic_cast<const UnexpectedRows*>(
                 &e.base()) };
             auto resp{ drogon::HttpResponse::newHttpResponse() };
-			resp->setContentTypeCode(CT_TEXT_PLAIN);
+            resp->setContentTypeCode(CT_TEXT_PLAIN);
             resp->setContentTypeCode(CT_TEXT_PLAIN);
             if (ur)
             {
