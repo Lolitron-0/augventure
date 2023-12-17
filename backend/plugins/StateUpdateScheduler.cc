@@ -7,8 +7,10 @@
 #include "StateUpdateScheduler.h"
 #include <chrono>
 #include <drogon/orm/Exception.h>
+#include <iterator>
 #include <memory>
 #include <thread>
+#include <trantor/utils/Date.h>
 
 using namespace drogon;
 using namespace augventure::plugins;
@@ -27,34 +29,77 @@ void StateUpdateScheduler::initAndStart(const Json::Value& config)
         [this]()
         {
             using namespace std::literals::chrono_literals;
+            auto now{ trantor::Date::now() };
+            bool needUpdateJobList{ false };
             while (this->m_ThreadAlive)
             {
-                std::cout << "hello\n";
-                std::this_thread::sleep_for(2s);
+                needUpdateJobList = false;
+                for (auto it{ std::begin(m_ClosestSheduledJobs) };
+                     it != std::end(m_ClosestSheduledJobs);)
+                {
+                    if (it->mark.secondsSinceEpoch() - now.secondsSinceEpoch() <= 0)
+                    {
+                        it->jobCallback();
+                        m_ClosestSheduledJobs.erase(it);
+                        needUpdateJobList = true;
+                    }
+                    else
+                    {
+                        it++;
+                    }
+                }
+                if (needUpdateJobList)
+                    this->updateClosestTasks();
+                now = now.after(s_RefreshPeriodSeconds);
+                std::this_thread::sleep_for(
+                    std::chrono::seconds{ s_RefreshPeriodSeconds });
             }
         });
 }
 
 void StateUpdateScheduler::updateClosestTasks()
 {
-    static bool initLaunch = true;
     using namespace drogon_model::augventure_db;
+    this->_processMistimedEntities();
 
-    if (initLaunch)
+    this->_scheduleStateChange<Event>(TaskType::EventStart); //TODO: get other args from TaskType
+}
+
+void StateUpdateScheduler::_processMistimedEntities() const
+{
+
+    using namespace drogon_model::augventure_db;
+    using namespace drogon::orm;
+
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<Events> mapper{ dbClient };
+    auto now{ trantor::Date::now() };
+    auto schedEvents{mapper.orderBy(Events::Cols::_start)
+                         .findBy(Criteria{Events::Cols::_state, CompareOperator::EQ, "scheduled"}
+                                 // there should not be many unprocessed events to cause
+                                 // overflow (as they can't be created if server is offline)
+                                 )};
+    for (auto &event : schedEvents)
     {
-        this->_scheduleStateChange<Event>(Events::Cols::_state,
-                                          Events::Cols::_start, "scheduled",
-                                          "in_progress");
+        auto b = now.secondsSinceEpoch();
+        if (event.getValueOfStart().secondsSinceEpoch() - now.secondsSinceEpoch() <= 60)
+        {
+            auto dbClient{drogon::app().getDbClient()};
+            Mapper<Events> mapper{dbClient};
+            event.setState("in_progress");
+            mapper.update(
+                event, [](size_t) {}, [](const DrogonDbException &) {});
+        }
+        else // no mistimed further
+            return;
     }
-
-    initLaunch = false;
 }
 
 void StateUpdateScheduler::shutdown()
 {
-	m_ThreadAlive = false; // hehe no mutex goes brr
-	m_Thread->join();
-	LOG_INFO << "StateUpdateScheduler thread stopped";
+    m_ThreadAlive = false; // hehe no mutex goes brr
+    m_Thread->join();
+    LOG_INFO << "StateUpdateScheduler thread stopped";
 }
 
 } // namespace plugins

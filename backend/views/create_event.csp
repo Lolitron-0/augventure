@@ -24,7 +24,10 @@
 		<script>
             function formatDate(date)
             {
-                return `${date.getFullYear()}-${date.getMonth()}-${date.getDay()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+				const hrs = ('0'+date.getHours()).substr(-2)
+				const mins = ('0'+date.getMinutes()).substr(-2)
+				const secs = ('0'+date.getSeconds()).substr(-2)
+                return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${hrs}:${mins}:${secs}`
             }
 
 			function createEventRequest() {
@@ -32,7 +35,7 @@
                                 const url = "/api/events/create";
 
                 let date = new Date(document.getElementById("start").value);
-
+				console.log(formatDate(date))
 				xhr.open("POST", url, true);
 				xhr.setRequestHeader("Content-Type", "application/json");
 				xhr.onreadystatechange = function () {

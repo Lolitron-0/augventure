@@ -24,6 +24,7 @@
                             <p>Title: ${event.title}</p>
                             <p>Description: ${event.description}</p>
                             <p>Start: ${event.start}</p>
+                            <p>State: ${event.state}</p>
                             <hr>
 					        `
                     }

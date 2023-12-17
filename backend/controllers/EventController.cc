@@ -1,7 +1,9 @@
 #include "EventController.h"
 #include "Models.h"
 #include "plugins/JWTService.h"
+#include "plugins/StateUpdateScheduler.h"
 #include "utils/Macros.h"
+#include <drogon/HttpAppFramework.h>
 #include <drogon/HttpTypes.h>
 #include <drogon/orm/Criteria.h>
 #include <iterator>
@@ -27,12 +29,16 @@ void EventController::createEvent(
     newEventData.setAuthorId(currentUserId);
     mapper.insert(
         newEventData,
-        [=](Event)
+        [=](Event event)
         {
+            using namespace augventure::plugins;
+            drogon::app()
+                .getPlugin<StateUpdateScheduler>()
+                ->updateTaskType(StateUpdateScheduler::TaskType::EventStart, event);
             (*callbackPtr)(drogon::HttpResponse::newHttpResponse(
                 drogon::k200OK, drogon::CT_NONE));
         },
-        [=](const DrogonDbException& e)
+        [=](const DrogonDbException &e)
         {
             LOG_TRACE << e.base().what();
             auto resp{ HttpResponse::newHttpResponse() };
