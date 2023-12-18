@@ -33,13 +33,14 @@ public:
         SprintEnd
     };
     using UTCMark = trantor::Date;
-    using PrimaryKeyType = drogon_model::augventure_db::Events::PrimaryKeyType;
 
     StateUpdateScheduler() {}
     void initAndStart(const Json::Value& config) override;
 
     void schedule(const TaskType& type, const UTCMark& time,
                   const PrimaryKeyType& objectKey);
+
+	void removeTaskByKey(const PrimaryKeyType& objectKey);
 
     void shutdown() override;
 

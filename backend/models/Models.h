@@ -11,9 +11,10 @@ namespace augventure_db
 {
 using User = Users;
 using Event = Events;
-
 } // namespace augventure_db
 } // namespace drogon_model
+
+using PrimaryKeyType = drogon_model::augventure_db::User::PrimaryKeyType;
 
 inline trantor::Date dateFromJsonString(const std::string& string)
 {

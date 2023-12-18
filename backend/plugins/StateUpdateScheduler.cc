@@ -6,6 +6,7 @@
 
 #include "StateUpdateScheduler.h"
 #include "Events.h"
+#include "Models.h"
 #include "Sprints.h"
 #include <chrono>
 #include <drogon/orm/Criteria.h>
@@ -79,9 +80,18 @@ void StateUpdateScheduler::initAndStart(const Json::Value& config)
 void StateUpdateScheduler::schedule(const TaskType& type, const UTCMark& time,
                                     const PrimaryKeyType& objectKey)
 {
-    std::scoped_lock<std::mutex> lock{ m_Mutex };
     m_TaskQueue.insert(
         { .timestamp = time, .objectId = objectKey, .type = type });
+}
+
+void StateUpdateScheduler::removeTaskByKey(const PrimaryKeyType& objectKey)
+{
+    auto it{ std::find_if(std::begin(m_TaskQueue), std::end(m_TaskQueue),
+                          [objectKey](const ScheduledTask& task)
+                          { return task.objectId == objectKey; }) };
+    if (it == std::end(m_TaskQueue))
+        return;
+    m_TaskQueue.erase(it);
 }
 
 void StateUpdateScheduler::_initTaskQueue()

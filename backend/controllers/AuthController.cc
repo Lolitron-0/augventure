@@ -67,7 +67,8 @@ void AuthController::signup(drogon_model::augventure_db::User&& newUserData,
             LOG_TRACE << e.base().what();
             auto resp{ HttpResponse::newHttpResponse(k400BadRequest,
                                                      CT_TEXT_PLAIN) };
-            resp->setBody("database_exception");
+            resp->setBody("database exception: " +
+                          (std::string)e.base().what());
             (*callbackPtr)(resp);
         });
 }
@@ -126,7 +127,6 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
                 &e.base()) };
             auto resp{ drogon::HttpResponse::newHttpResponse() };
             resp->setContentTypeCode(CT_TEXT_PLAIN);
-            resp->setContentTypeCode(CT_TEXT_PLAIN);
             if (ur)
             {
                 LOG_INFO << "login : no_such_user";
@@ -136,7 +136,8 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
                 return;
             }
             resp->setStatusCode(k400BadRequest);
-            resp->setBody("database_exception");
+            resp->setBody("database exception: " +
+                          (std::string)e.base().what());
             (*callbackPtr)(resp);
         });
 }
@@ -166,7 +167,8 @@ void AuthController::currentUserTest(const drogon::HttpRequestPtr& req,
         {
             auto resp{ drogon::HttpResponse::newHttpResponse(k400BadRequest,
                                                              CT_TEXT_PLAIN) };
-            resp->setBody("database_exception");
+            resp->setBody("database exception: " +
+                          (std::string)e.base().what());
             (*callbackPtr)(resp);
         });
 }
@@ -220,7 +222,8 @@ void AuthController::passwordReset(const drogon::HttpRequestPtr& req,
                         LOG_TRACE << e.base().what();
                         auto resp{ HttpResponse::newHttpResponse(
                             k400BadRequest, CT_TEXT_PLAIN) };
-                        resp->setBody("database_exception");
+                        resp->setBody("database exception: " +
+                                      (std::string)e.base().what());
                         (*callbackPtr)(resp);
                     });
             }
@@ -236,7 +239,9 @@ void AuthController::passwordReset(const drogon::HttpRequestPtr& req,
         {
             auto resp = drogon::HttpResponse::newHttpResponse(k400BadRequest,
                                                               CT_TEXT_PLAIN);
-            resp->setBody("database_exception");
+
+            resp->setBody("database exception: " +
+                          (std::string)e.base().what());
             (*callbackPtr)(resp);
         });
 }

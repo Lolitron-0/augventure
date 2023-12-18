@@ -25,6 +25,8 @@ public:
                   "augventure::filters::LoginFilter");
     ADD_METHOD_TO(EventController::listEvents, "api/events", Get,
                   "augventure::filters::LoginFilter");
+    ADD_METHOD_TO(EventController::deleteEvent, "api/events/delete/{eventId}", Post,
+                  "augventure::filters::LoginFilter");
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -37,6 +39,8 @@ public:
                      drogon_model::augventure_db::Event&& newEventData);
     void listEvents(const drogon::HttpRequestPtr& req,
                     drogon::AdviceCallback&& callback);
+    void deleteEvent(const drogon::HttpRequestPtr& req,
+                     drogon::AdviceCallback&& callback, PrimaryKeyType eventId);
 };
 } // namespace controllers
 } // namespace augventure
