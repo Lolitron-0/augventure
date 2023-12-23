@@ -23,8 +23,8 @@ void AuthController::signup(drogon_model::augventure_db::User&& newUserData,
 
     char hashed_password[crypto_pwhash_STRBYTES];
     if (crypto_pwhash_str(hashed_password,
-                          newUserData.getValueOfPasswordHash().c_str(),
-                          newUserData.getValueOfPasswordHash().length(),
+                          newUserData.getValueOfPassword().c_str(),
+                          newUserData.getValueOfPassword().length(),
                           crypto_pwhash_OPSLIMIT_MODERATE,
                           crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0)
     { // testing only
@@ -33,7 +33,7 @@ void AuthController::signup(drogon_model::augventure_db::User&& newUserData,
 
     // at this point newUserData is only an interface to retrieve input form
     // info
-    newUserData.setPasswordHash(hashed_password);
+    newUserData.setPassword(hashed_password);
 
     auto auth_code = std::to_string(randombytes_uniform(1000000));
     auth_code =
@@ -60,7 +60,7 @@ void AuthController::signup(drogon_model::augventure_db::User&& newUserData,
         [=](User)
         {
             LOG_TRACE << "signup : ok";
-            (*callbackPtr)(HttpResponse::newHttpResponse(k200OK, CT_NONE));
+            (*callbackPtr)(HttpResponse::newHttpResponse(k201Created, CT_NONE));
         },
         [=](const DrogonDbException& e)
         {
@@ -93,14 +93,14 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
             auto response{ drogon::HttpResponse::newHttpJsonResponse(
                 Json::Value{}) };
             if (crypto_pwhash_str_verify(
-                    user.getValueOfPasswordHash().c_str(),
-                    loginUserData.getValueOfPasswordHash().c_str(),
-                    loginUserData.getValueOfPasswordHash().length()) == 0)
+                    user.getValueOfPassword().c_str(),
+                    loginUserData.getValueOfPassword().c_str(),
+                    loginUserData.getValueOfPassword().length()) == 0)
             {
                 auto token{ drogon::app()
                                 .getPlugin<plugins::JWTService>()
                                 ->generateFromUser(user) };
-                response->setStatusCode(drogon::k200OK);
+                response->setStatusCode(drogon::k202Accepted);
                 (*response->jsonObject())["token"] = token;
                 if (req->session()->find("session_token"))
                 {
@@ -194,7 +194,7 @@ void AuthController::passwordReset(const drogon::HttpRequestPtr& req,
             std::string oldPassword{ jsonPasswords["old_password"].asString() };
 
             if (crypto_pwhash_str_verify(
-                    currentUser.getValueOfPasswordHash().c_str(),
+                    currentUser.getValueOfPassword().c_str(),
                     oldPassword.c_str(), oldPassword.length()) == 0)
             {
                 std::string newPassword{
@@ -208,14 +208,14 @@ void AuthController::passwordReset(const drogon::HttpRequestPtr& req,
                 { // testing only
                     std::cerr << "out of memory!\n";
                 }
-                currentUser.setPasswordHash(hashedNewPassword);
+                currentUser.setPassword(hashedNewPassword);
 
                 Mapper<User> updateMapper{ dbClient };
                 updateMapper.update(
                     currentUser,
                     [=](size_t) {
                         (*callbackPtr)(
-                            HttpResponse::newHttpResponse(k200OK, CT_NONE));
+                            HttpResponse::newHttpResponse(k202Accepted, CT_NONE));
                     },
                     [=](const DrogonDbException& e)
                     {

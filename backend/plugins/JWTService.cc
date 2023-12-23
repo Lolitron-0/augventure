@@ -1,4 +1,9 @@
 #include "JWTService.h"
+#include "jwt-cpp/jwt.h"
+#include <drogon/HttpRequest.h>
+#include <exception>
+#include <optional>
+#include <trantor/utils/Logger.h>
 
 namespace augventure
 {
@@ -32,23 +37,39 @@ std::string JWTService::generateFromUser(
 
 std::optional<int> JWTService::getUserIdFromJWT(const std::string& token) const
 {
-    auto decoded = jwt::decode(token);
     try
     {
+        auto decoded{ jwt::decode(token) };
         m_VerifierPtr->verify(decoded);
+        return stoi(decoded.get_payload_claim("user").as_string());
     }
-    catch (const std::runtime_error& e)
+    catch (const std::exception& e)
     {
-        LOG_TRACE << e.what();
+        LOG_DEBUG << e.what();
         return std::nullopt;
     }
-    return stoi(decoded.get_payload_claim("user").as_string());
+}
+
+std::optional<std::string>
+JWTService::getJWTFromRequest(const drogon::HttpRequestPtr& req) const
+{
+    if (req->session()->getOptional<std::string>("session_token").has_value())
+    {
+		LOG_TRACE << "Got token from cookies";
+        return req->session()->getOptional<std::string>("session_token");
+    }
+    else if (req->headers().find("authorization") != req->headers().end())
+    {
+		LOG_TRACE << "Got token from headers";
+        return req->headers().at("authorization");
+    }
+    return std::nullopt;
 }
 
 std::optional<int>
 JWTService::getUserIdFromRequest(const drogon::HttpRequestPtr& req) const
 {
-    return getUserIdFromJWT(req->session()->get<std::string>("session_token"));
+    return getUserIdFromJWT(getJWTFromRequest(req).value_or(""));
 }
 
 void JWTService::shutdown() {}

@@ -15,7 +15,7 @@ using namespace drogon_model::augventure_db;
 
 const std::string Users::Cols::_id = "id";
 const std::string Users::Cols::_email = "email";
-const std::string Users::Cols::_password_hash = "password_hash";
+const std::string Users::Cols::_password = "password";
 const std::string Users::Cols::_username = "username";
 const std::string Users::Cols::_pfp_url = "pfp_url";
 const std::string Users::Cols::_bio = "bio";
@@ -27,7 +27,7 @@ const std::string Users::tableName = "users";
 const std::vector<typename Users::MetaData> Users::metaData_={
 {"id","uint32_t","int(10) unsigned",4,1,1,1},
 {"email","std::string","char(100)",0,0,0,1},
-{"password_hash","std::string","tinytext",0,0,0,1},
+{"password","std::string","tinytext",0,0,0,1},
 {"username","std::string","char(30)",0,0,0,1},
 {"pfp_url","std::string","tinytext",0,0,0,0},
 {"bio","std::string","text",0,0,0,1},
@@ -50,9 +50,9 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
         {
             email_=std::make_shared<std::string>(r["email"].as<std::string>());
         }
-        if(!r["password_hash"].isNull())
+        if(!r["password"].isNull())
         {
-            passwordHash_=std::make_shared<std::string>(r["password_hash"].as<std::string>());
+            password_=std::make_shared<std::string>(r["password"].as<std::string>());
         }
         if(!r["username"].isNull())
         {
@@ -93,7 +93,7 @@ Users::Users(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 2;
         if(!r[index].isNull())
         {
-            passwordHash_=std::make_shared<std::string>(r[index].as<std::string>());
+            password_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 3;
         if(!r[index].isNull())
@@ -147,7 +147,7 @@ Users::Users(const Json::Value &pJson, const std::vector<std::string> &pMasquera
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            passwordHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -202,12 +202,12 @@ Users::Users(const Json::Value &pJson) noexcept(false)
             email_=std::make_shared<std::string>(pJson["email"].asString());
         }
     }
-    if(pJson.isMember("password_hash"))
+    if(pJson.isMember("password"))
     {
         dirtyFlag_[2]=true;
-        if(!pJson["password_hash"].isNull())
+        if(!pJson["password"].isNull())
         {
-            passwordHash_=std::make_shared<std::string>(pJson["password_hash"].asString());
+            password_=std::make_shared<std::string>(pJson["password"].asString());
         }
     }
     if(pJson.isMember("username"))
@@ -272,7 +272,7 @@ void Users::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            passwordHash_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            password_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -326,12 +326,12 @@ void Users::updateByJson(const Json::Value &pJson) noexcept(false)
             email_=std::make_shared<std::string>(pJson["email"].asString());
         }
     }
-    if(pJson.isMember("password_hash"))
+    if(pJson.isMember("password"))
     {
         dirtyFlag_[2] = true;
-        if(!pJson["password_hash"].isNull())
+        if(!pJson["password"].isNull())
         {
-            passwordHash_=std::make_shared<std::string>(pJson["password_hash"].asString());
+            password_=std::make_shared<std::string>(pJson["password"].asString());
         }
     }
     if(pJson.isMember("username"))
@@ -412,25 +412,25 @@ void Users::setEmail(std::string &&pEmail) noexcept
     dirtyFlag_[1] = true;
 }
 
-const std::string &Users::getValueOfPasswordHash() const noexcept
+const std::string &Users::getValueOfPassword() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if(passwordHash_)
-        return *passwordHash_;
+    if(password_)
+        return *password_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Users::getPasswordHash() const noexcept
+const std::shared_ptr<std::string> &Users::getPassword() const noexcept
 {
-    return passwordHash_;
+    return password_;
 }
-void Users::setPasswordHash(const std::string &pPasswordHash) noexcept
+void Users::setPassword(const std::string &pPassword) noexcept
 {
-    passwordHash_ = std::make_shared<std::string>(pPasswordHash);
+    password_ = std::make_shared<std::string>(pPassword);
     dirtyFlag_[2] = true;
 }
-void Users::setPasswordHash(std::string &&pPasswordHash) noexcept
+void Users::setPassword(std::string &&pPassword) noexcept
 {
-    passwordHash_ = std::make_shared<std::string>(std::move(pPasswordHash));
+    password_ = std::make_shared<std::string>(std::move(pPassword));
     dirtyFlag_[2] = true;
 }
 
@@ -541,7 +541,7 @@ const std::vector<std::string> &Users::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "email",
-        "password_hash",
+        "password",
         "username",
         "pfp_url",
         "bio",
@@ -565,9 +565,9 @@ void Users::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getPasswordHash())
+        if(getPassword())
         {
-            binder << getValueOfPasswordHash();
+            binder << getValueOfPassword();
         }
         else
         {
@@ -665,9 +665,9 @@ void Users::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getPasswordHash())
+        if(getPassword())
         {
-            binder << getValueOfPasswordHash();
+            binder << getValueOfPassword();
         }
         else
         {
@@ -738,13 +738,13 @@ Json::Value Users::toJson() const
     {
         ret["email"]=Json::Value();
     }
-    if(getPasswordHash())
+    if(getPassword())
     {
-        ret["password_hash"]=getValueOfPasswordHash();
+        ret["password"]=getValueOfPassword();
     }
     else
     {
-        ret["password_hash"]=Json::Value();
+        ret["password"]=Json::Value();
     }
     if(getUsername())
     {
@@ -811,9 +811,9 @@ Json::Value Users::toMasqueradedJson(
         }
         if(!pMasqueradingVector[2].empty())
         {
-            if(getPasswordHash())
+            if(getPassword())
             {
-                ret[pMasqueradingVector[2]]=getValueOfPasswordHash();
+                ret[pMasqueradingVector[2]]=getValueOfPassword();
             }
             else
             {
@@ -883,13 +883,13 @@ Json::Value Users::toMasqueradedJson(
     {
         ret["email"]=Json::Value();
     }
-    if(getPasswordHash())
+    if(getPassword())
     {
-        ret["password_hash"]=getValueOfPasswordHash();
+        ret["password"]=getValueOfPassword();
     }
     else
     {
-        ret["password_hash"]=Json::Value();
+        ret["password"]=Json::Value();
     }
     if(getUsername())
     {
@@ -943,14 +943,14 @@ bool Users::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         err="The email column cannot be null";
         return false;
     }
-    if(pJson.isMember("password_hash"))
+    if(pJson.isMember("password"))
     {
-        if(!validJsonOfField(2, "password_hash", pJson["password_hash"], err, true))
+        if(!validJsonOfField(2, "password", pJson["password"], err, true))
             return false;
     }
     else
     {
-        err="The password_hash column cannot be null";
+        err="The password column cannot be null";
         return false;
     }
     if(pJson.isMember("username"))
@@ -1086,9 +1086,9 @@ bool Users::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(1, "email", pJson["email"], err, false))
             return false;
     }
-    if(pJson.isMember("password_hash"))
+    if(pJson.isMember("password"))
     {
-        if(!validJsonOfField(2, "password_hash", pJson["password_hash"], err, false))
+        if(!validJsonOfField(2, "password", pJson["password"], err, false))
             return false;
     }
     if(pJson.isMember("username"))

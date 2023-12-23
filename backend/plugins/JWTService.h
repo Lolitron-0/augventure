@@ -1,6 +1,7 @@
 #pragma once
 
 #include "models/Models.h"
+#include <drogon/HttpRequest.h>
 #include <drogon/drogon.h>
 #undef min
 #undef max
@@ -18,6 +19,7 @@ public:
     std::string
     generateFromUser(const drogon_model::augventure_db::User& user) const;
     std::optional<int> getUserIdFromJWT(const std::string& token) const;
+	std::optional<std::string> getJWTFromRequest(const drogon::HttpRequestPtr&) const;
     std::optional<int>
     getUserIdFromRequest(const drogon::HttpRequestPtr&) const;
 

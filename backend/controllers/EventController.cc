@@ -38,7 +38,7 @@ void EventController::createEvent(
                 StateUpdateScheduler::TaskType::EventStart,
                 event.getValueOfStart(), event.getValueOfId());
             (*callbackPtr)(drogon::HttpResponse::newHttpResponse(
-                drogon::k200OK, drogon::CT_NONE));
+                drogon::k201Created, drogon::CT_NONE));
         },
         [=](const DrogonDbException& e)
         {

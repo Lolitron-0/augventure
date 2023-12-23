@@ -1,7 +1,7 @@
 CREATE TABLE `users` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `email` char(100) NOT NULL,
-  `password_hash` tinytext NOT NULL,
+  `password` tinytext NOT NULL,
   `username` char(30) NOT NULL,
   `pfp_url` tinytext DEFAULT NULL,
   `bio` text NOT NULL DEFAULT '',

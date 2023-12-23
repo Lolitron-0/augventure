@@ -31,7 +31,7 @@
 				var data = JSON.stringify({
 					user: {
 						email: document.getElementById("email").value,
-						password_hash: document.getElementById("password").value,
+						password: document.getElementById("password").value,
 						username: document.getElementById("username").value,
 					},
 				});
@@ -51,7 +51,7 @@
 				var data = JSON.stringify({
 					user: {
 						email: document.getElementById("email").value,
-						password_hash: document.getElementById("password").value,
+						password: document.getElementById("password").value,
 					},
 				});
 				xhr.send(data);

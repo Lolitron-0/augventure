@@ -6,6 +6,7 @@
 
 #include "UserExistsFilter.h"
 #include "models/Models.h"
+#include <drogon/HttpTypes.h>
 #include <drogon/orm/Mapper.h>
 #include <drogon/drogon.h>
 
@@ -31,11 +32,10 @@ namespace augventure {
                     Criteria{ User::Cols::_username, CompareOperator::EQ, newUser.getValueOfUsername() }).get();
 
                 // failed
-                Json::Value json;
-                json["result"] = "already_exists";
 				LOG_TRACE << "UserExistsFilter : fail";
-                auto res = drogon::HttpResponse::newHttpJsonResponse(json);
-                fcb(res);
+                auto resp = drogon::HttpResponse::newHttpResponse(drogon::k401Unauthorized, drogon::CT_TEXT_PLAIN);
+				resp->setBody("already_exists");
+                fcb(resp);
             }
             catch (const UnexpectedRows&) // no user found
             {

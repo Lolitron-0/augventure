@@ -46,7 +46,7 @@ class Users
     {
         static const std::string _id;
         static const std::string _email;
-        static const std::string _password_hash;
+        static const std::string _password;
         static const std::string _username;
         static const std::string _pfp_url;
         static const std::string _bio;
@@ -119,14 +119,14 @@ class Users
     void setEmail(const std::string &pEmail) noexcept;
     void setEmail(std::string &&pEmail) noexcept;
 
-    /**  For column password_hash  */
-    ///Get the value of the column password_hash, returns the default value if the column is null
-    const std::string &getValueOfPasswordHash() const noexcept;
+    /**  For column password  */
+    ///Get the value of the column password, returns the default value if the column is null
+    const std::string &getValueOfPassword() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getPasswordHash() const noexcept;
-    ///Set the value of the column password_hash
-    void setPasswordHash(const std::string &pPasswordHash) noexcept;
-    void setPasswordHash(std::string &&pPasswordHash) noexcept;
+    const std::shared_ptr<std::string> &getPassword() const noexcept;
+    ///Set the value of the column password
+    void setPassword(const std::string &pPassword) noexcept;
+    void setPassword(std::string &&pPassword) noexcept;
 
     /**  For column username  */
     ///Get the value of the column username, returns the default value if the column is null
@@ -190,7 +190,7 @@ class Users
     void updateId(const uint64_t id);
     std::shared_ptr<uint32_t> id_;
     std::shared_ptr<std::string> email_;
-    std::shared_ptr<std::string> passwordHash_;
+    std::shared_ptr<std::string> password_;
     std::shared_ptr<std::string> username_;
     std::shared_ptr<std::string> pfpUrl_;
     std::shared_ptr<std::string> bio_;
@@ -233,7 +233,7 @@ class Users
         }
         if(dirtyFlag_[2])
         {
-            sql += "password_hash,";
+            sql += "password,";
             ++parametersCount;
         }
         if(dirtyFlag_[3])

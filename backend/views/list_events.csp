@@ -32,8 +32,9 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     const events = JSON.parse(xhr.responseText).events
-                    console.log(events)
-                    for (const event of events) {
+                    console.log(events.slice(0,100))
+                    let arr = []
+                    for (const event of events.slice(0, 100)) {
                         document.body.innerHTML += `
                             <p>Title: ${event.title}</p>
                             <p>Description: ${event.description}</p>
