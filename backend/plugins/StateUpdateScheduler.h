@@ -56,7 +56,9 @@ private:
 
         bool operator<(const ScheduledTask& other) const
         {
-            return timestamp < other.timestamp;
+            return timestamp < other.timestamp
+                   || (timestamp == other.timestamp && objectId < other.objectId)
+                   || (objectId == other.objectId && type < other.type);
         }
     };
 
