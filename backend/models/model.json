@@ -67,16 +67,16 @@
     ]
   },
   "restful_api_controllers": {
-    "enabled": false,
+    "enabled": true,
     // resource_uri: The URI to access the resource, the default value 
     // is '/*' in which the asterisk represents the table name.
     // If this option is set to a empty string, the URI is composed of the namespaces and the class name.
-    "resource_uri": "/*",
+    "resource_uri": "/api/*",
     // class_name: "Restful*Ctrl" by default, the asterisk represents the table name.
     // This option can contain namespaces.
-    "class_name": "Restful*Ctrl",
+    "class_name": "*Controller",
     // filters: an array of filter names.
-    "filters": [],
+    "filters": ["augventure::filters::LoginFilter"],
     // db_client: the database client used by the controller. this option must be consistent with
     // the configuration of the application.
     "db_client": {
@@ -88,6 +88,6 @@
     // directory: The directory where the controller source files are stored.
     "directory": "controllers",
     // generate_base_only: false by default. Set to true to avoid overwriting custom subclasses.
-    "generate_base_only": false
+    "generate_base_only": true
   }
 }

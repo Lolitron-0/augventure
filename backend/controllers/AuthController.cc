@@ -102,6 +102,7 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
                                 ->generateFromUser(user) };
                 response->setStatusCode(drogon::k202Accepted);
                 (*response->jsonObject())["token"] = token;
+				(*response->jsonObject())["user"] = user.toJson();
                 if (req->session()->find("session_token"))
                 {
                     req->session()->modify<std::string>(

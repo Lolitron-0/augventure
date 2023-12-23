@@ -3,6 +3,7 @@
 #include "plugins/JWTService.h"
 #include "plugins/StateUpdateScheduler.h"
 #include "utils/Macros.h"
+#include "utils/Utils.h"
 #include <drogon/HttpAppFramework.h>
 #include <drogon/HttpTypes.h>
 #include <drogon/orm/Criteria.h>
@@ -52,7 +53,7 @@ void EventController::createEvent(
 }
 
 void EventController::listEvents(const drogon::HttpRequestPtr& req,
-                                 drogon::AdviceCallback&& callback)
+                                 drogon::AdviceCallback&& callback, EventsFilteringData&& filteringData)
 {
     using namespace drogon_model::augventure_db;
     using namespace drogon::orm;
@@ -87,7 +88,7 @@ void EventController::listEvents(const drogon::HttpRequestPtr& req,
 
 void EventController::deleteEvent(const drogon::HttpRequestPtr& req,
                                   drogon::AdviceCallback&& callback,
-                                  PrimaryKeyType eventId)
+                                  PrimaryKeyType&& eventId)
 {
     using namespace drogon_model::augventure_db;
     using namespace drogon::orm;

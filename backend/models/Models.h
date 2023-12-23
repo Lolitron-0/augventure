@@ -2,8 +2,12 @@
 #include "Events.h"
 #include "Sprints.h"
 #include "Users.h"
+#include <drogon/HttpRequest.h>
 #include <drogon/drogon.h>
+#include <drogon/orm/Criteria.h>
+#include <json/value.h>
 #include <string>
+#include <vector>
 
 namespace drogon_model
 {
@@ -27,6 +31,8 @@ inline trantor::Date dateFromJsonString(const std::string& string)
 
 namespace drogon
 {
+
+
 template <>
 inline drogon_model::augventure_db::User fromRequest(const HttpRequest& req)
 {

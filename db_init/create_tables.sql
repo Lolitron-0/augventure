@@ -23,6 +23,7 @@ create table events(
     description text not null default '',
     picture_url tinytext,
     start datetime not null default NOW(),
+	creation_date datetime not null default NOW(),
     author_id int unsigned NOT NULL,
 	state enum ('scheduled','in_progress','ended') NOT NULL default 'scheduled',
     constraint `fk_event_author_id`

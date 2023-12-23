@@ -51,6 +51,7 @@ class Events
         static const std::string _start;
         static const std::string _author_id;
         static const std::string _state;
+        static const std::string _creation_date;
     };
 
     const static int primaryKeyNumber;
@@ -163,8 +164,16 @@ class Events
     void setState(const std::string &pState) noexcept;
     void setState(std::string &&pState) noexcept;
 
+    /**  For column creation_date  */
+    ///Get the value of the column creation_date, returns the default value if the column is null
+    const ::trantor::Date &getValueOfCreationDate() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<::trantor::Date> &getCreationDate() const noexcept;
+    ///Set the value of the column creation_date
+    void setCreationDate(const ::trantor::Date &pCreationDate) noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 7;  }
+
+    static size_t getColumnNumber() noexcept {  return 8;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -192,6 +201,7 @@ class Events
     std::shared_ptr<::trantor::Date> start_;
     std::shared_ptr<uint32_t> authorId_;
     std::shared_ptr<std::string> state_;
+    std::shared_ptr<::trantor::Date> creationDate_;
     struct MetaData
     {
         const std::string colName_;
@@ -203,7 +213,7 @@ class Events
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[7]={ false };
+    bool dirtyFlag_[8]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -256,6 +266,12 @@ class Events
         {
             needSelection=true;
         }
+        sql += "creation_date,";
+        ++parametersCount;
+        if(!dirtyFlag_[7])
+        {
+            needSelection=true;
+        }
         needSelection=true;
         if(parametersCount > 0)
         {
@@ -300,6 +316,15 @@ class Events
 
         }
         if(dirtyFlag_[6])
+        {
+            sql.append("?,");
+
+        }
+        else
+        {
+            sql +="default,";
+        }
+        if(dirtyFlag_[7])
         {
             sql.append("?,");
 

@@ -2,6 +2,7 @@
 
 #include "models/Models.h"
 #include <drogon/HttpController.h>
+#include "utils/Utils.h"
 
 using namespace drogon;
 
@@ -11,6 +12,7 @@ namespace controllers
 {
 class EventController : public drogon::HttpController<EventController>
 {
+
 public:
     METHOD_LIST_BEGIN
     // use METHOD_ADD to add your custom processing function here;
@@ -38,9 +40,9 @@ public:
                      drogon::AdviceCallback&& callback,
                      drogon_model::augventure_db::Event&& newEventData);
     void listEvents(const drogon::HttpRequestPtr& req,
-                    drogon::AdviceCallback&& callback);
+                    drogon::AdviceCallback&& callback, EventsFilteringData&& filteringData);
     void deleteEvent(const drogon::HttpRequestPtr& req,
-                     drogon::AdviceCallback&& callback, PrimaryKeyType eventId);
+                     drogon::AdviceCallback&& callback, PrimaryKeyType&& eventId);
 };
 } // namespace controllers
 } // namespace augventure

@@ -20,6 +20,7 @@ const std::string Events::Cols::_picture_url = "picture_url";
 const std::string Events::Cols::_start = "start";
 const std::string Events::Cols::_author_id = "author_id";
 const std::string Events::Cols::_state = "state";
+const std::string Events::Cols::_creation_date = "creation_date";
 const std::string Events::primaryKeyName = "id";
 const bool Events::hasPrimaryKey = true;
 const std::string Events::tableName = "events";
@@ -31,7 +32,8 @@ const std::vector<typename Events::MetaData> Events::metaData_={
 {"picture_url","std::string","tinytext",0,0,0,0},
 {"start","::trantor::Date","datetime",0,0,0,1},
 {"author_id","uint32_t","int(10) unsigned",4,0,0,1},
-{"state","std::string","enum('scheduled','in_progress','ended')",0,0,0,1}
+{"state","std::string","enum('scheduled','in_progress','ended')",0,0,0,1},
+{"creation_date","::trantor::Date","datetime",0,0,0,1}
 };
 const std::string &Events::getColumnName(size_t index) noexcept(false)
 {
@@ -88,11 +90,33 @@ Events::Events(const Row &r, const ssize_t indexOffset) noexcept
         {
             state_=std::make_shared<std::string>(r["state"].as<std::string>());
         }
+        if(!r["creation_date"].isNull())
+        {
+            auto timeStr = r["creation_date"].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 7 > r.size())
+        if(offset + 8 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -151,13 +175,36 @@ Events::Events(const Row &r, const ssize_t indexOffset) noexcept
         {
             state_=std::make_shared<std::string>(r[index].as<std::string>());
         }
+        index = offset + 7;
+        if(!r[index].isNull())
+        {
+            auto timeStr = r[index].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
 
 }
 
 Events::Events(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 7)
+    if(pMasqueradingVector.size() != 8)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -236,6 +283,32 @@ Events::Events(const Json::Value &pJson, const std::vector<std::string> &pMasque
             state_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
         }
     }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[7]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
 }
 
 Events::Events(const Json::Value &pJson) noexcept(false)
@@ -282,7 +355,7 @@ Events::Events(const Json::Value &pJson) noexcept(false)
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-            size_t decimalNum = 0;
+           size_t decimalNum = 0;
             if(p)
             {
                 if(*p=='.')
@@ -314,12 +387,38 @@ Events::Events(const Json::Value &pJson) noexcept(false)
             state_=std::make_shared<std::string>(pJson["state"].asString());
         }
     }
+    if(pJson.isMember("creation_date"))
+    {
+        dirtyFlag_[7]=true;
+        if(!pJson["creation_date"].isNull())
+        {
+            auto timeStr = pJson["creation_date"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
 }
 
 void Events::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 7)
+    if(pMasqueradingVector.size() != 8)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -397,6 +496,32 @@ void Events::updateByMasqueradedJson(const Json::Value &pJson,
             state_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
         }
     }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[7]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
 }
 
 void Events::updateByJson(const Json::Value &pJson) noexcept(false)
@@ -472,6 +597,32 @@ void Events::updateByJson(const Json::Value &pJson) noexcept(false)
         if(!pJson["state"].isNull())
         {
             state_=std::make_shared<std::string>(pJson["state"].asString());
+        }
+    }
+    if(pJson.isMember("creation_date"))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson["creation_date"].isNull())
+        {
+            auto timeStr = pJson["creation_date"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -625,6 +776,23 @@ void Events::setState(std::string &&pState) noexcept
     dirtyFlag_[6] = true;
 }
 
+const ::trantor::Date &Events::getValueOfCreationDate() const noexcept
+{
+    const static ::trantor::Date defaultValue = ::trantor::Date();
+    if(creationDate_)
+        return *creationDate_;
+    return defaultValue;
+}
+const std::shared_ptr<::trantor::Date> &Events::getCreationDate() const noexcept
+{
+    return creationDate_;
+}
+void Events::setCreationDate(const ::trantor::Date &pCreationDate) noexcept
+{
+    creationDate_ = std::make_shared<::trantor::Date>(pCreationDate);
+    dirtyFlag_[7] = true;
+}
+
 void Events::updateId(const uint64_t id)
 {
     id_ = std::make_shared<uint32_t>(static_cast<uint32_t>(id));
@@ -638,7 +806,8 @@ const std::vector<std::string> &Events::insertColumns() noexcept
         "picture_url",
         "start",
         "author_id",
-        "state"
+        "state",
+        "creation_date"
     };
     return inCols;
 }
@@ -711,6 +880,17 @@ void Events::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[7])
+    {
+        if(getCreationDate())
+        {
+            binder << getValueOfCreationDate();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
 }
 
 const std::vector<std::string> Events::updateColumns() const
@@ -739,6 +919,10 @@ const std::vector<std::string> Events::updateColumns() const
     if(dirtyFlag_[6])
     {
         ret.push_back(getColumnName(6));
+    }
+    if(dirtyFlag_[7])
+    {
+        ret.push_back(getColumnName(7));
     }
     return ret;
 }
@@ -811,6 +995,17 @@ void Events::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[7])
+    {
+        if(getCreationDate())
+        {
+            binder << getValueOfCreationDate();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
 }
 Json::Value Events::toJson() const
 {
@@ -871,6 +1066,14 @@ Json::Value Events::toJson() const
     {
         ret["state"]=Json::Value();
     }
+    if(getCreationDate())
+    {
+        ret["creation_date"]=getCreationDate()->toDbStringLocal();
+    }
+    else
+    {
+        ret["creation_date"]=Json::Value();
+    }
     return ret;
 }
 
@@ -878,7 +1081,7 @@ Json::Value Events::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 7)
+    if(pMasqueradingVector.size() == 8)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -957,6 +1160,17 @@ Json::Value Events::toMasqueradedJson(
                 ret[pMasqueradingVector[6]]=Json::Value();
             }
         }
+        if(!pMasqueradingVector[7].empty())
+        {
+            if(getCreationDate())
+            {
+                ret[pMasqueradingVector[7]]=getCreationDate()->toDbStringLocal();
+            }
+            else
+            {
+                ret[pMasqueradingVector[7]]=Json::Value();
+            }
+        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
@@ -1016,6 +1230,14 @@ Json::Value Events::toMasqueradedJson(
     {
         ret["state"]=Json::Value();
     }
+    if(getCreationDate())
+    {
+        ret["creation_date"]=getCreationDate()->toDbStringLocal();
+    }
+    else
+    {
+        ret["creation_date"]=Json::Value();
+    }
     return ret;
 }
 
@@ -1066,13 +1288,18 @@ bool Events::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(6, "state", pJson["state"], err, true))
             return false;
     }
+    if(pJson.isMember("creation_date"))
+    {
+        if(!validJsonOfField(7, "creation_date", pJson["creation_date"], err, true))
+            return false;
+    }
     return true;
 }
 bool Events::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                 const std::vector<std::string> &pMasqueradingVector,
                                                 std::string &err)
 {
-    if(pMasqueradingVector.size() != 7)
+    if(pMasqueradingVector.size() != 8)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1144,6 +1371,14 @@ bool Events::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                   return false;
           }
       }
+      if(!pMasqueradingVector[7].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[7]))
+          {
+              if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true))
+                  return false;
+          }
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -1194,13 +1429,18 @@ bool Events::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(6, "state", pJson["state"], err, false))
             return false;
     }
+    if(pJson.isMember("creation_date"))
+    {
+        if(!validJsonOfField(7, "creation_date", pJson["creation_date"], err, false))
+            return false;
+    }
     return true;
 }
 bool Events::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                               const std::vector<std::string> &pMasqueradingVector,
                                               std::string &err)
 {
-    if(pMasqueradingVector.size() != 7)
+    if(pMasqueradingVector.size() != 8)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1244,6 +1484,11 @@ bool Events::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
       {
           if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+      {
+          if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false))
               return false;
       }
     }
@@ -1339,6 +1584,18 @@ bool Events::validJsonOfField(size_t index,
             }
             break;
         case 6:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 7:
             if(pJson.isNull())
             {
                 err="The " + fieldName + " column cannot be null";
