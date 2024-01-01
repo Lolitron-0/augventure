@@ -1,6 +1,7 @@
 #pragma once
 #include "Events.h"
 #include "Sprints.h"
+#include "Posts.h"
 #include "Users.h"
 #include <drogon/HttpRequest.h>
 #include <drogon/drogon.h>
@@ -15,6 +16,7 @@ namespace augventure_db
 {
 using User = Users;
 using Event = Events;
+using Sprint = Sprints;
 } // namespace augventure_db
 } // namespace drogon_model
 

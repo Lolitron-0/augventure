@@ -40,7 +40,7 @@ public:
     void schedule(const TaskType& type, const UTCMark& time,
                   const PrimaryKeyType& objectKey);
 
-	void removeTaskByKey(const PrimaryKeyType& objectKey);
+    void removeTaskByKey(const PrimaryKeyType& objectKey);
 
     void shutdown() override;
 
@@ -56,9 +56,11 @@ private:
 
         bool operator<(const ScheduledTask& other) const
         {
-            return timestamp < other.timestamp
-                   || (timestamp == other.timestamp && objectId < other.objectId)
-                   || (objectId == other.objectId && type < other.type);
+            return timestamp < other.timestamp ||
+                   (timestamp == other.timestamp &&
+                    objectId < other.objectId) ||
+                   (timestamp == other.timestamp &&
+                    objectId == other.objectId && type < other.type);
         }
     };
 

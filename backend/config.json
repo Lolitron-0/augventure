@@ -263,6 +263,7 @@
   //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method.
   "custom_config": {
     "jwt-secret": "aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa",
-    "jwt-sessionDuration": 86400
+    "jwt-sessionDuration": 86400,
+	"host-string": "http:/127.0.0.1"
   }
 }
