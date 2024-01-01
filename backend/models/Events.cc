@@ -355,7 +355,7 @@ Events::Events(const Json::Value &pJson) noexcept(false)
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
             time_t t = mktime(&stm);
-           size_t decimalNum = 0;
+            size_t decimalNum = 0;
             if(p)
             {
                 if(*p=='.')

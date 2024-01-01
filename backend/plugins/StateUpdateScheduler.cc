@@ -43,7 +43,7 @@ void StateUpdateScheduler::initAndStart(const Json::Value& config)
             while (this->m_ThreadAlive)
             {
                 now = trantor::Date::now();
-                auto it = std::begin(m_TaskQueue);
+                auto it{ std::begin(m_TaskQueue) };
                 for (; it != std::end(m_TaskQueue);)
                 {
                     if (it->timestamp.secondsSinceEpoch() -

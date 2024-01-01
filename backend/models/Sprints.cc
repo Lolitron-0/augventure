@@ -17,6 +17,7 @@ const std::string Sprints::Cols::_id = "id";
 const std::string Sprints::Cols::_state = "state";
 const std::string Sprints::Cols::_suggestion_winner_id = "suggestion_winner_id";
 const std::string Sprints::Cols::_event_id = "event_id";
+const std::string Sprints::Cols::_start = "start";
 const std::string Sprints::primaryKeyName = "id";
 const bool Sprints::hasPrimaryKey = true;
 const std::string Sprints::tableName = "sprints";
@@ -25,7 +26,8 @@ const std::vector<typename Sprints::MetaData> Sprints::metaData_={
 {"id","uint32_t","int(10) unsigned",4,1,1,1},
 {"state","std::string","enum('voting','implementing','ended')",0,0,0,0},
 {"suggestion_winner_id","uint32_t","int(10) unsigned",4,0,0,0},
-{"event_id","uint32_t","int(10) unsigned",4,0,0,1}
+{"event_id","uint32_t","int(10) unsigned",4,0,0,1},
+{"start","::trantor::Date","datetime",0,0,0,0}
 };
 const std::string &Sprints::getColumnName(size_t index) noexcept(false)
 {
@@ -52,11 +54,33 @@ Sprints::Sprints(const Row &r, const ssize_t indexOffset) noexcept
         {
             eventId_=std::make_shared<uint32_t>(r["event_id"].as<uint32_t>());
         }
+        if(!r["start"].isNull())
+        {
+            auto timeStr = r["start"].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                start_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 4 > r.size())
+        if(offset + 5 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -82,13 +106,36 @@ Sprints::Sprints(const Row &r, const ssize_t indexOffset) noexcept
         {
             eventId_=std::make_shared<uint32_t>(r[index].as<uint32_t>());
         }
+        index = offset + 4;
+        if(!r[index].isNull())
+        {
+            auto timeStr = r[index].as<std::string>();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                start_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
     }
 
 }
 
 Sprints::Sprints(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -123,6 +170,32 @@ Sprints::Sprints(const Json::Value &pJson, const std::vector<std::string> &pMasq
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
             eventId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[3]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[4]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                start_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -161,12 +234,38 @@ Sprints::Sprints(const Json::Value &pJson) noexcept(false)
             eventId_=std::make_shared<uint32_t>((uint32_t)pJson["event_id"].asUInt64());
         }
     }
+    if(pJson.isMember("start"))
+    {
+        dirtyFlag_[4]=true;
+        if(!pJson["start"].isNull())
+        {
+            auto timeStr = pJson["start"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                start_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
 }
 
 void Sprints::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -202,6 +301,32 @@ void Sprints::updateByMasqueradedJson(const Json::Value &pJson,
             eventId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[3]].asUInt64());
         }
     }
+    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson[pMasqueradingVector[4]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[4]].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                start_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
+        }
+    }
 }
 
 void Sprints::updateByJson(const Json::Value &pJson) noexcept(false)
@@ -235,6 +360,32 @@ void Sprints::updateByJson(const Json::Value &pJson) noexcept(false)
         if(!pJson["event_id"].isNull())
         {
             eventId_=std::make_shared<uint32_t>((uint32_t)pJson["event_id"].asUInt64());
+        }
+    }
+    if(pJson.isMember("start"))
+    {
+        dirtyFlag_[4] = true;
+        if(!pJson["start"].isNull())
+        {
+            auto timeStr = pJson["start"].asString();
+            struct tm stm;
+            memset(&stm,0,sizeof(stm));
+            auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
+            time_t t = mktime(&stm);
+            size_t decimalNum = 0;
+            if(p)
+            {
+                if(*p=='.')
+                {
+                    std::string decimals(p+1,&timeStr[timeStr.length()]);
+                    while(decimals.length()<6)
+                    {
+                        decimals += "0";
+                    }
+                    decimalNum = (size_t)atol(decimals.c_str());
+                }
+                start_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
+            }
         }
     }
 }
@@ -327,6 +478,28 @@ void Sprints::setEventId(const uint32_t &pEventId) noexcept
     dirtyFlag_[3] = true;
 }
 
+const ::trantor::Date &Sprints::getValueOfStart() const noexcept
+{
+    const static ::trantor::Date defaultValue = ::trantor::Date();
+    if(start_)
+        return *start_;
+    return defaultValue;
+}
+const std::shared_ptr<::trantor::Date> &Sprints::getStart() const noexcept
+{
+    return start_;
+}
+void Sprints::setStart(const ::trantor::Date &pStart) noexcept
+{
+    start_ = std::make_shared<::trantor::Date>(pStart);
+    dirtyFlag_[4] = true;
+}
+void Sprints::setStartToNull() noexcept
+{
+    start_.reset();
+    dirtyFlag_[4] = true;
+}
+
 void Sprints::updateId(const uint64_t id)
 {
     id_ = std::make_shared<uint32_t>(static_cast<uint32_t>(id));
@@ -337,7 +510,8 @@ const std::vector<std::string> &Sprints::insertColumns() noexcept
     static const std::vector<std::string> inCols={
         "state",
         "suggestion_winner_id",
-        "event_id"
+        "event_id",
+        "start"
     };
     return inCols;
 }
@@ -377,6 +551,17 @@ void Sprints::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[4])
+    {
+        if(getStart())
+        {
+            binder << getValueOfStart();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
 }
 
 const std::vector<std::string> Sprints::updateColumns() const
@@ -393,6 +578,10 @@ const std::vector<std::string> Sprints::updateColumns() const
     if(dirtyFlag_[3])
     {
         ret.push_back(getColumnName(3));
+    }
+    if(dirtyFlag_[4])
+    {
+        ret.push_back(getColumnName(4));
     }
     return ret;
 }
@@ -426,6 +615,17 @@ void Sprints::updateArgs(drogon::orm::internal::SqlBinder &binder) const
         if(getEventId())
         {
             binder << getValueOfEventId();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[4])
+    {
+        if(getStart())
+        {
+            binder << getValueOfStart();
         }
         else
         {
@@ -468,6 +668,14 @@ Json::Value Sprints::toJson() const
     {
         ret["event_id"]=Json::Value();
     }
+    if(getStart())
+    {
+        ret["start"]=getStart()->toDbStringLocal();
+    }
+    else
+    {
+        ret["start"]=Json::Value();
+    }
     return ret;
 }
 
@@ -475,7 +683,7 @@ Json::Value Sprints::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 4)
+    if(pMasqueradingVector.size() == 5)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -521,6 +729,17 @@ Json::Value Sprints::toMasqueradedJson(
                 ret[pMasqueradingVector[3]]=Json::Value();
             }
         }
+        if(!pMasqueradingVector[4].empty())
+        {
+            if(getStart())
+            {
+                ret[pMasqueradingVector[4]]=getStart()->toDbStringLocal();
+            }
+            else
+            {
+                ret[pMasqueradingVector[4]]=Json::Value();
+            }
+        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
@@ -556,6 +775,14 @@ Json::Value Sprints::toMasqueradedJson(
     {
         ret["event_id"]=Json::Value();
     }
+    if(getStart())
+    {
+        ret["start"]=getStart()->toDbStringLocal();
+    }
+    else
+    {
+        ret["start"]=Json::Value();
+    }
     return ret;
 }
 
@@ -586,13 +813,18 @@ bool Sprints::validateJsonForCreation(const Json::Value &pJson, std::string &err
         err="The event_id column cannot be null";
         return false;
     }
+    if(pJson.isMember("start"))
+    {
+        if(!validJsonOfField(4, "start", pJson["start"], err, true))
+            return false;
+    }
     return true;
 }
 bool Sprints::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                  const std::vector<std::string> &pMasqueradingVector,
                                                  std::string &err)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         err = "Bad masquerading vector";
         return false;
@@ -635,6 +867,14 @@ bool Sprints::validateMasqueradedJsonForCreation(const Json::Value &pJson,
             return false;
         }
       }
+      if(!pMasqueradingVector[4].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[4]))
+          {
+              if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
+                  return false;
+          }
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -670,13 +910,18 @@ bool Sprints::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(3, "event_id", pJson["event_id"], err, false))
             return false;
     }
+    if(pJson.isMember("start"))
+    {
+        if(!validJsonOfField(4, "start", pJson["start"], err, false))
+            return false;
+    }
     return true;
 }
 bool Sprints::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                const std::vector<std::string> &pMasqueradingVector,
                                                std::string &err)
 {
-    if(pMasqueradingVector.size() != 4)
+    if(pMasqueradingVector.size() != 5)
     {
         err = "Bad masquerading vector";
         return false;
@@ -705,6 +950,11 @@ bool Sprints::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
       {
           if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
+      {
+          if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, false))
               return false;
       }
     }
@@ -769,6 +1019,17 @@ bool Sprints::validJsonOfField(size_t index,
                 return false;
             }
             if(!pJson.isUInt())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 4:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;

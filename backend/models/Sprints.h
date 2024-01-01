@@ -48,6 +48,7 @@ class Sprints
         static const std::string _state;
         static const std::string _suggestion_winner_id;
         static const std::string _event_id;
+        static const std::string _start;
     };
 
     const static int primaryKeyNumber;
@@ -134,8 +135,17 @@ class Sprints
     ///Set the value of the column event_id
     void setEventId(const uint32_t &pEventId) noexcept;
 
+    /**  For column start  */
+    ///Get the value of the column start, returns the default value if the column is null
+    const ::trantor::Date &getValueOfStart() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<::trantor::Date> &getStart() const noexcept;
+    ///Set the value of the column start
+    void setStart(const ::trantor::Date &pStart) noexcept;
+    void setStartToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 4;  }
+
+    static size_t getColumnNumber() noexcept {  return 5;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -160,6 +170,7 @@ class Sprints
     std::shared_ptr<std::string> state_;
     std::shared_ptr<uint32_t> suggestionWinnerId_;
     std::shared_ptr<uint32_t> eventId_;
+    std::shared_ptr<::trantor::Date> start_;
     struct MetaData
     {
         const std::string colName_;
@@ -171,7 +182,7 @@ class Sprints
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[4]={ false };
+    bool dirtyFlag_[5]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -206,6 +217,12 @@ class Sprints
             sql += "event_id,";
             ++parametersCount;
         }
+        sql += "start,";
+        ++parametersCount;
+        if(!dirtyFlag_[4])
+        {
+            needSelection=true;
+        }
         needSelection=true;
         if(parametersCount > 0)
         {
@@ -230,6 +247,15 @@ class Sprints
         {
             sql.append("?,");
 
+        }
+        if(dirtyFlag_[4])
+        {
+            sql.append("?,");
+
+        }
+        else
+        {
+            sql +="default,";
         }
         if(parametersCount > 0)
         {
