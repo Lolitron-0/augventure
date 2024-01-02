@@ -38,6 +38,8 @@ namespace drogon_model
 {
 namespace augventure_db
 {
+class Events;
+class EventsTags;
 
 class Tags
 {
@@ -130,6 +132,10 @@ class Tags
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const;
     /// Relationship interfaces
+    std::vector<std::pair<Events,EventsTags>> getEvents(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getEvents(const drogon::orm::DbClientPtr &clientPtr,
+                   const std::function<void(std::vector<std::pair<Events,EventsTags>>)> &rcb,
+                   const drogon::orm::ExceptionCallback &ecb) const;
   private:
     friend drogon::orm::Mapper<Tags>;
     friend drogon::orm::BaseBuilder<Tags, true, true>;

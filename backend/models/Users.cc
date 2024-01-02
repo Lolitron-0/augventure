@@ -6,6 +6,7 @@
  */
 
 #include "Users.h"
+#include "Events.h"
 #include <drogon/utils/Utilities.h>
 #include <string>
 
@@ -1271,4 +1272,37 @@ bool Users::validJsonOfField(size_t index,
             return false;
     }
     return true;
+}
+std::vector<Events> Users::getEvents(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<Events>>> pro(new std::promise<std::vector<Events>>);
+    std::future<std::vector<Events>> f = pro->get_future();
+    getEvents(clientPtr, [&pro] (std::vector<Events> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Users::getEvents(const DbClientPtr &clientPtr,
+                      const std::function<void(std::vector<Events>)> &rcb,
+                      const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from events where author_id = ?";
+    *clientPtr << sql
+               << *id_
+               >> [rcb = std::move(rcb)](const Result &r){
+                   std::vector<Events> ret;
+                   ret.reserve(r.size());
+                   for (auto const &row : r)
+                   {
+                       ret.emplace_back(Events(row));
+                   }
+                   rcb(ret);
+               }
+               >> ecb;
 }

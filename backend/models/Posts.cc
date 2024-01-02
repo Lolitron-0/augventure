@@ -6,6 +6,7 @@
  */
 
 #include "Posts.h"
+#include "PostMedia.h"
 #include <drogon/utils/Utilities.h>
 #include <string>
 
@@ -773,4 +774,42 @@ bool Posts::validJsonOfField(size_t index,
             return false;
     }
     return true;
+}
+PostMedia Posts::getPostMedia(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<PostMedia>> pro(new std::promise<PostMedia>);
+    std::future<PostMedia> f = pro->get_future();
+    getPostMedia(clientPtr, [&pro] (PostMedia result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Posts::getPostMedia(const DbClientPtr &clientPtr,
+                         const std::function<void(PostMedia)> &rcb,
+                         const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from post_media where post_id = ?";
+    *clientPtr << sql
+               << *id_
+               >> [rcb = std::move(rcb), ecb](const Result &r){
+                    if (r.size() == 0)
+                    {
+                        ecb(UnexpectedRows("0 rows found"));
+                    }
+                    else if (r.size() > 1)
+                    {
+                        ecb(UnexpectedRows("Found more than one row"));
+                    }
+                    else
+                    {
+                        rcb(PostMedia(r[0]));
+                    }
+               }
+               >> ecb;
 }

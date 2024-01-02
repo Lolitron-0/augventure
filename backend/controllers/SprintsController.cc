@@ -8,38 +8,40 @@
 #include "SprintsController.h"
 #include <string>
 
-
-void SprintsController::getOne(const HttpRequestPtr &req,
-                               std::function<void(const HttpResponsePtr &)> &&callback,
-                               Sprints::PrimaryKeyType &&id)
+void SprintsController::getOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Sprints::PrimaryKeyType&& id)
 {
     SprintsControllerBase::getOne(req, std::move(callback), std::move(id));
 }
 
-
-void SprintsController::updateOne(const HttpRequestPtr &req,
-                                  std::function<void(const HttpResponsePtr &)> &&callback,
-                                  Sprints::PrimaryKeyType &&id)
+void SprintsController::updateOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Sprints::PrimaryKeyType&& id)
 {
     SprintsControllerBase::updateOne(req, std::move(callback), std::move(id));
 }
 
-
-void SprintsController::deleteOne(const HttpRequestPtr &req,
-                                  std::function<void(const HttpResponsePtr &)> &&callback,
-                                  Sprints::PrimaryKeyType &&id)
+void SprintsController::deleteOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Sprints::PrimaryKeyType&& id)
 {
     SprintsControllerBase::deleteOne(req, std::move(callback), std::move(id));
 }
 
-void SprintsController::get(const HttpRequestPtr &req,
-                            std::function<void(const HttpResponsePtr &)> &&callback)
+void SprintsController::get(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
     SprintsControllerBase::get(req, std::move(callback));
 }
 
-void SprintsController::create(const HttpRequestPtr &req,
-                               std::function<void(const HttpResponsePtr &)> &&callback)
+void SprintsController::create(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
     SprintsControllerBase::create(req, std::move(callback));
 }

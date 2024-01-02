@@ -38,6 +38,7 @@ namespace drogon_model
 {
 namespace augventure_db
 {
+class PostMedia;
 
 class Posts
 {
@@ -142,6 +143,10 @@ class Posts
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const;
     /// Relationship interfaces
+    PostMedia getPostMedia(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getPostMedia(const drogon::orm::DbClientPtr &clientPtr,
+                      const std::function<void(PostMedia)> &rcb,
+                      const drogon::orm::ExceptionCallback &ecb) const;
   private:
     friend drogon::orm::Mapper<Posts>;
     friend drogon::orm::BaseBuilder<Posts, true, true>;

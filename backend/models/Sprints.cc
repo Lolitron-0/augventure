@@ -6,6 +6,9 @@
  */
 
 #include "Sprints.h"
+#include "Events.h"
+#include "Posts.h"
+#include "Suggestions.h"
 #include <drogon/utils/Utilities.h>
 #include <string>
 
@@ -1040,4 +1043,115 @@ bool Sprints::validJsonOfField(size_t index,
             return false;
     }
     return true;
+}
+
+Posts Sprints::getPost(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<Posts>> pro(new std::promise<Posts>);
+    std::future<Posts> f = pro->get_future();
+    getPost(clientPtr, [&pro] (Posts result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Sprints::getPost(const DbClientPtr &clientPtr,
+                      const std::function<void(Posts)> &rcb,
+                      const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from posts where sprint_id = ?";
+    *clientPtr << sql
+               << *id_
+               >> [rcb = std::move(rcb), ecb](const Result &r){
+                    if (r.size() == 0)
+                    {
+                        ecb(UnexpectedRows("0 rows found"));
+                    }
+                    else if (r.size() > 1)
+                    {
+                        ecb(UnexpectedRows("Found more than one row"));
+                    }
+                    else
+                    {
+                        rcb(Posts(r[0]));
+                    }
+               }
+               >> ecb;
+}
+
+Events Sprints::getEvent(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<Events>> pro(new std::promise<Events>);
+    std::future<Events> f = pro->get_future();
+    getEvent(clientPtr, [&pro] (Events result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Sprints::getEvent(const DbClientPtr &clientPtr,
+                       const std::function<void(Events)> &rcb,
+                       const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from events where id = ?";
+    *clientPtr << sql
+               << *eventId_
+               >> [rcb = std::move(rcb), ecb](const Result &r){
+                    if (r.size() == 0)
+                    {
+                        ecb(UnexpectedRows("0 rows found"));
+                    }
+                    else if (r.size() > 1)
+                    {
+                        ecb(UnexpectedRows("Found more than one row"));
+                    }
+                    else
+                    {
+                        rcb(Events(r[0]));
+                    }
+               }
+               >> ecb;
+}
+std::vector<Suggestions> Sprints::getSuggestions(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<Suggestions>>> pro(new std::promise<std::vector<Suggestions>>);
+    std::future<std::vector<Suggestions>> f = pro->get_future();
+    getSuggestions(clientPtr, [&pro] (std::vector<Suggestions> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Sprints::getSuggestions(const DbClientPtr &clientPtr,
+                             const std::function<void(std::vector<Suggestions>)> &rcb,
+                             const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from suggestions where sprint_id = ?";
+    *clientPtr << sql
+               << *id_
+               >> [rcb = std::move(rcb)](const Result &r){
+                   std::vector<Suggestions> ret;
+                   ret.reserve(r.size());
+                   for (auto const &row : r)
+                   {
+                       ret.emplace_back(Suggestions(row));
+                   }
+                   rcb(ret);
+               }
+               >> ecb;
 }

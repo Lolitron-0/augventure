@@ -6,6 +6,10 @@
  */
 
 #include "Events.h"
+#include "EventsTags.h"
+#include "Sprints.h"
+#include "Tags.h"
+#include "Users.h"
 #include <drogon/utils/Utilities.h>
 #include <string>
 
@@ -1612,4 +1616,110 @@ bool Events::validJsonOfField(size_t index,
             return false;
     }
     return true;
+}
+
+Users Events::getUser(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<Users>> pro(new std::promise<Users>);
+    std::future<Users> f = pro->get_future();
+    getUser(clientPtr, [&pro] (Users result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Events::getUser(const DbClientPtr &clientPtr,
+                     const std::function<void(Users)> &rcb,
+                     const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from users where id = ?";
+    *clientPtr << sql
+               << *authorId_
+               >> [rcb = std::move(rcb), ecb](const Result &r){
+                    if (r.size() == 0)
+                    {
+                        ecb(UnexpectedRows("0 rows found"));
+                    }
+                    else if (r.size() > 1)
+                    {
+                        ecb(UnexpectedRows("Found more than one row"));
+                    }
+                    else
+                    {
+                        rcb(Users(r[0]));
+                    }
+               }
+               >> ecb;
+}
+std::vector<Sprints> Events::getSprints(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<Sprints>>> pro(new std::promise<std::vector<Sprints>>);
+    std::future<std::vector<Sprints>> f = pro->get_future();
+    getSprints(clientPtr, [&pro] (std::vector<Sprints> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Events::getSprints(const DbClientPtr &clientPtr,
+                        const std::function<void(std::vector<Sprints>)> &rcb,
+                        const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from sprints where event_id = ?";
+    *clientPtr << sql
+               << *id_
+               >> [rcb = std::move(rcb)](const Result &r){
+                   std::vector<Sprints> ret;
+                   ret.reserve(r.size());
+                   for (auto const &row : r)
+                   {
+                       ret.emplace_back(Sprints(row));
+                   }
+                   rcb(ret);
+               }
+               >> ecb;
+}
+std::vector<std::pair<Tags,EventsTags>> Events::getTags(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<std::pair<Tags,EventsTags>>>> pro(new std::promise<std::vector<std::pair<Tags,EventsTags>>>);
+    std::future<std::vector<std::pair<Tags,EventsTags>>> f = pro->get_future();
+    getTags(clientPtr, [&pro] (std::vector<std::pair<Tags,EventsTags>> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
+void Events::getTags(const DbClientPtr &clientPtr,
+                     const std::function<void(std::vector<std::pair<Tags,EventsTags>>)> &rcb,
+                     const ExceptionCallback &ecb) const
+{
+    const static std::string sql = "select * from tags,events_tags where events_tags.event_id = ? and events_tags.tag_id = tags.id";
+    *clientPtr << sql
+               << *id_
+               >> [rcb = std::move(rcb)](const Result &r){
+                   std::vector<std::pair<Tags,EventsTags>> ret;
+                   ret.reserve(r.size());
+                   for (auto const &row : r)
+                   {
+                       ret.emplace_back(std::pair<Tags,EventsTags>(
+                           Tags(row),EventsTags(row,Tags::getColumnNumber())));
+                   }
+                   rcb(ret);
+               }
+               >> ecb;
 }

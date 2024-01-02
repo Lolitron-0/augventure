@@ -1,13 +1,17 @@
 #pragma once
 #include "Events.h"
-#include "Sprints.h"
 #include "Posts.h"
+#include "Sprints.h"
 #include "Users.h"
+#include "utils/Macros.h"
 #include <drogon/HttpRequest.h>
 #include <drogon/drogon.h>
 #include <drogon/orm/Criteria.h>
+#include <drogon/orm/Exception.h>
+#include <functional>
 #include <json/value.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace drogon_model
@@ -22,6 +26,11 @@ using Sprint = Sprints;
 
 using PrimaryKeyType = drogon_model::augventure_db::User::PrimaryKeyType;
 
+void getFullEventData(
+    const Json::Value &eventJson,
+    std::function<void(const Json::Value &result)> &&successCallback,
+    std::function<void(const drogon::orm::DrogonDbException &e)> &&dbExceptionCallback);
+
 inline trantor::Date dateFromJsonString(const std::string& string)
 {
     struct tm stm;
@@ -33,7 +42,6 @@ inline trantor::Date dateFromJsonString(const std::string& string)
 
 namespace drogon
 {
-
 
 template <>
 inline drogon_model::augventure_db::User fromRequest(const HttpRequest& req)

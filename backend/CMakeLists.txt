@@ -21,6 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SOURCES 
     main.cc
+    models/Models.cc
     ${PLUGIN_SRC}
     ${MODEL_SRC}
     ${FILTER_SRC}

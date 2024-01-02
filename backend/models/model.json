@@ -27,39 +27,79 @@
     ]
   },
   "relationships": {
-    "enabled": false,
+    "enabled": true,
     "items": [
       {
         "type": "has one",
-        "original_table_name": "products",
-        "original_table_alias": "product",
+        "original_table_name": "sprints",
+        "original_table_alias": "sprint",
         "original_key": "id",
-        "target_table_name": "skus",
-        "target_table_alias": "SKU",
-        "target_key": "product_id",
+        "target_table_name": "posts",
+        "target_table_alias": "post",
+        "target_key": "sprint_id",
+        "enable_reverse": false
+      },
+      {
+        "type": "has one",
+        "original_table_name": "suggestions",
+        "original_table_alias": "suggestion",
+        "original_key": "id",
+        "target_table_name": "posts",
+        "target_table_alias": "post",
+        "target_key": "suggestion_id",
+        "enable_reverse": false
+      },
+      {
+        "type": "has one",
+        "original_table_name": "posts",
+        "original_table_alias": "post",
+        "original_key": "id",
+        "target_table_name": "post_media",
+        "target_table_alias": "",
+        "target_key": "post_id",
+        "enable_reverse": false
+      },
+      {
+        "type": "has many",
+        "original_table_name": "users",
+        "original_table_alias": "user",
+        "original_key": "id",
+        "target_table_name": "events",
+        "target_table_alias": "",
+        "target_key": "author_id",
         "enable_reverse": true
       },
       {
         "type": "has many",
-        "original_table_name": "products",
-        "original_table_alias": "product",
+        "original_table_name": "events",
+        "original_table_alias": "event",
         "original_key": "id",
-        "target_table_name": "reviews",
+        "target_table_name": "sprints",
         "target_table_alias": "",
-        "target_key": "product_id",
+        "target_key": "event_id",
+        "enable_reverse": true
+      },
+      {
+        "type": "has many",
+        "original_table_name": "sprints",
+        "original_table_alias": "sprint",
+        "original_key": "id",
+        "target_table_name": "suggestions",
+        "target_table_alias": "",
+        "target_key": "sprint_id",
         "enable_reverse": true
       },
       {
         "type": "many to many",
-        "original_table_name": "products",
+        "original_table_name": "events",
         "original_table_alias": "",
         "original_key": "id",
         "pivot_table": {
-          "table_name": "carts_products",
-          "original_key": "product_id",
-          "target_key": "cart_id"
+          "table_name": "events_tags",
+          "original_key": "event_id",
+          "target_key": "tag_id"
         },
-        "target_table_name": "carts",
+        "target_table_name": "tags",
         "target_table_alias": "",
         "target_key": "id",
         "enable_reverse": true

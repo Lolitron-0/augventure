@@ -61,6 +61,7 @@ create table sprints (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
   state enum ('voting','implementing','ended'),
   suggestion_winner_id int unsigned unique, 
+  start datetime default NOW(),
   event_id int unsigned not null,
     constraint `fk_sprint_event_id`
       foreign key (event_id) references events (id)

@@ -38,6 +38,7 @@ namespace drogon_model
 {
 namespace augventure_db
 {
+class Events;
 
 class Users
 {
@@ -173,6 +174,10 @@ class Users
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const;
     /// Relationship interfaces
+    std::vector<Events> getEvents(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getEvents(const drogon::orm::DbClientPtr &clientPtr,
+                   const std::function<void(std::vector<Events>)> &rcb,
+                   const drogon::orm::ExceptionCallback &ecb) const;
   private:
     friend drogon::orm::Mapper<Users>;
     friend drogon::orm::BaseBuilder<Users, true, true>;

@@ -38,6 +38,9 @@ namespace drogon_model
 {
 namespace augventure_db
 {
+class Events;
+class Posts;
+class Suggestions;
 
 class Sprints
 {
@@ -151,6 +154,18 @@ class Sprints
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const;
     /// Relationship interfaces
+    Posts getPost(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getPost(const drogon::orm::DbClientPtr &clientPtr,
+                 const std::function<void(Posts)> &rcb,
+                 const drogon::orm::ExceptionCallback &ecb) const;
+    Events getEvent(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getEvent(const drogon::orm::DbClientPtr &clientPtr,
+                  const std::function<void(Events)> &rcb,
+                  const drogon::orm::ExceptionCallback &ecb) const;
+    std::vector<Suggestions> getSuggestions(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getSuggestions(const drogon::orm::DbClientPtr &clientPtr,
+                        const std::function<void(std::vector<Suggestions>)> &rcb,
+                        const drogon::orm::ExceptionCallback &ecb) const;
   private:
     friend drogon::orm::Mapper<Sprints>;
     friend drogon::orm::BaseBuilder<Sprints, true, true>;

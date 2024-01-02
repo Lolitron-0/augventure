@@ -19,9 +19,11 @@
 #include <drogon/HttpRequest.h>
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
+#include <drogon/drogon_callbacks.h>
 #include <drogon/orm/Criteria.h>
 #include <drogon/orm/Exception.h>
 #include <drogon/orm/Mapper.h>
+#include <drogon/orm/Result.h>
 #include <iterator>
 #include <json/value.h>
 #include <json/writer.h>
@@ -37,79 +39,26 @@ void EventsController::getOne(
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
     EventsControllerBase::getOne(
         req,
-        [callbackPtr, eventId = id](const HttpResponsePtr& resp)
+        [callbackPtr](const HttpResponsePtr& resp)
         {
             if (resp->statusCode() != k200OK)
                 (*callbackPtr)(resp);
 
             auto dbClient{ drogon::app().getDbClient() };
             Mapper<Sprint> sprintMapper{ dbClient };
-            auto result{ std::make_shared<Json::Value>() };
-            (*result)["event"] = *resp->getJsonObject();
-            sprintMapper.orderBy(Sprints::Cols::_start, SortOrder::ASC)
-                .findBy(
-                    Criteria{ Sprints::Cols::_event_id, CompareOperator::EQ,
-                              eventId },
-                    [callbackPtr, result](std::vector<Sprint> sprintHistory)
-                    {
-                        auto dbClient{ drogon::app().getDbClient() };
-                        Mapper<Posts> postsMapper{ dbClient };
-                        postsMapper.findBy(
-                            Criteria{
-                                Posts::Cols::_sprint_id, CompareOperator::In,
-                                std::invoke(
-                                    [&sprintHistory]() // IIFE so won't
-                                                       // invalidate
-                                    {
-                                        std::vector<int> ids{};
-                                        for (const auto& sprint : sprintHistory)
-                                            ids.push_back(
-                                                sprint.getValueOfId());
-                                        return ids;
-                                    }) },
-                            [sprintHistory = std::move(sprintHistory), result,
-                             callbackPtr](std::vector<Posts> posts)
-                            {
-                                for (auto it{ std::cbegin(sprintHistory) };
-                                     it != std::cend(sprintHistory); it++)
-                                {
-                                    (*result)["sprints"][(int32_t)std::distance(
-                                        std::cbegin(sprintHistory), it)] =
-                                        it->toJson();
-                                    (*result)["sprints"][(int32_t)std::distance(
-                                        std::cbegin(sprintHistory),
-                                        it)]["post"] =
-                                        std::find_if(
-                                            std::begin(posts), std::end(posts),
-                                            [it](const Posts& post) {
-                                                return post.getValueOfSprintId() ==
-                                                       it->getValueOfId();
-                                            })
-                                            ->toJson();
-                                }
-                                (*callbackPtr)(
-                                    HttpResponse::newHttpJsonResponse(*result));
-                            },
 
-                            [callbackPtr](const DrogonDbException& e)
-                            {
-                                LOG_TRACE << e.base().what();
-                                auto resp{ HttpResponse::newHttpResponse(
-                                    k400BadRequest, CT_TEXT_PLAIN) };
-                                resp->setBody("database exception: " +
-                                              (std::string)e.base().what());
-                                (*callbackPtr)(resp);
-                            });
-                    },
-                    [callbackPtr](const DrogonDbException& e)
-                    {
-                        LOG_TRACE << e.base().what();
-                        auto resp{ HttpResponse::newHttpResponse(
-                            k400BadRequest, CT_TEXT_PLAIN) };
-                        resp->setBody("database exception: " +
-                                      (std::string)e.base().what());
-                        (*callbackPtr)(resp);
-                    });
+            getFullEventData(
+                *resp->jsonObject(), [callbackPtr](const Json::Value& result)
+                { (*callbackPtr)(HttpResponse::newHttpJsonResponse(result)); },
+                [callbackPtr](const DrogonDbException& e)
+                {
+                    LOG_TRACE << e.base().what();
+                    auto resp{ HttpResponse::newHttpResponse(k400BadRequest,
+                                                             CT_TEXT_PLAIN) };
+                    resp->setBody("database exception: " +
+                                  (std::string)e.base().what());
+                    (*callbackPtr)(resp);
+                });
         },
         std::move(id));
 }
@@ -171,7 +120,39 @@ void EventsController::get(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr&)>&& callback)
 {
-    EventsControllerBase::get(req, std::move(callback));
+
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+    EventsControllerBase::get(
+        req,
+        [callbackPtr](const HttpResponsePtr& resp)
+        {
+            if (resp->statusCode() != k200OK)
+                (*callbackPtr)(resp);
+
+            auto respJsonPtr{ resp->jsonObject() };
+            for (int32_t i{ 0 }; i < respJsonPtr->size(); i++)
+            {
+                getFullEventData(
+                    std::move((*respJsonPtr)[i]),
+                    [respJsonPtr, callbackPtr, resp, i,
+                     isLast = (i == respJsonPtr->size() - 1)](
+                        const Json::Value& result)
+                    {
+                        (*respJsonPtr)[i] = result;
+                        if (isLast)
+                            (*callbackPtr)(resp);
+                    },
+                    [callbackPtr](const DrogonDbException& e)
+                    {
+                        LOG_TRACE << e.base().what();
+                        auto resp{ HttpResponse::newHttpResponse(
+                            k400BadRequest, CT_TEXT_PLAIN) };
+                        resp->setBody("database exception: " +
+                                      (std::string)e.base().what());
+                        (*callbackPtr)(resp);
+                    });
+            }
+        });
 }
 
 void EventsController::create(
@@ -191,8 +172,8 @@ void EventsController::create(
     }
     EventsControllerBase::create(
         createEventRequest,
-        [callbackPtr, createEventRequest,
-         eventRequestJson](const HttpResponsePtr& createEventResponse)
+        [callbackPtr, createEventRequest, eventRequestJson,
+         this](const HttpResponsePtr& createEventResponse)
         {
             if (createEventResponse->statusCode() ==
                 drogon::k200OK) // if event creation successful -> try create
@@ -218,8 +199,8 @@ void EventsController::create(
                 DrClassMap::getSingleInstance<SprintsController>()->create(
                     createSprintRequest,
                     [callbackPtr, createEventResponse, createEventRequest,
-                     eventRequestJson](
-                        const HttpResponsePtr& createSprintResponse)
+                     eventRequestJson,
+                     this](const HttpResponsePtr& createSprintResponse)
                     {
                         if (createSprintResponse->statusCode() ==
                             k200OK) // if sprint created -> try create initial
@@ -258,12 +239,19 @@ void EventsController::create(
                         }
                         else // sprint creation failed
                         {
+                            deleteOne(HttpRequest::newHttpRequest(),
+                                      AdviceCallback{},
+                                      eventRequestJson[Events::Cols::_id]
+                                          .as<PrimaryKeyType>());
                             (*callbackPtr)(createSprintResponse);
                         }
                     });
             }
             else // event creation failed
             {
+                deleteOne(
+                    HttpRequest::newHttpRequest(), AdviceCallback{},
+                    eventRequestJson[Events::Cols::_id].as<PrimaryKeyType>());
                 (*callbackPtr)(createEventResponse);
             }
         });
