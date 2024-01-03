@@ -27,9 +27,14 @@ using Sprint = Sprints;
 using PrimaryKeyType = drogon_model::augventure_db::User::PrimaryKeyType;
 
 void getFullEventData(
-    const Json::Value &eventJson,
-    std::function<void(const Json::Value &result)> &&successCallback,
-    std::function<void(const drogon::orm::DrogonDbException &e)> &&dbExceptionCallback);
+    const Json::Value& eventJson,
+    std::function<void(const Json::Value& result)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
+
+void expandEventList(
+    const Json::Value& eventListJson,
+    std::function<void(const Json::Value& result)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
 
 inline trantor::Date dateFromJsonString(const std::string& string)
 {

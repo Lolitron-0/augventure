@@ -14,6 +14,8 @@
 #include "plugins/JWTService.h"
 #include "plugins/StateUpdateScheduler.h"
 #include "utils/Macros.h"
+#include "utils/Utils.h"
+#include <algorithm>
 #include <drogon/DrClassMap.h>
 #include <drogon/HttpClient.h>
 #include <drogon/HttpRequest.h>
@@ -27,6 +29,7 @@
 #include <iterator>
 #include <json/value.h>
 #include <json/writer.h>
+#include <list>
 #include <memory>
 #include <string>
 #include <utility>
@@ -42,7 +45,10 @@ void EventsController::getOne(
         [callbackPtr](const HttpResponsePtr& resp)
         {
             if (resp->statusCode() != k200OK)
+            {
                 (*callbackPtr)(resp);
+                return;
+            }
 
             auto dbClient{ drogon::app().getDbClient() };
             Mapper<Sprint> sprintMapper{ dbClient };
@@ -50,15 +56,7 @@ void EventsController::getOne(
             getFullEventData(
                 *resp->jsonObject(), [callbackPtr](const Json::Value& result)
                 { (*callbackPtr)(HttpResponse::newHttpJsonResponse(result)); },
-                [callbackPtr](const DrogonDbException& e)
-                {
-                    LOG_TRACE << e.base().what();
-                    auto resp{ HttpResponse::newHttpResponse(k400BadRequest,
-                                                             CT_TEXT_PLAIN) };
-                    resp->setBody("database exception: " +
-                                  (std::string)e.base().what());
-                    (*callbackPtr)(resp);
-                });
+                HANDLE_DB_EXCEPTION(*callbackPtr));
         },
         std::move(id));
 }
@@ -98,60 +96,37 @@ void EventsController::deleteOne(
             }
             else
             {
-                Json::Value ret;
-                ret["error"] = "not owner";
-                auto response{ HttpResponse::newHttpJsonResponse(ret) };
-                response->setStatusCode(drogon::k403Forbidden);
+                auto response{ HttpResponse::newHttpResponse(
+                    drogon::k403Forbidden, drogon::CT_TEXT_PLAIN) };
+                response->setBody("you are not the owner");
                 (*callbackPtr)(response);
             }
         },
-        [=](const DrogonDbException& e)
-        {
-            LOG_TRACE << e.base().what();
-            auto resp{ HttpResponse::newHttpResponse(k400BadRequest,
-                                                     CT_TEXT_PLAIN) };
-            resp->setBody("database exception: " +
-                          (std::string)e.base().what());
-            (*callbackPtr)(resp);
-        });
+        [callbackPtr](auto e) { handleDatabaseException(e, *callbackPtr); });
 }
 
 void EventsController::get(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr&)>&& callback)
 {
-
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
     EventsControllerBase::get(
         req,
         [callbackPtr](const HttpResponsePtr& resp)
         {
-            if (resp->statusCode() != k200OK)
-                (*callbackPtr)(resp);
-
-            auto respJsonPtr{ resp->jsonObject() };
-            for (int32_t i{ 0 }; i < respJsonPtr->size(); i++)
+            if (resp->statusCode() != k200OK || resp->jsonObject()->empty())
             {
-                getFullEventData(
-                    std::move((*respJsonPtr)[i]),
-                    [respJsonPtr, callbackPtr, resp, i,
-                     isLast = (i == respJsonPtr->size() - 1)](
-                        const Json::Value& result)
-                    {
-                        (*respJsonPtr)[i] = result;
-                        if (isLast)
-                            (*callbackPtr)(resp);
-                    },
-                    [callbackPtr](const DrogonDbException& e)
-                    {
-                        LOG_TRACE << e.base().what();
-                        auto resp{ HttpResponse::newHttpResponse(
-                            k400BadRequest, CT_TEXT_PLAIN) };
-                        resp->setBody("database exception: " +
-                                      (std::string)e.base().what());
-                        (*callbackPtr)(resp);
-                    });
+                (*callbackPtr)(resp);
+                return;
             }
+            expandEventList(
+                *resp->jsonObject(),
+                [callbackPtr](auto result) {
+                    (*callbackPtr)(
+                        HttpResponse::newHttpJsonResponse(std::move(result)));
+                },
+
+                HANDLE_DB_EXCEPTION(*callbackPtr));
         });
 }
 
@@ -176,8 +151,8 @@ void EventsController::create(
          this](const HttpResponsePtr& createEventResponse)
         {
             if (createEventResponse->statusCode() ==
-                drogon::k200OK) // if event creation successful -> try create
-                                // sprint
+                drogon::k200OK) // if event creation successful
+                                // -> try create sprint
             {
                 using namespace augventure::plugins;
                 auto eventJson{ *createEventResponse->jsonObject() };
