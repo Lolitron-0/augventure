@@ -102,7 +102,7 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
                                 ->generateFromUser(user) };
                 response->setStatusCode(drogon::k202Accepted);
                 (*response->jsonObject())["token"] = token;
-				(*response->jsonObject())["user"] = user.toJson();
+                (*response->jsonObject())["user"] = user.toJson();
                 if (req->session()->find("session_token"))
                 {
                     req->session()->modify<std::string>(
@@ -215,8 +215,8 @@ void AuthController::passwordReset(const drogon::HttpRequestPtr& req,
                 updateMapper.update(
                     currentUser,
                     [=](size_t) {
-                        (*callbackPtr)(
-                            HttpResponse::newHttpResponse(k202Accepted, CT_NONE));
+                        (*callbackPtr)(HttpResponse::newHttpResponse(
+                            k202Accepted, CT_NONE));
                     },
                     [=](const DrogonDbException& e)
                     {

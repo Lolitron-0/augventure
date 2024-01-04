@@ -8,38 +8,40 @@
 #include "PostsController.h"
 #include <string>
 
-
-void PostsController::getOne(const HttpRequestPtr &req,
-                             std::function<void(const HttpResponsePtr &)> &&callback,
-                             Posts::PrimaryKeyType &&id)
+void PostsController::getOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Posts::PrimaryKeyType&& id)
 {
     PostsControllerBase::getOne(req, std::move(callback), std::move(id));
 }
 
-
-void PostsController::updateOne(const HttpRequestPtr &req,
-                                std::function<void(const HttpResponsePtr &)> &&callback,
-                                Posts::PrimaryKeyType &&id)
+void PostsController::updateOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Posts::PrimaryKeyType&& id)
 {
     PostsControllerBase::updateOne(req, std::move(callback), std::move(id));
 }
 
-
-void PostsController::deleteOne(const HttpRequestPtr &req,
-                                std::function<void(const HttpResponsePtr &)> &&callback,
-                                Posts::PrimaryKeyType &&id)
+void PostsController::deleteOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Posts::PrimaryKeyType&& id)
 {
     PostsControllerBase::deleteOne(req, std::move(callback), std::move(id));
 }
 
-void PostsController::get(const HttpRequestPtr &req,
-                          std::function<void(const HttpResponsePtr &)> &&callback)
+void PostsController::get(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
     PostsControllerBase::get(req, std::move(callback));
 }
 
-void PostsController::create(const HttpRequestPtr &req,
-                             std::function<void(const HttpResponsePtr &)> &&callback)
+void PostsController::create(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
     PostsControllerBase::create(req, std::move(callback));
 }

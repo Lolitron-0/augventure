@@ -3,7 +3,6 @@
 #include "Posts.h"
 #include "Sprints.h"
 #include "Users.h"
-#include "utils/Macros.h"
 #include <drogon/HttpRequest.h>
 #include <drogon/drogon.h>
 #include <drogon/orm/Criteria.h>

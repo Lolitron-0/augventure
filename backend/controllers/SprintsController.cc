@@ -21,11 +21,10 @@ void SprintsController::updateOne(
     std::function<void(const HttpResponsePtr&)>&& callback,
     Sprints::PrimaryKeyType&& id)
 {
-	auto reqJson{req->jsonObject()};
-	if(reqJson)
-		(*reqJson)[Sprints::Cols::_id] = id;
+    auto reqJson{ req->jsonObject() };
+    if (reqJson)
+        (*reqJson)[Sprints::Cols::_id] = id;
 
-	
     SprintsControllerBase::updateOne(req, std::move(callback), std::move(id));
 }
 

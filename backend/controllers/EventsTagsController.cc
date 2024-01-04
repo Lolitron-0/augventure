@@ -8,16 +8,16 @@
 #include "EventsTagsController.h"
 #include <string>
 
-
-
-void EventsTagsController::get(const HttpRequestPtr &req,
-                               std::function<void(const HttpResponsePtr &)> &&callback)
+void EventsTagsController::get(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
     EventsTagsControllerBase::get(req, std::move(callback));
 }
 
-void EventsTagsController::create(const HttpRequestPtr &req,
-                                  std::function<void(const HttpResponsePtr &)> &&callback)
+void EventsTagsController::create(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
     EventsTagsControllerBase::create(req, std::move(callback));
 }

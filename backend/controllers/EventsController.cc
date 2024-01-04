@@ -92,7 +92,7 @@ void EventsController::deleteOne(
                 (*callbackPtr)(response);
             }
         },
-        [callbackPtr](auto e) { handleDatabaseException(e, *callbackPtr); });
+        HANDLE_DB_EXCEPTION(*callbackPtr));
 }
 
 void EventsController::get(
@@ -121,31 +121,31 @@ void EventsController::get(
 }
 
 void EventsController::create(
-    const HttpRequestPtr& createEventRequest,
+    const HttpRequestPtr& eventCreationRequest,
     std::function<void(const HttpResponsePtr&)>&& callback)
 {
-    auto eventRequestJsonPtr{ createEventRequest->jsonObject() };
+    auto eventRequestJsonPtr{ eventCreationRequest->jsonObject() };
     Json::Value eventRequestJson;
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
     if (eventRequestJsonPtr)
     {
         (*eventRequestJsonPtr)["event"][Events::Cols::_author_id] =
-            CURRENT_USER_ID(createEventRequest);
+            CURRENT_USER_ID(eventCreationRequest);
         eventRequestJson = Json::Value{ *eventRequestJsonPtr };
         (*eventRequestJsonPtr) =
             (*eventRequestJsonPtr)["event"]; // leaving only event creation json
     }
     EventsControllerBase::create(
-        createEventRequest,
-        [callbackPtr, createEventRequest, eventRequestJson,
-         this](const HttpResponsePtr& createEventResponse)
+        eventCreationRequest,
+        [callbackPtr, eventCreationRequest, eventRequestJson,
+         this](const HttpResponsePtr& eventCreationResponse)
         {
-            if (createEventResponse->statusCode() ==
+            if (eventCreationResponse->statusCode() ==
                 drogon::k200OK) // if event creation successful
                                 // -> try create sprint
             {
                 using namespace augventure::plugins;
-                auto eventJson{ *createEventResponse->jsonObject() };
+                auto eventJson{ *eventCreationResponse->jsonObject() };
                 drogon::app().getPlugin<StateUpdateScheduler>()->schedule(
                     StateUpdateScheduler::TaskType::EventStart,
                     dateFromJsonString(eventJson["start"].asString()),
@@ -155,19 +155,19 @@ void EventsController::create(
                 initialSprintJson[Sprints::Cols::_event_id] =
                     eventJson["id"].as<PrimaryKeyType>();
                 initialSprintJson[Sprints::Cols::_state] = "voting";
-                auto createSprintRequest{
+                auto sprintCreationRequest{
                     drogon::HttpRequest::newHttpJsonRequest(initialSprintJson)
                 };
-                createSprintRequest->setMethod(drogon::Post);
+                sprintCreationRequest->setMethod(drogon::Post);
                 // createSprintRequest->setBody(Json::writeString(
                 //     Json::StreamWriterBuilder{}, initialSprint.toJson()));
                 DrClassMap::getSingleInstance<SprintsController>()->create(
-                    createSprintRequest,
-                    [callbackPtr, createEventResponse, createEventRequest,
+                    sprintCreationRequest,
+                    [callbackPtr, eventCreationResponse, eventCreationRequest,
                      eventRequestJson,
-                     this](const HttpResponsePtr& createSprintResponse)
+                     this](const HttpResponsePtr& sprintCreationResponse)
                     {
-                        if (createSprintResponse->statusCode() ==
+                        if (sprintCreationResponse->statusCode() ==
                             k200OK) // if sprint created -> try create initial
                         // post
                         {
@@ -175,30 +175,38 @@ void EventsController::create(
                                 eventRequestJson["initialPost"]
                             };
                             initialPostJson[Posts::Cols::_sprint_id] =
-                                (*createSprintResponse
+                                (*sprintCreationResponse
                                       ->getJsonObject())[Sprints::Cols::_id]
                                     .as<PrimaryKeyType>();
-                            auto createInitialPostRequest{
+                            auto initialPostCreationRequest{
                                 drogon::HttpRequest::newHttpJsonRequest(
                                     initialPostJson)
                             };
-                            createInitialPostRequest->setMethod(drogon::Post);
+                            initialPostCreationRequest->setMethod(drogon::Post);
                             DrClassMap::getSingleInstance<PostsController>()
                                 ->create(
-                                    createInitialPostRequest,
-                                    [callbackPtr, createEventResponse](
-                                        const HttpResponsePtr&
-                                            createInitialPostResponse)
+                                    initialPostCreationRequest,
+                                    [callbackPtr, eventCreationResponse,
+                                     eventRequestJson,
+                                     this](const HttpResponsePtr&
+                                               initialPostCreationResponse)
                                     {
-                                        if (createInitialPostResponse
+                                        if (initialPostCreationResponse
                                                 ->statusCode() == k200OK)
                                         {
-                                            (*callbackPtr)(createEventResponse);
+                                            (*callbackPtr)(
+                                                eventCreationResponse);
                                         }
                                         else // initial post creation failed
                                         {
+                                            deleteOne(
+                                                HttpRequest::newHttpRequest(),
+                                                AdviceCallback{},
+                                                eventRequestJson
+                                                    [Events::Cols::_id]
+                                                        .as<PrimaryKeyType>());
                                             (*callbackPtr)(
-                                                createInitialPostResponse);
+                                                initialPostCreationResponse);
                                         }
                                     });
                         }
@@ -208,7 +216,7 @@ void EventsController::create(
                                       AdviceCallback{},
                                       eventRequestJson[Events::Cols::_id]
                                           .as<PrimaryKeyType>());
-                            (*callbackPtr)(createSprintResponse);
+                            (*callbackPtr)(sprintCreationResponse);
                         }
                     });
             }
@@ -217,7 +225,7 @@ void EventsController::create(
                 deleteOne(
                     HttpRequest::newHttpRequest(), AdviceCallback{},
                     eventRequestJson[Events::Cols::_id].as<PrimaryKeyType>());
-                (*callbackPtr)(createEventResponse);
+                (*callbackPtr)(eventCreationResponse);
             }
         });
 }

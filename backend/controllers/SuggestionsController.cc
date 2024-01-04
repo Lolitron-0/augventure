@@ -6,40 +6,123 @@
  */
 
 #include "SuggestionsController.h"
+#include "Models.h"
+#include "controllers/PostsController.h"
+#include "controllers/SuggestionsControllerBase.h"
+#include "plugins/JWTService.h"
+#include "utils/Macros.h"
+#include <drogon/DrClassMap.h>
+#include <drogon/HttpRequest.h>
+#include <drogon/HttpTypes.h>
+#include <json/value.h>
 #include <string>
 
-
-void SuggestionsController::getOne(const HttpRequestPtr &req,
-                                   std::function<void(const HttpResponsePtr &)> &&callback,
-                                   Suggestions::PrimaryKeyType &&id)
+void SuggestionsController::getOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Suggestions::PrimaryKeyType&& id)
 {
     SuggestionsControllerBase::getOne(req, std::move(callback), std::move(id));
 }
 
-
-void SuggestionsController::updateOne(const HttpRequestPtr &req,
-                                      std::function<void(const HttpResponsePtr &)> &&callback,
-                                      Suggestions::PrimaryKeyType &&id)
+void SuggestionsController::updateOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Suggestions::PrimaryKeyType&& id)
 {
-    SuggestionsControllerBase::updateOne(req, std::move(callback), std::move(id));
+    SuggestionsControllerBase::updateOne(req, std::move(callback),
+                                         std::move(id));
 }
 
-
-void SuggestionsController::deleteOne(const HttpRequestPtr &req,
-                                      std::function<void(const HttpResponsePtr &)> &&callback,
-                                      Suggestions::PrimaryKeyType &&id)
+void SuggestionsController::deleteOne(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Suggestions::PrimaryKeyType&& id)
 {
-    SuggestionsControllerBase::deleteOne(req, std::move(callback), std::move(id));
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<Suggestions> mapper{ dbClient };
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+    auto currentUserId{ CURRENT_USER_ID(req) };
+
+    mapper.findByPrimaryKey(
+        id,
+        [currentUserId, id, callbackPtr, req,
+         this](auto suggestionToDelete) mutable
+        {
+            if (suggestionToDelete.getValueOfAuthorId() == currentUserId)
+            {
+
+                SuggestionsControllerBase::deleteOne(
+                    req, std::move(*callbackPtr), std::move(id));
+            }
+            else
+            {
+                auto response{ HttpResponse::newHttpResponse(
+                    drogon::k403Forbidden, drogon::CT_TEXT_PLAIN) };
+                response->setBody("you are not the owner");
+                (*callbackPtr)(response);
+            }
+        },
+        HANDLE_DB_EXCEPTION(*callbackPtr));
+
+    SuggestionsControllerBase::deleteOne(req, std::move(callback),
+                                         std::move(id));
 }
 
-void SuggestionsController::get(const HttpRequestPtr &req,
-                                std::function<void(const HttpResponsePtr &)> &&callback)
+void SuggestionsController::get(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
     SuggestionsControllerBase::get(req, std::move(callback));
 }
 
-void SuggestionsController::create(const HttpRequestPtr &req,
-                                   std::function<void(const HttpResponsePtr &)> &&callback)
+void SuggestionsController::create(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
 {
-    SuggestionsControllerBase::create(req, std::move(callback));
+    auto reqJson{ req->jsonObject() };
+    Json::Value initialRequestJson{};
+    if (reqJson)
+    {
+        (*reqJson)["suggestion"][Suggestions::Cols::_author_id] =
+            CURRENT_USER_ID(req);
+        initialRequestJson = std::move(*reqJson);
+        *reqJson = initialRequestJson["suggestion"];
+    }
+
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+    SuggestionsControllerBase::create(
+        req,
+        [callbackPtr, initialRequestJson, this](auto suggestionCreationResponse)
+        {
+            if (suggestionCreationResponse->statusCode() != k200OK)
+            {
+                (*callbackPtr)(std::move(suggestionCreationResponse));
+                return;
+            }
+
+            auto postJson{ initialRequestJson["content"] };
+            auto postCreationRequest{ drogon::HttpRequest::newHttpJsonRequest(
+                postJson) };
+            postCreationRequest->setMethod(drogon::Post);
+            DrClassMap::getSingleInstance<PostsController>()->create(
+                postCreationRequest,
+                [callbackPtr, initialRequestJson, suggestionCreationResponse,
+                 this](auto postCreationResponse)
+                {
+                    if (postCreationResponse->statusCode() == k200OK)
+                    {
+                        (*callbackPtr)(suggestionCreationResponse);
+                    }
+                    else
+                    {
+                        deleteOne(HttpRequest::newHttpRequest(),
+                                  AdviceCallback{},
+                                  initialRequestJson["suggestion"]
+                                                    [Suggestions::Cols::_id]
+                                                        .as<PrimaryKeyType>());
+                        (*callbackPtr)(postCreationResponse);
+                    }
+                });
+        });
 }

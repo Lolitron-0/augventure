@@ -1,4 +1,7 @@
 #pragma once
+#include "utils/Utils.h"
+#include "plugins/JWTService.h"
+
 #define MAKE_CALLBACK_HEAP_PTR(callbackName)                                   \
     std::make_shared<drogon::AdviceCallback>(                                  \
         std::forward<drogon::AdviceCallback>(callbackName))
