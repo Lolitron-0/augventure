@@ -16,12 +16,12 @@ void getFullEventData(
         std::make_shared<std::function<void(const Json::Value&)>>(
             successCallback)
     };
-	Json::Value eventList{};
-	eventList[0] = eventJson;
-	expandEventList(std::move(eventList), [successCallbackPtr](auto result)
-			{
-				(*successCallbackPtr)(result[0]);
-			}, std::forward<decltype(dbExceptionCallback)>(dbExceptionCallback));
+    Json::Value eventList{};
+    eventList[0] = eventJson;
+    expandEventList(
+        std::move(eventList),
+        [successCallbackPtr](auto result) { (*successCallbackPtr)(result[0]); },
+        std::forward<decltype(dbExceptionCallback)>(dbExceptionCallback));
 }
 
 void expandEventList(
