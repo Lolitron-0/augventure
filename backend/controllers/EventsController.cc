@@ -24,6 +24,29 @@
 #include <memory>
 #include <utility>
 
+void EventsController::finishVoting(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Events::PrimaryKeyType&& id)
+{
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+    auto dbClient{ app().getDbClient() };
+    Mapper<Sprint> mapper{ dbClient };
+
+    mapper.findOne(
+        Criteria{ Sprints::Cols::_event_id, CompareOperator::EQ, id } &&
+            Criteria{ Sprints::Cols::_state, CompareOperator::EQ, "voting" },
+        [mapper, callbackPtr](Sprint sprint) mutable
+        {
+            sprint.setState("implementing");
+            mapper.update(
+                sprint, [callbackPtr](auto)
+                { (*callbackPtr)(HttpResponse::newHttpResponse()); },
+                DB_EXCEPTION_HANDLER(*callbackPtr));
+        },
+        DB_EXCEPTION_HANDLER(*callbackPtr));
+}
+
 void EventsController::getOne(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr&)>&& callback,
@@ -37,7 +60,7 @@ void EventsController::getOne(
             if (resp->statusCode() != k200OK)
             {
                 (*callbackPtr)(resp);
-                return;
+                retrn;
             }
 
             auto dbClient{ drogon::app().getDbClient() };
@@ -71,9 +94,9 @@ void EventsController::deleteOne(
 
     mapper.findByPrimaryKey(
         id,
-        [currentUserId, id, callbackPtr, req,
-         this](Event eventToDelete) mutable // id gets const qual and cannot be
-                                            // binded to rval
+        [currentUserId, id, callbackPtr, req, this](Event eventToDelete) mutable
+        // id gets const qual and cannot be
+        // binded to rval
         {
             if (eventToDelete.getValueOfAuthorId() == currentUserId)
             {
@@ -142,7 +165,7 @@ void EventsController::create(
         {
             if (eventCreationResponse->statusCode() ==
                 drogon::k200OK) // if event creation successful
-                                // -> try create sprint
+            // -> try create sprint
             {
                 using namespace augventure::plugins;
                 auto eventJson{ *eventCreationResponse->jsonObject() };
