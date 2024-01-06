@@ -94,7 +94,7 @@ void SuggestionsController::vote(
                     DB_EXCEPTION_HANDLER(*callbackPtr));
         },
         [callbackPtr, votesMapper, dbClient, id, currentUserId,
-         voteValue](const DrogonDbException& e) mutable
+         voteValue](auto&& e) mutable
         {
             const auto* ur{ dynamic_cast<const UnexpectedRows*>(&e.base()) };
             if (ur) // no votes yet

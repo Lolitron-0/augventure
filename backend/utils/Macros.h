@@ -13,5 +13,5 @@
         .value()
 
 #define DB_EXCEPTION_HANDLER(callback)                                         \
-    [callbackCapture = (callback)](auto e)                                     \
+    [callbackCapture = (callback)](auto&& e)                                   \
     { handleDatabaseException(e, callbackCapture); }

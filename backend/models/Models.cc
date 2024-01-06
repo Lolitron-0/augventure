@@ -23,7 +23,7 @@ void getFullEventData(
     eventList[0] = eventJson;
     expandEventList(
         std::move(eventList),
-        [successCallbackPtr](auto result) { (*successCallbackPtr)(result[0]); },
+        [successCallbackPtr](auto&& result) { (*successCallbackPtr)(result[0]); },
         std::forward<decltype(dbExceptionCallback)>(dbExceptionCallback));
 }
 
@@ -213,7 +213,7 @@ void expandSuggestionList(
                     if (voteSort)
                     {
                         std::stable_sort(resultVec.begin(), resultVec.end(),
-                                         [voteSort](auto s1, auto s2)
+                                         [voteSort](auto&& s1, auto&& s2)
                                          {
                                              if (voteSort > 0)
                                                  return (s1["votes"].asUInt() <

@@ -154,13 +154,11 @@ void EventsController::create(
                 Json::Value initialSprintJson{};
                 initialSprintJson[Sprints::Cols::_event_id] =
                     eventJson["id"].as<PrimaryKeyType>();
-                initialSprintJson[Sprints::Cols::_state] = "voting";
+                initialSprintJson[Sprints::Cols::_state] = "ended";
                 auto sprintCreationRequest{
                     drogon::HttpRequest::newHttpJsonRequest(initialSprintJson)
                 };
                 sprintCreationRequest->setMethod(drogon::Post);
-                // createSprintRequest->setBody(Json::writeString(
-                //     Json::StreamWriterBuilder{}, initialSprint.toJson()));
                 DrClassMap::getSingleInstance<SprintsController>()->create(
                     sprintCreationRequest,
                     [callbackPtr, eventCreationResponse, eventCreationRequest,
@@ -183,32 +181,76 @@ void EventsController::create(
                                     initialPostJson)
                             };
                             initialPostCreationRequest->setMethod(drogon::Post);
-                            DrClassMap::getSingleInstance<PostsController>()
-                                ->create(
-                                    initialPostCreationRequest,
-                                    [callbackPtr, eventCreationResponse,
-                                     eventRequestJson,
-                                     this](const HttpResponsePtr&
-                                               initialPostCreationResponse)
+                            DrClassMap::getSingleInstance<PostsController>()->create(
+                                initialPostCreationRequest,
+                                [callbackPtr, eventCreationResponse,
+                                 eventRequestJson,
+                                 this](const HttpResponsePtr&
+                                           initialPostCreationResponse)
+                                {
+                                    if (initialPostCreationResponse
+                                            ->statusCode() == k200OK)
                                     {
-                                        if (initialPostCreationResponse
-                                                ->statusCode() == k200OK)
-                                        {
-                                            (*callbackPtr)(
-                                                eventCreationResponse);
-                                        }
-                                        else // initial post creation failed
-                                        {
-                                            deleteOne(
-                                                HttpRequest::newHttpRequest(),
-                                                AdviceCallback{},
-                                                eventRequestJson
-                                                    [Events::Cols::_id]
-                                                        .as<PrimaryKeyType>());
-                                            (*callbackPtr)(
-                                                initialPostCreationResponse);
-                                        }
-                                    });
+
+                                        Json::Value firstSprintJson{};
+                                        firstSprintJson
+                                            [Sprints::Cols::_event_id] =
+                                                (*eventCreationResponse
+                                                      ->jsonObject())["id"]
+                                                    .as<PrimaryKeyType>();
+                                        firstSprintJson[Sprints::Cols::_state] =
+                                            "voting";
+                                        auto firstSprintCreationRequest{
+                                            drogon::HttpRequest::
+                                                newHttpJsonRequest(
+                                                    firstSprintJson)
+                                        };
+                                        firstSprintCreationRequest->setMethod(
+                                            drogon::Post);
+                                        DrClassMap::getSingleInstance<
+                                            SprintsController>()
+                                            ->create(
+                                                firstSprintCreationRequest,
+                                                [callbackPtr,
+                                                 eventCreationResponse, this,
+                                                 eventRequestJson](
+                                                    auto&&
+                                                        firstSprintCreationResponse)
+                                                {
+                                                    if (firstSprintCreationResponse
+                                                            ->statusCode() ==
+                                                        k200OK)
+                                                    {
+                                                        (*callbackPtr)(
+                                                            eventCreationResponse);
+                                                    }
+                                                    else // first sprint
+                                                         // creation failed
+                                                    {
+                                                        deleteOne(
+                                                            HttpRequest::
+                                                                newHttpRequest(),
+                                                            AdviceCallback{},
+                                                            eventRequestJson
+                                                                [Events::Cols::
+                                                                     _id]
+                                                                    .as<PrimaryKeyType>());
+                                                        (*callbackPtr)(
+                                                            firstSprintCreationResponse);
+                                                    }
+                                                });
+                                    }
+                                    else // initial post creation failed
+                                    {
+                                        deleteOne(
+                                            HttpRequest::newHttpRequest(),
+                                            AdviceCallback{},
+                                            eventRequestJson[Events::Cols::_id]
+                                                .as<PrimaryKeyType>());
+                                        (*callbackPtr)(
+                                            initialPostCreationResponse);
+                                    }
+                                });
                         }
                         else // sprint creation failed
                         {
