@@ -39,6 +39,7 @@ namespace drogon_model
 namespace augventure_db
 {
 class Events;
+class Suggestions;
 
 class Users
 {
@@ -178,6 +179,10 @@ class Users
     void getEvents(const drogon::orm::DbClientPtr &clientPtr,
                    const std::function<void(std::vector<Events>)> &rcb,
                    const drogon::orm::ExceptionCallback &ecb) const;
+    std::vector<Suggestions> getSuggestions(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getSuggestions(const drogon::orm::DbClientPtr &clientPtr,
+                        const std::function<void(std::vector<Suggestions>)> &rcb,
+                        const drogon::orm::ExceptionCallback &ecb) const;
   private:
     friend drogon::orm::Mapper<Users>;
     friend drogon::orm::BaseBuilder<Users, true, true>;

@@ -6,9 +6,10 @@
 
 #include "UserExistsFilter.h"
 #include "models/Models.h"
+#include "utils/Macros.h"
 #include <drogon/HttpTypes.h>
-#include <drogon/orm/Mapper.h>
 #include <drogon/drogon.h>
+#include <drogon/orm/Mapper.h>
 
 namespace augventure {
     namespace filters {
@@ -23,26 +24,32 @@ namespace augventure {
             auto dbClient{ drogon::app().getDbClient() };
             Mapper<User> mapper{ dbClient };
 
-            User newUser{ drogon::fromRequest<User>(*req) };
+            User newUser{drogon::fromRequest<User>(*req)};
 
-            try
-            {
-                mapper.findFutureOne(
-                    Criteria{ User::Cols::_email, CompareOperator::EQ, newUser.getValueOfEmail() } ||
-                    Criteria{ User::Cols::_username, CompareOperator::EQ, newUser.getValueOfUsername() }).get();
-
-                // failed
-				LOG_TRACE << "UserExistsFilter : fail";
-                auto resp = drogon::HttpResponse::newHttpResponse(drogon::k401Unauthorized, drogon::CT_TEXT_PLAIN);
-				resp->setBody("already_exists");
-                fcb(resp);
-            }
-            catch (const UnexpectedRows&) // no user found
-            {
-                // passed
-                fccb();
-                return;
-            }
+            mapper.findOne(
+                Criteria{User::Cols::_email, CompareOperator::EQ, newUser.getValueOfEmail()}
+                    || Criteria{User::Cols::_username,
+                                CompareOperator::EQ,
+                                newUser.getValueOfUsername()},
+                [fcb](auto)
+                {
+                    // failed
+                    LOG_TRACE << "UserExistsFilter : fail";
+                    auto resp = drogon::HttpResponse::newHttpResponse(drogon::k401Unauthorized,
+                                                                      drogon::CT_TEXT_PLAIN);
+                    resp->setBody("already_exists");
+                    fcb(resp);
+                },
+                [fccb, fcb](const DrogonDbException &e)
+                {
+                    const auto *ur{dynamic_cast<const UnexpectedRows *>(&e.base())};
+                    if (ur) // no user found
+                    {
+                        fccb();
+                        return;
+                    }
+                    std::invoke(DB_EXCEPTION_HANDLER(fcb), e);
+                });
         }
     }
 }

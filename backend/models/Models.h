@@ -3,6 +3,7 @@
 #include "Posts.h"
 #include "Sprints.h"
 #include "Users.h"
+#include "Votes.h"
 #include <drogon/HttpRequest.h>
 #include <drogon/drogon.h>
 #include <drogon/orm/Criteria.h>
@@ -20,6 +21,8 @@ namespace augventure_db
 using User = Users;
 using Event = Events;
 using Sprint = Sprints;
+using Suggestion = Suggestions;
+using Vote = Votes;
 } // namespace augventure_db
 } // namespace drogon_model
 
@@ -34,6 +37,11 @@ void expandEventList(
     const Json::Value& eventListJson,
     std::function<void(const Json::Value& result)>&& successCallback,
     drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
+
+void expandSuggestionList(const Json::Value &suggestionListJson,
+                          int8_t voteSort,
+                          std::function<void(const Json::Value &result)> &&successCallback,
+                          drogon::orm::DrogonDbExceptionCallback &&dbExceptionCallback);
 
 inline trantor::Date dateFromJsonString(const std::string& string)
 {

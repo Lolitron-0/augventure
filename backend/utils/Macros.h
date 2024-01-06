@@ -1,6 +1,6 @@
 #pragma once
-#include "utils/Utils.h"
 #include "plugins/JWTService.h"
+#include "utils/Utils.h"
 
 #define MAKE_CALLBACK_HEAP_PTR(callbackName)                                   \
     std::make_shared<drogon::AdviceCallback>(                                  \
@@ -12,6 +12,6 @@
         ->getUserIdFromRequest(requestObj)                                     \
         .value()
 
-#define HANDLE_DB_EXCEPTION(callback)                                          \
+#define DB_EXCEPTION_HANDLER(callback)                                         \
     [callbackCapture = (callback)](auto e)                                     \
     { handleDatabaseException(e, callbackCapture); }

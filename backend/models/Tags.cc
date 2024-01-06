@@ -22,251 +22,238 @@ const std::string Tags::primaryKeyName = "id";
 const bool Tags::hasPrimaryKey = true;
 const std::string Tags::tableName = "tags";
 
-const std::vector<typename Tags::MetaData> Tags::metaData_ = {
-    { "id", "uint32_t", "int(10) unsigned", 4, 1, 1, 1 },
-    { "label", "std::string", "char(30)", 0, 0, 0, 1 },
-    { "counter", "int32_t", "int(11)", 4, 0, 0, 1 }
+const std::vector<typename Tags::MetaData> Tags::metaData_={
+{"id","uint32_t","int(10) unsigned",4,1,1,1},
+{"label","std::string","char(30)",0,0,0,1},
+{"counter","int32_t","int(11)",4,0,0,1}
 };
-const std::string& Tags::getColumnName(size_t index) noexcept(false)
+const std::string &Tags::getColumnName(size_t index) noexcept(false)
 {
     assert(index < metaData_.size());
     return metaData_[index].colName_;
 }
-Tags::Tags(const Row& r, const ssize_t indexOffset) noexcept
+Tags::Tags(const Row &r, const ssize_t indexOffset) noexcept
 {
-    if (indexOffset < 0)
+    if(indexOffset < 0)
     {
-        if (!r["id"].isNull())
+        if(!r["id"].isNull())
         {
-            id_ = std::make_shared<uint32_t>(r["id"].as<uint32_t>());
+            id_=std::make_shared<uint32_t>(r["id"].as<uint32_t>());
         }
-        if (!r["label"].isNull())
+        if(!r["label"].isNull())
         {
-            label_ =
-                std::make_shared<std::string>(r["label"].as<std::string>());
+            label_=std::make_shared<std::string>(r["label"].as<std::string>());
         }
-        if (!r["counter"].isNull())
+        if(!r["counter"].isNull())
         {
-            counter_ = std::make_shared<int32_t>(r["counter"].as<int32_t>());
+            counter_=std::make_shared<int32_t>(r["counter"].as<int32_t>());
         }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if (offset + 3 > r.size())
+        if(offset + 3 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
         }
         size_t index;
         index = offset + 0;
-        if (!r[index].isNull())
+        if(!r[index].isNull())
         {
-            id_ = std::make_shared<uint32_t>(r[index].as<uint32_t>());
+            id_=std::make_shared<uint32_t>(r[index].as<uint32_t>());
         }
         index = offset + 1;
-        if (!r[index].isNull())
+        if(!r[index].isNull())
         {
-            label_ = std::make_shared<std::string>(r[index].as<std::string>());
+            label_=std::make_shared<std::string>(r[index].as<std::string>());
         }
         index = offset + 2;
-        if (!r[index].isNull())
+        if(!r[index].isNull())
         {
-            counter_ = std::make_shared<int32_t>(r[index].as<int32_t>());
+            counter_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
     }
+
 }
 
-Tags::Tags(const Json::Value& pJson,
-           const std::vector<std::string>& pMasqueradingVector) noexcept(false)
+Tags::Tags(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if (pMasqueradingVector.size() != 3)
+    if(pMasqueradingVector.size() != 3)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
-    if (!pMasqueradingVector[0].empty() &&
-        pJson.isMember(pMasqueradingVector[0]))
+    if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
     {
         dirtyFlag_[0] = true;
-        if (!pJson[pMasqueradingVector[0]].isNull())
+        if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_ = std::make_shared<uint32_t>(
-                (uint32_t)pJson[pMasqueradingVector[0]].asUInt64());
+            id_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[0]].asUInt64());
         }
     }
-    if (!pMasqueradingVector[1].empty() &&
-        pJson.isMember(pMasqueradingVector[1]))
+    if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
     {
         dirtyFlag_[1] = true;
-        if (!pJson[pMasqueradingVector[1]].isNull())
+        if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            label_ = std::make_shared<std::string>(
-                pJson[pMasqueradingVector[1]].asString());
+            label_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
         }
     }
-    if (!pMasqueradingVector[2].empty() &&
-        pJson.isMember(pMasqueradingVector[2]))
+    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
     {
         dirtyFlag_[2] = true;
-        if (!pJson[pMasqueradingVector[2]].isNull())
+        if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            counter_ = std::make_shared<int32_t>(
-                (int32_t)pJson[pMasqueradingVector[2]].asInt64());
+            counter_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[2]].asInt64());
         }
     }
 }
 
-Tags::Tags(const Json::Value& pJson) noexcept(false)
+Tags::Tags(const Json::Value &pJson) noexcept(false)
 {
-    if (pJson.isMember("id"))
+    if(pJson.isMember("id"))
     {
-        dirtyFlag_[0] = true;
-        if (!pJson["id"].isNull())
+        dirtyFlag_[0]=true;
+        if(!pJson["id"].isNull())
         {
-            id_ = std::make_shared<uint32_t>((uint32_t)pJson["id"].asUInt64());
+            id_=std::make_shared<uint32_t>((uint32_t)pJson["id"].asUInt64());
         }
     }
-    if (pJson.isMember("label"))
+    if(pJson.isMember("label"))
     {
-        dirtyFlag_[1] = true;
-        if (!pJson["label"].isNull())
+        dirtyFlag_[1]=true;
+        if(!pJson["label"].isNull())
         {
-            label_ = std::make_shared<std::string>(pJson["label"].asString());
+            label_=std::make_shared<std::string>(pJson["label"].asString());
         }
     }
-    if (pJson.isMember("counter"))
+    if(pJson.isMember("counter"))
     {
-        dirtyFlag_[2] = true;
-        if (!pJson["counter"].isNull())
+        dirtyFlag_[2]=true;
+        if(!pJson["counter"].isNull())
         {
-            counter_ =
-                std::make_shared<int32_t>((int32_t)pJson["counter"].asInt64());
+            counter_=std::make_shared<int32_t>((int32_t)pJson["counter"].asInt64());
         }
     }
 }
 
-void Tags::updateByMasqueradedJson(
-    const Json::Value& pJson,
-    const std::vector<std::string>& pMasqueradingVector) noexcept(false)
+void Tags::updateByMasqueradedJson(const Json::Value &pJson,
+                                            const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if (pMasqueradingVector.size() != 3)
+    if(pMasqueradingVector.size() != 3)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
     }
-    if (!pMasqueradingVector[0].empty() &&
-        pJson.isMember(pMasqueradingVector[0]))
+    if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
     {
-        if (!pJson[pMasqueradingVector[0]].isNull())
+        if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_ = std::make_shared<uint32_t>(
-                (uint32_t)pJson[pMasqueradingVector[0]].asUInt64());
+            id_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[0]].asUInt64());
         }
     }
-    if (!pMasqueradingVector[1].empty() &&
-        pJson.isMember(pMasqueradingVector[1]))
+    if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
     {
         dirtyFlag_[1] = true;
-        if (!pJson[pMasqueradingVector[1]].isNull())
+        if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            label_ = std::make_shared<std::string>(
-                pJson[pMasqueradingVector[1]].asString());
+            label_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
         }
     }
-    if (!pMasqueradingVector[2].empty() &&
-        pJson.isMember(pMasqueradingVector[2]))
+    if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
     {
         dirtyFlag_[2] = true;
-        if (!pJson[pMasqueradingVector[2]].isNull())
+        if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            counter_ = std::make_shared<int32_t>(
-                (int32_t)pJson[pMasqueradingVector[2]].asInt64());
+            counter_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[2]].asInt64());
         }
     }
 }
 
-void Tags::updateByJson(const Json::Value& pJson) noexcept(false)
+void Tags::updateByJson(const Json::Value &pJson) noexcept(false)
 {
-    if (pJson.isMember("id"))
+    if(pJson.isMember("id"))
     {
-        if (!pJson["id"].isNull())
+        if(!pJson["id"].isNull())
         {
-            id_ = std::make_shared<uint32_t>((uint32_t)pJson["id"].asUInt64());
+            id_=std::make_shared<uint32_t>((uint32_t)pJson["id"].asUInt64());
         }
     }
-    if (pJson.isMember("label"))
+    if(pJson.isMember("label"))
     {
         dirtyFlag_[1] = true;
-        if (!pJson["label"].isNull())
+        if(!pJson["label"].isNull())
         {
-            label_ = std::make_shared<std::string>(pJson["label"].asString());
+            label_=std::make_shared<std::string>(pJson["label"].asString());
         }
     }
-    if (pJson.isMember("counter"))
+    if(pJson.isMember("counter"))
     {
         dirtyFlag_[2] = true;
-        if (!pJson["counter"].isNull())
+        if(!pJson["counter"].isNull())
         {
-            counter_ =
-                std::make_shared<int32_t>((int32_t)pJson["counter"].asInt64());
+            counter_=std::make_shared<int32_t>((int32_t)pJson["counter"].asInt64());
         }
     }
 }
 
-const uint32_t& Tags::getValueOfId() const noexcept
+const uint32_t &Tags::getValueOfId() const noexcept
 {
     const static uint32_t defaultValue = uint32_t();
-    if (id_)
+    if(id_)
         return *id_;
     return defaultValue;
 }
-const std::shared_ptr<uint32_t>& Tags::getId() const noexcept { return id_; }
-void Tags::setId(const uint32_t& pId) noexcept
+const std::shared_ptr<uint32_t> &Tags::getId() const noexcept
+{
+    return id_;
+}
+void Tags::setId(const uint32_t &pId) noexcept
 {
     id_ = std::make_shared<uint32_t>(pId);
     dirtyFlag_[0] = true;
 }
-const typename Tags::PrimaryKeyType& Tags::getPrimaryKey() const
+const typename Tags::PrimaryKeyType & Tags::getPrimaryKey() const
 {
     assert(id_);
     return *id_;
 }
 
-const std::string& Tags::getValueOfLabel() const noexcept
+const std::string &Tags::getValueOfLabel() const noexcept
 {
     const static std::string defaultValue = std::string();
-    if (label_)
+    if(label_)
         return *label_;
     return defaultValue;
 }
-const std::shared_ptr<std::string>& Tags::getLabel() const noexcept
+const std::shared_ptr<std::string> &Tags::getLabel() const noexcept
 {
     return label_;
 }
-void Tags::setLabel(const std::string& pLabel) noexcept
+void Tags::setLabel(const std::string &pLabel) noexcept
 {
     label_ = std::make_shared<std::string>(pLabel);
     dirtyFlag_[1] = true;
 }
-void Tags::setLabel(std::string&& pLabel) noexcept
+void Tags::setLabel(std::string &&pLabel) noexcept
 {
     label_ = std::make_shared<std::string>(std::move(pLabel));
     dirtyFlag_[1] = true;
 }
 
-const int32_t& Tags::getValueOfCounter() const noexcept
+const int32_t &Tags::getValueOfCounter() const noexcept
 {
     const static int32_t defaultValue = int32_t();
-    if (counter_)
+    if(counter_)
         return *counter_;
     return defaultValue;
 }
-const std::shared_ptr<int32_t>& Tags::getCounter() const noexcept
+const std::shared_ptr<int32_t> &Tags::getCounter() const noexcept
 {
     return counter_;
 }
-void Tags::setCounter(const int32_t& pCounter) noexcept
+void Tags::setCounter(const int32_t &pCounter) noexcept
 {
     counter_ = std::make_shared<int32_t>(pCounter);
     dirtyFlag_[2] = true;
@@ -277,17 +264,20 @@ void Tags::updateId(const uint64_t id)
     id_ = std::make_shared<uint32_t>(static_cast<uint32_t>(id));
 }
 
-const std::vector<std::string>& Tags::insertColumns() noexcept
+const std::vector<std::string> &Tags::insertColumns() noexcept
 {
-    static const std::vector<std::string> inCols = { "label", "counter" };
+    static const std::vector<std::string> inCols={
+        "label",
+        "counter"
+    };
     return inCols;
 }
 
-void Tags::outputArgs(drogon::orm::internal::SqlBinder& binder) const
+void Tags::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if (dirtyFlag_[1])
+    if(dirtyFlag_[1])
     {
-        if (getLabel())
+        if(getLabel())
         {
             binder << getValueOfLabel();
         }
@@ -296,9 +286,9 @@ void Tags::outputArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
         }
     }
-    if (dirtyFlag_[2])
+    if(dirtyFlag_[2])
     {
-        if (getCounter())
+        if(getCounter())
         {
             binder << getValueOfCounter();
         }
@@ -312,22 +302,22 @@ void Tags::outputArgs(drogon::orm::internal::SqlBinder& binder) const
 const std::vector<std::string> Tags::updateColumns() const
 {
     std::vector<std::string> ret;
-    if (dirtyFlag_[1])
+    if(dirtyFlag_[1])
     {
         ret.push_back(getColumnName(1));
     }
-    if (dirtyFlag_[2])
+    if(dirtyFlag_[2])
     {
         ret.push_back(getColumnName(2));
     }
     return ret;
 }
 
-void Tags::updateArgs(drogon::orm::internal::SqlBinder& binder) const
+void Tags::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if (dirtyFlag_[1])
+    if(dirtyFlag_[1])
     {
-        if (getLabel())
+        if(getLabel())
         {
             binder << getValueOfLabel();
         }
@@ -336,9 +326,9 @@ void Tags::updateArgs(drogon::orm::internal::SqlBinder& binder) const
             binder << nullptr;
         }
     }
-    if (dirtyFlag_[2])
+    if(dirtyFlag_[2])
     {
-        if (getCounter())
+        if(getCounter())
         {
             binder << getValueOfCounter();
         }
@@ -351,343 +341,321 @@ void Tags::updateArgs(drogon::orm::internal::SqlBinder& binder) const
 Json::Value Tags::toJson() const
 {
     Json::Value ret;
-    if (getId())
+    if(getId())
     {
-        ret["id"] = getValueOfId();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["id"] = Json::Value();
+        ret["id"]=Json::Value();
     }
-    if (getLabel())
+    if(getLabel())
     {
-        ret["label"] = getValueOfLabel();
-    }
-    else
-    {
-        ret["label"] = Json::Value();
-    }
-    if (getCounter())
-    {
-        ret["counter"] = getValueOfCounter();
+        ret["label"]=getValueOfLabel();
     }
     else
     {
-        ret["counter"] = Json::Value();
+        ret["label"]=Json::Value();
+    }
+    if(getCounter())
+    {
+        ret["counter"]=getValueOfCounter();
+    }
+    else
+    {
+        ret["counter"]=Json::Value();
     }
     return ret;
 }
 
 Json::Value Tags::toMasqueradedJson(
-    const std::vector<std::string>& pMasqueradingVector) const
+    const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if (pMasqueradingVector.size() == 3)
+    if(pMasqueradingVector.size() == 3)
     {
-        if (!pMasqueradingVector[0].empty())
+        if(!pMasqueradingVector[0].empty())
         {
-            if (getId())
+            if(getId())
             {
-                ret[pMasqueradingVector[0]] = getValueOfId();
+                ret[pMasqueradingVector[0]]=getValueOfId();
             }
             else
             {
-                ret[pMasqueradingVector[0]] = Json::Value();
+                ret[pMasqueradingVector[0]]=Json::Value();
             }
         }
-        if (!pMasqueradingVector[1].empty())
+        if(!pMasqueradingVector[1].empty())
         {
-            if (getLabel())
+            if(getLabel())
             {
-                ret[pMasqueradingVector[1]] = getValueOfLabel();
+                ret[pMasqueradingVector[1]]=getValueOfLabel();
             }
             else
             {
-                ret[pMasqueradingVector[1]] = Json::Value();
+                ret[pMasqueradingVector[1]]=Json::Value();
             }
         }
-        if (!pMasqueradingVector[2].empty())
+        if(!pMasqueradingVector[2].empty())
         {
-            if (getCounter())
+            if(getCounter())
             {
-                ret[pMasqueradingVector[2]] = getValueOfCounter();
+                ret[pMasqueradingVector[2]]=getValueOfCounter();
             }
             else
             {
-                ret[pMasqueradingVector[2]] = Json::Value();
+                ret[pMasqueradingVector[2]]=Json::Value();
             }
         }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
-    if (getId())
+    if(getId())
     {
-        ret["id"] = getValueOfId();
+        ret["id"]=getValueOfId();
     }
     else
     {
-        ret["id"] = Json::Value();
+        ret["id"]=Json::Value();
     }
-    if (getLabel())
+    if(getLabel())
     {
-        ret["label"] = getValueOfLabel();
-    }
-    else
-    {
-        ret["label"] = Json::Value();
-    }
-    if (getCounter())
-    {
-        ret["counter"] = getValueOfCounter();
+        ret["label"]=getValueOfLabel();
     }
     else
     {
-        ret["counter"] = Json::Value();
+        ret["label"]=Json::Value();
+    }
+    if(getCounter())
+    {
+        ret["counter"]=getValueOfCounter();
+    }
+    else
+    {
+        ret["counter"]=Json::Value();
     }
     return ret;
 }
 
-bool Tags::validateJsonForCreation(const Json::Value& pJson, std::string& err)
+bool Tags::validateJsonForCreation(const Json::Value &pJson, std::string &err)
 {
-    if (pJson.isMember("id"))
+    if(pJson.isMember("id"))
     {
-        if (!validJsonOfField(0, "id", pJson["id"], err, true))
+        if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
-    if (pJson.isMember("label"))
+    if(pJson.isMember("label"))
     {
-        if (!validJsonOfField(1, "label", pJson["label"], err, true))
+        if(!validJsonOfField(1, "label", pJson["label"], err, true))
             return false;
     }
     else
     {
-        err = "The label column cannot be null";
+        err="The label column cannot be null";
         return false;
     }
-    if (pJson.isMember("counter"))
+    if(pJson.isMember("counter"))
     {
-        if (!validJsonOfField(2, "counter", pJson["counter"], err, true))
+        if(!validJsonOfField(2, "counter", pJson["counter"], err, true))
             return false;
     }
     return true;
 }
-bool Tags::validateMasqueradedJsonForCreation(
-    const Json::Value& pJson,
-    const std::vector<std::string>& pMasqueradingVector, std::string& err)
+bool Tags::validateMasqueradedJsonForCreation(const Json::Value &pJson,
+                                              const std::vector<std::string> &pMasqueradingVector,
+                                              std::string &err)
 {
-    if (pMasqueradingVector.size() != 3)
+    if(pMasqueradingVector.size() != 3)
     {
         err = "Bad masquerading vector";
         return false;
     }
-    try
-    {
-        if (!pMasqueradingVector[0].empty())
-        {
-            if (pJson.isMember(pMasqueradingVector[0]))
-            {
-                if (!validJsonOfField(0, pMasqueradingVector[0],
-                                      pJson[pMasqueradingVector[0]], err, true))
-                    return false;
-            }
-        }
-        if (!pMasqueradingVector[1].empty())
-        {
-            if (pJson.isMember(pMasqueradingVector[1]))
-            {
-                if (!validJsonOfField(1, pMasqueradingVector[1],
-                                      pJson[pMasqueradingVector[1]], err, true))
-                    return false;
-            }
-            else
-            {
-                err =
-                    "The " + pMasqueradingVector[1] + " column cannot be null";
-                return false;
-            }
-        }
-        if (!pMasqueradingVector[2].empty())
-        {
-            if (pJson.isMember(pMasqueradingVector[2]))
-            {
-                if (!validJsonOfField(2, pMasqueradingVector[2],
-                                      pJson[pMasqueradingVector[2]], err, true))
-                    return false;
-            }
-        }
-    }
-    catch (const Json::LogicError& e)
-    {
-        err = e.what();
-        return false;
-    }
-    return true;
-}
-bool Tags::validateJsonForUpdate(const Json::Value& pJson, std::string& err)
-{
-    if (pJson.isMember("id"))
-    {
-        if (!validJsonOfField(0, "id", pJson["id"], err, false))
-            return false;
-    }
-    else
-    {
-        err = "The value of primary key must be set in the json object for "
-              "update";
-        return false;
-    }
-    if (pJson.isMember("label"))
-    {
-        if (!validJsonOfField(1, "label", pJson["label"], err, false))
-            return false;
-    }
-    if (pJson.isMember("counter"))
-    {
-        if (!validJsonOfField(2, "counter", pJson["counter"], err, false))
-            return false;
-    }
-    return true;
-}
-bool Tags::validateMasqueradedJsonForUpdate(
-    const Json::Value& pJson,
-    const std::vector<std::string>& pMasqueradingVector, std::string& err)
-{
-    if (pMasqueradingVector.size() != 3)
-    {
-        err = "Bad masquerading vector";
-        return false;
-    }
-    try
-    {
-        if (!pMasqueradingVector[0].empty() &&
-            pJson.isMember(pMasqueradingVector[0]))
-        {
-            if (!validJsonOfField(0, pMasqueradingVector[0],
-                                  pJson[pMasqueradingVector[0]], err, false))
-                return false;
-        }
+    try {
+      if(!pMasqueradingVector[0].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[0]))
+          {
+              if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[1].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[1]))
+          {
+              if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, true))
+                  return false;
+          }
         else
         {
-            err = "The value of primary key must be set in the json object for "
-                  "update";
+            err="The " + pMasqueradingVector[1] + " column cannot be null";
             return false;
         }
-        if (!pMasqueradingVector[1].empty() &&
-            pJson.isMember(pMasqueradingVector[1]))
-        {
-            if (!validJsonOfField(1, pMasqueradingVector[1],
-                                  pJson[pMasqueradingVector[1]], err, false))
-                return false;
-        }
-        if (!pMasqueradingVector[2].empty() &&
-            pJson.isMember(pMasqueradingVector[2]))
-        {
-            if (!validJsonOfField(2, pMasqueradingVector[2],
-                                  pJson[pMasqueradingVector[2]], err, false))
-                return false;
-        }
+      }
+      if(!pMasqueradingVector[2].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[2]))
+          {
+              if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, true))
+                  return false;
+          }
+      }
     }
-    catch (const Json::LogicError& e)
+    catch(const Json::LogicError &e)
     {
-        err = e.what();
-        return false;
+      err = e.what();
+      return false;
     }
     return true;
 }
-bool Tags::validJsonOfField(size_t index, const std::string& fieldName,
-                            const Json::Value& pJson, std::string& err,
+bool Tags::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
+{
+    if(pJson.isMember("id"))
+    {
+        if(!validJsonOfField(0, "id", pJson["id"], err, false))
+            return false;
+    }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
+    if(pJson.isMember("label"))
+    {
+        if(!validJsonOfField(1, "label", pJson["label"], err, false))
+            return false;
+    }
+    if(pJson.isMember("counter"))
+    {
+        if(!validJsonOfField(2, "counter", pJson["counter"], err, false))
+            return false;
+    }
+    return true;
+}
+bool Tags::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
+                                            const std::vector<std::string> &pMasqueradingVector,
+                                            std::string &err)
+{
+    if(pMasqueradingVector.size() != 3)
+    {
+        err = "Bad masquerading vector";
+        return false;
+    }
+    try {
+      if(!pMasqueradingVector[0].empty() && pJson.isMember(pMasqueradingVector[0]))
+      {
+          if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, false))
+              return false;
+      }
+    else
+    {
+        err = "The value of primary key must be set in the json object for update";
+        return false;
+    }
+      if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
+      {
+          if(!validJsonOfField(1, pMasqueradingVector[1], pJson[pMasqueradingVector[1]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
+      {
+          if(!validJsonOfField(2, pMasqueradingVector[2], pJson[pMasqueradingVector[2]], err, false))
+              return false;
+      }
+    }
+    catch(const Json::LogicError &e)
+    {
+      err = e.what();
+      return false;
+    }
+    return true;
+}
+bool Tags::validJsonOfField(size_t index,
+                            const std::string &fieldName,
+                            const Json::Value &pJson,
+                            std::string &err,
                             bool isForCreation)
 {
-    switch (index)
+    switch(index)
     {
-    case 0:
-        if (pJson.isNull())
-        {
-            err = "The " + fieldName + " column cannot be null";
+        case 0:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(isForCreation)
+            {
+                err="The automatic primary key cannot be set";
+                return false;
+            }
+            if(!pJson.isUInt())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 1:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 2:
+            if(pJson.isNull())
+            {
+                err="The " + fieldName + " column cannot be null";
+                return false;
+            }
+            if(!pJson.isInt())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        default:
+            err="Internal error in the server";
             return false;
-        }
-        if (isForCreation)
-        {
-            err = "The automatic primary key cannot be set";
-            return false;
-        }
-        if (!pJson.isUInt())
-        {
-            err = "Type error in the " + fieldName + " field";
-            return false;
-        }
-        break;
-    case 1:
-        if (pJson.isNull())
-        {
-            err = "The " + fieldName + " column cannot be null";
-            return false;
-        }
-        if (!pJson.isString())
-        {
-            err = "Type error in the " + fieldName + " field";
-            return false;
-        }
-        break;
-    case 2:
-        if (pJson.isNull())
-        {
-            err = "The " + fieldName + " column cannot be null";
-            return false;
-        }
-        if (!pJson.isInt())
-        {
-            err = "Type error in the " + fieldName + " field";
-            return false;
-        }
-        break;
-    default:
-        err = "Internal error in the server";
-        return false;
     }
     return true;
 }
-std::vector<std::pair<Events, EventsTags>>
-Tags::getEvents(const drogon::orm::DbClientPtr& clientPtr) const
-{
-    std::shared_ptr<std::promise<std::vector<std::pair<Events, EventsTags>>>>
-        pro(new std::promise<std::vector<std::pair<Events, EventsTags>>>);
-    std::future<std::vector<std::pair<Events, EventsTags>>> f =
-        pro->get_future();
-    getEvents(
-        clientPtr,
-        [&pro](std::vector<std::pair<Events, EventsTags>> result)
-        {
-            try
-            {
-                pro->set_value(result);
-            }
-            catch (...)
-            {
-                pro->set_exception(std::current_exception());
-            }
-        },
-        [&pro](const DrogonDbException& err)
-        { pro->set_exception(std::make_exception_ptr(err)); });
+std::vector<std::pair<Events,EventsTags>> Tags::getEvents(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<std::pair<Events,EventsTags>>>> pro(new std::promise<std::vector<std::pair<Events,EventsTags>>>);
+    std::future<std::vector<std::pair<Events,EventsTags>>> f = pro->get_future();
+    getEvents(clientPtr, [&pro] (std::vector<std::pair<Events,EventsTags>> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
     return f.get();
 }
-void Tags::getEvents(
-    const DbClientPtr& clientPtr,
-    const std::function<void(std::vector<std::pair<Events, EventsTags>>)>& rcb,
-    const ExceptionCallback& ecb) const
+void Tags::getEvents(const DbClientPtr &clientPtr,
+                     const std::function<void(std::vector<std::pair<Events,EventsTags>>)> &rcb,
+                     const ExceptionCallback &ecb) const
 {
-    const static std::string sql =
-        "select * from events,events_tags where events_tags.tag_id = ? and "
-        "events_tags.event_id = events.id";
-    *clientPtr << sql << *id_ >> [rcb = std::move(rcb)](const Result& r)
-    {
-        std::vector<std::pair<Events, EventsTags>> ret;
-        ret.reserve(r.size());
-        for (const auto& row : r)
-        {
-            ret.emplace_back(std::pair<Events, EventsTags>(
-                Events(row), EventsTags(row, Events::getColumnNumber())));
-        }
-        rcb(ret);
-    } >> ecb;
+    const static std::string sql = "select * from events,events_tags where events_tags.tag_id = ? and events_tags.event_id = events.id";
+    *clientPtr << sql
+               << *id_
+               >> [rcb = std::move(rcb)](const Result &r){
+                   std::vector<std::pair<Events,EventsTags>> ret;
+                   ret.reserve(r.size());
+                   for (auto const &row : r)
+                   {
+                       ret.emplace_back(std::pair<Events,EventsTags>(
+                           Events(row),EventsTags(row,Events::getColumnNumber())));
+                   }
+                   rcb(ret);
+               }
+               >> ecb;
 }

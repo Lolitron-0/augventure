@@ -1,11 +1,14 @@
 #include "Models.h"
-#include "utils/Macros.h"
+#include "Suggestions.h"
+#include <algorithm>
+#include <cstdint>
+#include <drogon/orm/Criteria.h>
 #include <drogon/orm/Exception.h>
+#include <drogon/orm/Mapper.h>
 #include <functional>
 #include <json/value.h>
 #include <list>
 #include <memory>
-#include <type_traits>
 
 void getFullEventData(
     const Json::Value& eventJson,
@@ -135,4 +138,97 @@ void expandEventList(
                 *dbExceptionCallbackPtr); // TODO: macros
         },
         *dbExceptionCallbackPtr);
+}
+void expandSuggestionList(
+    const Json::Value& suggestionListJson, int8_t voteSort,
+    std::function<void(const Json::Value&)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback)
+{
+    using namespace drogon_model::augventure_db;
+    using namespace drogon::orm;
+
+    auto resultJsonPtr{ std::make_shared<Json::Value>(
+        std::move(suggestionListJson)) };
+    auto successCallbackPtr{
+        std::make_shared<std::function<void(const Json::Value&)>>(
+            successCallback)
+    };
+    auto dbExceptionCallbackPtr{ std::make_shared<DrogonDbExceptionCallback>(
+        dbExceptionCallback) };
+    std::vector<PrimaryKeyType> suggestionIds{};
+    std::vector<PrimaryKeyType> authorIds{};
+    for (auto suggestionJson : *resultJsonPtr)
+    {
+        suggestionIds.push_back(
+            suggestionJson[Suggestions::Cols::_id].as<PrimaryKeyType>());
+        authorIds.push_back(
+            suggestionJson[Suggestions::Cols::_author_id].as<PrimaryKeyType>());
+    }
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<Votes> votesMapper{ dbClient };
+    votesMapper.findBy(
+        Criteria{ Votes::Cols::_suggestion_id, CompareOperator::In,
+                  suggestionIds },
+        [resultJsonPtr, authorIds, dbClient, successCallbackPtr, voteSort,
+         dbExceptionCallbackPtr](auto votes)
+        {
+            Mapper<User> usersMapper{ dbClient };
+            usersMapper.findBy(
+                Criteria{ Users::Cols::_id, CompareOperator::In, authorIds },
+                [resultVec = std::vector<Json::Value>{ resultJsonPtr->begin(),
+                                                       resultJsonPtr->end() },
+                 successCallbackPtr, voteSort,
+                 votesList = std::list<Vote>{ votes.begin(), votes.end() }](
+                    auto authorsVec) mutable
+                {
+                    for (auto& responseEntryJson : resultVec)
+                    {
+                        auto suggestionAuthor{ std::find_if(
+                            authorsVec.begin(), authorsVec.end(),
+                            [authorId =
+                                 responseEntryJson
+                                     [Suggestions::Cols::_author_id]
+                                         .as<PrimaryKeyType>()](auto user)
+                            { return user.getValueOfId() == authorId; }) };
+                        responseEntryJson["author"] =
+                            suggestionAuthor->toJson();
+                        uint32_t votes{ 0 };
+                        for (auto voteIt{ votesList.begin() };
+                             voteIt != votesList.end();)
+                        {
+                            if (voteIt->getValueOfSuggestionId() ==
+                                responseEntryJson[Suggestions::Cols::_id]
+                                    .as<PrimaryKeyType>())
+                            {
+                                votes += voteIt->getValueOfVoteValue();
+                                voteIt = votesList.erase(voteIt);
+                            }
+                            else
+                            {
+                                voteIt++;
+                            }
+                        }
+                        responseEntryJson["votes"] = votes;
+                    }
+                    if (voteSort)
+                    {
+                        std::stable_sort(resultVec.begin(), resultVec.end(),
+                                         [voteSort](auto s1, auto s2)
+                                         {
+                                             if (voteSort > 0)
+                                                 return (s1["votes"].asUInt() <
+                                                         s2["votes"].asUInt());
+                                             else
+                                                 return (s1["votes"].asUInt() >
+                                                         s2["votes"].asUInt());
+                                         });
+                    }
+                    Json::Value resultJson;
+                    for (auto suggestion : resultVec)
+                        resultJson.append(suggestion);
+                    (*successCallbackPtr)(resultJson);
+                },
+                *dbExceptionCallbackPtr);
+        },
+        dbExceptionCallback);
 }

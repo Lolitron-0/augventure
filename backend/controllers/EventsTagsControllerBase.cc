@@ -9,27 +9,27 @@
 #include "EventsTagsControllerBase.h"
 #include <string>
 
-void EventsTagsControllerBase::get(
-    const HttpRequestPtr& req,
-    std::function<void(const HttpResponsePtr&)>&& callback)
+
+void EventsTagsControllerBase::get(const HttpRequestPtr &req,
+                                   std::function<void(const HttpResponsePtr &)> &&callback)
 {
     auto dbClientPtr = getDbClient();
     drogon::orm::Mapper<EventsTags> mapper(dbClientPtr);
-    auto& parameters = req->parameters();
+    auto &parameters = req->parameters();
     auto iter = parameters.find("sort");
-    if (iter != parameters.end())
+    if(iter != parameters.end())
     {
         auto sortFields = drogon::utils::splitString(iter->second, ",");
-        for (auto& field : sortFields)
+        for(auto &field : sortFields)
         {
-            if (field.empty())
+            if(field.empty())
                 continue;
-            if (field[0] == '+')
+            if(field[0] == '+')
             {
                 field = field.substr(1);
                 mapper.orderBy(field, SortOrder::ASC);
             }
-            else if (field[0] == '-')
+            else if(field[0] == '-')
             {
                 field = field.substr(1);
                 mapper.orderBy(field, SortOrder::DESC);
@@ -41,14 +41,13 @@ void EventsTagsControllerBase::get(
         }
     }
     iter = parameters.find("offset");
-    if (iter != parameters.end())
+    if(iter != parameters.end())
     {
-        try
-        {
+        try{
             auto offset = std::stoll(iter->second);
             mapper.offset(offset);
         }
-        catch (...)
+        catch(...)
         {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(k400BadRequest);
@@ -57,53 +56,48 @@ void EventsTagsControllerBase::get(
         }
     }
     iter = parameters.find("limit");
-    if (iter != parameters.end())
+    if(iter != parameters.end())
     {
-        try
-        {
+        try{
             auto limit = std::stoll(iter->second);
             mapper.limit(limit);
         }
-        catch (...)
+        catch(...)
         {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(k400BadRequest);
             callback(resp);
             return;
         }
-    }
+    }    
     auto callbackPtr =
-        std::make_shared<std::function<void(const HttpResponsePtr&)>>(
+        std::make_shared<std::function<void(const HttpResponsePtr &)>>(
             std::move(callback));
     auto jsonPtr = req->jsonObject();
-    if (jsonPtr && jsonPtr->isMember("filter"))
+    if(jsonPtr && jsonPtr->isMember("filter"))
     {
-        try
-        {
+        try{
             auto criteria = makeCriteria((*jsonPtr)["filter"]);
-            mapper.findBy(
-                criteria,
-                [req, callbackPtr, this](const std::vector<EventsTags>& v)
-                {
+            mapper.findBy(criteria,
+                [req, callbackPtr, this](const std::vector<EventsTags> &v) {
                     Json::Value ret;
                     ret.resize(0);
-                    for (auto& obj : v)
+                    for (auto &obj : v)
                     {
                         ret.append(makeJson(req, obj));
                     }
                     (*callbackPtr)(HttpResponse::newHttpJsonResponse(ret));
                 },
-                [callbackPtr](const DrogonDbException& e)
-                {
+                [callbackPtr](const DrogonDbException &e) { 
                     LOG_ERROR << e.base().what();
                     Json::Value ret;
                     ret["error"] = "database error";
                     auto resp = HttpResponse::newHttpJsonResponse(ret);
                     resp->setStatusCode(k500InternalServerError);
-                    (*callbackPtr)(resp);
+                    (*callbackPtr)(resp);    
                 });
         }
-        catch (const std::exception& e)
+        catch(const std::exception &e)
         {
             LOG_ERROR << e.what();
             Json::Value ret;
@@ -111,66 +105,61 @@ void EventsTagsControllerBase::get(
             auto resp = HttpResponse::newHttpJsonResponse(ret);
             resp->setStatusCode(k400BadRequest);
             (*callbackPtr)(resp);
-            return;
+            return;    
         }
     }
     else
     {
-        mapper.findAll(
-            [req, callbackPtr, this](const std::vector<EventsTags>& v)
-            {
+        mapper.findAll([req, callbackPtr, this](const std::vector<EventsTags> &v) {
                 Json::Value ret;
                 ret.resize(0);
-                for (auto& obj : v)
+                for (auto &obj : v)
                 {
                     ret.append(makeJson(req, obj));
                 }
                 (*callbackPtr)(HttpResponse::newHttpJsonResponse(ret));
             },
-            [callbackPtr](const DrogonDbException& e)
-            {
+            [callbackPtr](const DrogonDbException &e) { 
                 LOG_ERROR << e.base().what();
                 Json::Value ret;
                 ret["error"] = "database error";
                 auto resp = HttpResponse::newHttpJsonResponse(ret);
                 resp->setStatusCode(k500InternalServerError);
-                (*callbackPtr)(resp);
+                (*callbackPtr)(resp);    
             });
     }
 }
 
-void EventsTagsControllerBase::create(
-    const HttpRequestPtr& req,
-    std::function<void(const HttpResponsePtr&)>&& callback)
+void EventsTagsControllerBase::create(const HttpRequestPtr &req,
+                                      std::function<void(const HttpResponsePtr &)> &&callback)
 {
-    auto jsonPtr = req->jsonObject();
-    if (!jsonPtr)
+    auto jsonPtr=req->jsonObject();
+    if(!jsonPtr)
     {
         Json::Value ret;
-        ret["error"] = "No json object is found in the request";
-        auto resp = HttpResponse::newHttpJsonResponse(ret);
+        ret["error"]="No json object is found in the request";
+        auto resp= HttpResponse::newHttpJsonResponse(ret);
         resp->setStatusCode(k400BadRequest);
         callback(resp);
         return;
     }
     std::string err;
-    if (!doCustomValidations(*jsonPtr, err))
+    if(!doCustomValidations(*jsonPtr, err))
     {
         Json::Value ret;
         ret["error"] = err;
-        auto resp = HttpResponse::newHttpJsonResponse(ret);
+        auto resp= HttpResponse::newHttpJsonResponse(ret);
         resp->setStatusCode(k400BadRequest);
         callback(resp);
         return;
     }
-    if (isMasquerading())
+    if(isMasquerading())
     {
-        if (!EventsTags::validateMasqueradedJsonForCreation(
-                *jsonPtr, masqueradingVector(), err))
+        if(!EventsTags::validateMasqueradedJsonForCreation(*jsonPtr, masqueradingVector(), err))
         {
             Json::Value ret;
             ret["error"] = err;
-            auto resp = HttpResponse::newHttpJsonResponse(ret);
+            auto resp= HttpResponse::newHttpJsonResponse(ret);
             resp->setStatusCode(k400BadRequest);
             callback(resp);
             return;
@@ -178,73 +167,74 @@ void EventsTagsControllerBase::create(
     }
     else
     {
-        if (!EventsTags::validateJsonForCreation(*jsonPtr, err))
+        if(!EventsTags::validateJsonForCreation(*jsonPtr, err))
         {
             Json::Value ret;
             ret["error"] = err;
-            auto resp = HttpResponse::newHttpJsonResponse(ret);
+            auto resp= HttpResponse::newHttpJsonResponse(ret);
             resp->setStatusCode(k400BadRequest);
             callback(resp);
             return;
         }
-    }
-    try
+    }   
+    try 
     {
-        EventsTags object =
-            (isMasquerading() ? EventsTags(*jsonPtr, masqueradingVector())
-                              : EventsTags(*jsonPtr));
+        EventsTags object = 
+            (isMasquerading()? 
+             EventsTags(*jsonPtr, masqueradingVector()) : 
+             EventsTags(*jsonPtr));
         auto dbClientPtr = getDbClient();
         auto callbackPtr =
-            std::make_shared<std::function<void(const HttpResponsePtr&)>>(
+            std::make_shared<std::function<void(const HttpResponsePtr &)>>(
                 std::move(callback));
         drogon::orm::Mapper<EventsTags> mapper(dbClientPtr);
         mapper.insert(
             object,
-            [req, callbackPtr, this](EventsTags newObject)
-            {
+            [req, callbackPtr, this](EventsTags newObject){
                 (*callbackPtr)(HttpResponse::newHttpJsonResponse(
                     makeJson(req, newObject)));
             },
-            [callbackPtr](const DrogonDbException& e)
-            {
+            [callbackPtr](const DrogonDbException &e){
                 LOG_ERROR << e.base().what();
                 Json::Value ret;
                 ret["error"] = "database error";
                 auto resp = HttpResponse::newHttpJsonResponse(ret);
                 resp->setStatusCode(k500InternalServerError);
-                (*callbackPtr)(resp);
+                (*callbackPtr)(resp);   
             });
     }
-    catch (const Json::Exception& e)
+    catch(const Json::Exception &e)
     {
         LOG_ERROR << e.what();
         Json::Value ret;
-        ret["error"] = "Field type error";
-        auto resp = HttpResponse::newHttpJsonResponse(ret);
+        ret["error"]="Field type error";
+        auto resp= HttpResponse::newHttpJsonResponse(ret);
         resp->setStatusCode(k400BadRequest);
         callback(resp);
-        return;
-    }
+        return;        
+    }   
 }
 
 /*
 void EventsTagsControllerBase::update(const HttpRequestPtr &req,
-                                      std::function<void(const HttpResponsePtr
-&)> &&callback)
+                                      std::function<void(const HttpResponsePtr &)> &&callback)
 {
 
 }*/
 
 EventsTagsControllerBase::EventsTagsControllerBase()
-    : RestfulController({ "event_id", "tag_id" })
+    : RestfulController({
+          "event_id",
+          "tag_id"
+      })
 {
-    /**
-     * The items in the vector are aliases of column names in the table.
-     * if one item is set to an empty string, the related column is not sent
-     * to clients.
-     */
+   /**
+    * The items in the vector are aliases of column names in the table.
+    * if one item is set to an empty string, the related column is not sent
+    * to clients.
+    */
     enableMasquerading({
         "event_id", // the alias for the event_id column.
-        "tag_id"    // the alias for the tag_id column.
+        "tag_id"  // the alias for the tag_id column.
     });
 }

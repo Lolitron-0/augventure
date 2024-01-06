@@ -46,7 +46,7 @@ void EventsController::getOne(
             getFullEventData(
                 *resp->jsonObject(), [callbackPtr](const Json::Value& result)
                 { (*callbackPtr)(HttpResponse::newHttpJsonResponse(result)); },
-                HANDLE_DB_EXCEPTION(*callbackPtr));
+                DB_EXCEPTION_HANDLER(*callbackPtr));
         },
         std::move(id));
 }
@@ -92,7 +92,7 @@ void EventsController::deleteOne(
                 (*callbackPtr)(response);
             }
         },
-        HANDLE_DB_EXCEPTION(*callbackPtr));
+        DB_EXCEPTION_HANDLER(*callbackPtr));
 }
 
 void EventsController::get(
@@ -116,7 +116,7 @@ void EventsController::get(
                         HttpResponse::newHttpJsonResponse(std::move(result)));
                 },
 
-                HANDLE_DB_EXCEPTION(*callbackPtr));
+                DB_EXCEPTION_HANDLER(*callbackPtr));
         });
 }
 

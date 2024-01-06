@@ -71,6 +71,16 @@
       },
       {
         "type": "has many",
+        "original_table_name": "users",
+        "original_table_alias": "author",
+        "original_key": "id",
+        "target_table_name": "suggestions",
+        "target_table_alias": "",
+        "target_key": "author_id",
+        "enable_reverse": true
+      },
+      {
+        "type": "has many",
         "original_table_name": "events",
         "original_table_alias": "event",
         "original_key": "id",

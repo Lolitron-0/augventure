@@ -36,8 +36,8 @@ create table events_tags (
     event_id int unsigned not null,
     constraint `fk_event_id`
       foreign key (event_id) references events (id)
-      on delete cascade
-      on update cascade,
+      on delete cascade 
+      on update cascade, -- if event deleted, pivot table entry should be deleted too
     tag_id int unsigned not null,
     constraint `fk_tag_id`
       foreign key (tag_id) references tags (id)
@@ -55,6 +55,21 @@ create table suggestions (
     foreign key (author_id) references users (id)
     on delete restrict
     on update restrict
+);
+
+create table votes (
+	id int unsigned primary key not null auto_increment,
+    suggestion_id int unsigned not null,
+    constraint `fk_suggestion_id`
+      foreign key (suggestion_id) references suggestions (id)
+      on delete cascade
+      on update cascade,
+    user_id int unsigned not null,
+    constraint `fk_user_id`
+      foreign key (user_id) references users (id)
+      on delete cascade
+      on update cascade,
+	vote_value tinyint not null
 );
 
 create table sprints (
