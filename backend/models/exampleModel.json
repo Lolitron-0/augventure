@@ -1,0 +1,143 @@
+{
+  "rdbms": "mysql",
+  "host": "127.0.0.1",
+  "port": 3306,
+  "dbname": "augventure_db",
+  "schema": "public",
+  "user": "augventureUser",
+  "password": "augventureUserPassword",
+  "tables": [],
+  "convert": {
+    "enabled": false,
+    "items": [
+      {
+        "table": "user",
+        "column": "password",
+        "method": {
+          //after_db_read: name of the method which is called after reading from database, signature: void([const] std::shared_ptr [&])
+          "after_db_read": "decrypt_password",
+          //before_db_write: name of the method which is called before writing to database, signature: void([const] std::shared_ptr [&])
+          "before_db_write": "encrypt_password"
+        },
+        "includes": [
+          "\"file_local_search_path.h\"",
+          "<file_in_global_search_path.h>"
+        ]
+      }
+    ]
+  },
+  "relationships": {
+    "enabled": true,
+    "items": [
+      {
+        "type": "has one",
+        "original_table_name": "sprints",
+        "original_table_alias": "sprint",
+        "original_key": "id",
+        "target_table_name": "posts",
+        "target_table_alias": "post",
+        "target_key": "sprint_id",
+        "enable_reverse": false
+      },
+      {
+        "type": "has one",
+        "original_table_name": "suggestions",
+        "original_table_alias": "suggestion",
+        "original_key": "id",
+        "target_table_name": "posts",
+        "target_table_alias": "post",
+        "target_key": "suggestion_id",
+        "enable_reverse": false
+      },
+      {
+        "type": "has one",
+        "original_table_name": "posts",
+        "original_table_alias": "post",
+        "original_key": "id",
+        "target_table_name": "post_media",
+        "target_table_alias": "",
+        "target_key": "post_id",
+        "enable_reverse": false
+      },
+      {
+        "type": "has many",
+        "original_table_name": "users",
+        "original_table_alias": "user",
+        "original_key": "id",
+        "target_table_name": "events",
+        "target_table_alias": "",
+        "target_key": "author_id",
+        "enable_reverse": true
+      },
+      {
+        "type": "has many",
+        "original_table_name": "users",
+        "original_table_alias": "author",
+        "original_key": "id",
+        "target_table_name": "suggestions",
+        "target_table_alias": "",
+        "target_key": "author_id",
+        "enable_reverse": true
+      },
+      {
+        "type": "has many",
+        "original_table_name": "events",
+        "original_table_alias": "event",
+        "original_key": "id",
+        "target_table_name": "sprints",
+        "target_table_alias": "",
+        "target_key": "event_id",
+        "enable_reverse": true
+      },
+      {
+        "type": "has many",
+        "original_table_name": "sprints",
+        "original_table_alias": "sprint",
+        "original_key": "id",
+        "target_table_name": "suggestions",
+        "target_table_alias": "",
+        "target_key": "sprint_id",
+        "enable_reverse": true
+      },
+      {
+        "type": "many to many",
+        "original_table_name": "events",
+        "original_table_alias": "",
+        "original_key": "id",
+        "pivot_table": {
+          "table_name": "events_tags",
+          "original_key": "event_id",
+          "target_key": "tag_id"
+        },
+        "target_table_name": "tags",
+        "target_table_alias": "",
+        "target_key": "id",
+        "enable_reverse": true
+      }
+    ]
+  },
+  "restful_api_controllers": {
+    "enabled": true,
+    // resource_uri: The URI to access the resource, the default value 
+    // is '/*' in which the asterisk represents the table name.
+    // If this option is set to a empty string, the URI is composed of the namespaces and the class name.
+    "resource_uri": "/api/*",
+    // class_name: "Restful*Ctrl" by default, the asterisk represents the table name.
+    // This option can contain namespaces.
+    "class_name": "*Controller",
+    // filters: an array of filter names.
+    "filters": ["augventure::filters::LoginFilter"],
+    // db_client: the database client used by the controller. this option must be consistent with
+    // the configuration of the application.
+    "db_client": {
+      //name: Name of the client,'default' by default
+      "name": "default",
+      //is_fast: 
+      "is_fast": false
+    },
+    // directory: The directory where the controller source files are stored.
+    "directory": "controllers",
+    // generate_base_only: false by default. Set to true to avoid overwriting custom subclasses.
+    "generate_base_only": true
+  }
+}
