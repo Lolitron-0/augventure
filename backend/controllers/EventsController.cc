@@ -60,7 +60,7 @@ void EventsController::getOne(
             if (resp->statusCode() != k200OK)
             {
                 (*callbackPtr)(resp);
-                retrn;
+                return;
             }
 
             auto dbClient{ drogon::app().getDbClient() };
