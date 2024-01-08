@@ -1,6 +1,8 @@
+#pragma GCC diagnostic push
+// somehow std::stable_sort uses deprecated in C++17 std::get_temporary_buffer
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "Models.h"
 #include "Suggestions.h"
-#include <algorithm>
 #include <cstdint>
 #include <drogon/orm/Criteria.h>
 #include <drogon/orm/Exception.h>
@@ -22,8 +24,8 @@ void getFullEventData(
     Json::Value eventList{};
     eventList[0] = eventJson;
     expandEventList(
-        std::move(eventList),
-        [successCallbackPtr](auto&& result) { (*successCallbackPtr)(result[0]); },
+        std::move(eventList), [successCallbackPtr](auto&& result)
+        { (*successCallbackPtr)(result[0]); },
         std::forward<decltype(dbExceptionCallback)>(dbExceptionCallback));
 }
 
@@ -232,3 +234,4 @@ void expandSuggestionList(
         },
         dbExceptionCallback);
 }
+#pragma GCC diagnostic pop

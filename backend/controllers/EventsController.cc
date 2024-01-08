@@ -33,55 +33,57 @@ void EventsController::finishVoting(
     Events::PrimaryKeyType&& id)
 {
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
-    auto dbClient{ app().getDbClient() };
-
     auto currentUserId{ CURRENT_USER_ID(req) };
-    Mapper<Event> eventMapper {dbClient};
 
-    // Валидируем request
-    auto jsonPtr=req->jsonObject();
+    auto dbClient{ app().getDbClient() };
+    Mapper<Event> eventMapper{ dbClient };
+
+    auto jsonPtr{ req->jsonObject() };
     if (!jsonPtr || !jsonPtr->isMember(Sprint::Cols::_suggestion_winner_id))
     {
-        (*callbackPtr)(HttpResponse::newHttpResponse(k400BadRequest, CT_NONE));
+        auto errResp{ HttpResponse::newHttpResponse(k400BadRequest,
+                                                    CT_TEXT_PLAIN) };
+        errResp->setBody("Request body is ill-formed");
+        (*callbackPtr)(errResp);
     }
 
-    // Проверяем, имеет ли пользователь возможность изменять Event
-    eventMapper.findOne(Criteria{Events::Cols::_id, CompareOperator::EQ, id},
+    eventMapper.findByPrimaryKey(
+        id,
         [jsonPtr, dbClient, callbackPtr, currentUserId](Event event)
         {
             if (event.getValueOfAuthorId() == currentUserId)
             {
                 Mapper<Sprint> sprintMapper{ dbClient };
-                // Находим активный Sprint
                 sprintMapper.findOne(
                     Criteria{ Sprints::Cols::_event_id, CompareOperator::EQ,
                               event.getValueOfId() } &&
-                    Criteria{ Sprints::Cols::_state, CompareOperator::EQ,
-                              "voting" },
-                    [jsonPtr, dbClient, sprintMapper, callbackPtr](Sprint sprint) mutable
+                        Criteria{ Sprints::Cols::_state, CompareOperator::EQ,
+                                  "voting" },
+                    [jsonPtr, dbClient, sprintMapper,
+                     callbackPtr](Sprint sprint) mutable
                     {
-                        // Изменяем статус спринта
                         sprint.setState("implementing");
-                        // Изменяем suggestion winner
-                        PrimaryKeyType suggestionWinnerId = ((*jsonPtr)[Sprints::Cols::_suggestion_winner_id]).as<PrimaryKeyType>();
-                        sprint.setSuggestionWinnerId(suggestionWinnerId);
-                        // Обновляем sprint
+                        sprint.setSuggestionWinnerId(
+                            (*jsonPtr)[Sprints::Cols::_suggestion_winner_id]
+                                .as<PrimaryKeyType>());
                         sprintMapper.update(
-                            sprint, [sprint, sprintMapper, callbackPtr](auto)
-                            {
+                            sprint,
+                            [sprint, sprintMapper, callbackPtr](auto) {
                                 (*callbackPtr)(HttpResponse::newHttpResponse());
                             },
                             DB_EXCEPTION_HANDLER(*callbackPtr));
                     },
-        DB_EXCEPTION_HANDLER(*callbackPtr));
+                    DB_EXCEPTION_HANDLER(*callbackPtr));
             }
             else
             {
-                auto resp = HttpResponse::newHttpResponse(k400BadRequest, ContentType::CT_TEXT_PLAIN);
-                resp->setBody("Invalid User");
+                auto resp{ HttpResponse::newHttpResponse(
+                    k400BadRequest, ContentType::CT_TEXT_PLAIN) };
+                resp->setBody("You are not the owner");
                 (*callbackPtr)(resp);
             }
-        }, DB_EXCEPTION_HANDLER(*callbackPtr));
+        },
+        DB_EXCEPTION_HANDLER(*callbackPtr));
 }
 
 void EventsController::getOne(
@@ -148,7 +150,7 @@ void EventsController::deleteOne(
             {
                 auto response{ HttpResponse::newHttpResponse(
                     drogon::k403Forbidden, drogon::CT_TEXT_PLAIN) };
-                response->setBody("you are not the owner");
+                response->setBody("You are not the owner");
                 (*callbackPtr)(response);
             }
         },
