@@ -2,12 +2,15 @@
 #include "Models.h"
 #include "Posts.h"
 #include "Sprints.h"
+#include "SuggestionsControllerBase.h"
 #include "controllers/PostsController.h"
 #include "controllers/SprintsController.h"
 #include "plugins/JWTService.h"
 #include "plugins/StateUpdateScheduler.h"
 #include "utils/Macros.h"
 #include "utils/Utils.h"
+
+#include <Suggestions.h>
 #include <algorithm>
 #include <drogon/DrClassMap.h>
 #include <drogon/HttpClient.h>
@@ -31,20 +34,54 @@ void EventsController::finishVoting(
 {
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
     auto dbClient{ app().getDbClient() };
-    Mapper<Sprint> mapper{ dbClient };
 
-    mapper.findOne(
-        Criteria{ Sprints::Cols::_event_id, CompareOperator::EQ, id } &&
-            Criteria{ Sprints::Cols::_state, CompareOperator::EQ, "voting" },
-        [mapper, callbackPtr](Sprint sprint) mutable
+    auto currentUserId{ CURRENT_USER_ID(req) };
+    Mapper<Event> eventMapper {dbClient};
+
+    // Валидируем request
+    auto jsonPtr=req->jsonObject();
+    if (!jsonPtr || !jsonPtr->isMember(Sprint::Cols::_suggestion_winner_id))
+    {
+        (*callbackPtr)(HttpResponse::newHttpResponse(k400BadRequest, CT_NONE));
+    }
+
+    // Проверяем, имеет ли пользователь возможность изменять Event
+    eventMapper.findOne(Criteria{Events::Cols::_id, CompareOperator::EQ, id},
+        [jsonPtr, dbClient, callbackPtr, currentUserId](Event event)
         {
-            sprint.setState("implementing");
-            mapper.update(
-                sprint, [callbackPtr](auto)
-                { (*callbackPtr)(HttpResponse::newHttpResponse()); },
-                DB_EXCEPTION_HANDLER(*callbackPtr));
-        },
+            if (event.getValueOfAuthorId() == currentUserId)
+            {
+                Mapper<Sprint> sprintMapper{ dbClient };
+                // Находим активный Sprint
+                sprintMapper.findOne(
+                    Criteria{ Sprints::Cols::_event_id, CompareOperator::EQ,
+                              event.getValueOfId() } &&
+                    Criteria{ Sprints::Cols::_state, CompareOperator::EQ,
+                              "voting" },
+                    [jsonPtr, dbClient, sprintMapper, callbackPtr](Sprint sprint) mutable
+                    {
+                        // Изменяем статус спринта
+                        sprint.setState("implementing");
+                        // Изменяем suggestion winner
+                        PrimaryKeyType suggestionWinnerId = ((*jsonPtr)[Sprints::Cols::_suggestion_winner_id]).as<PrimaryKeyType>();
+                        sprint.setSuggestionWinnerId(suggestionWinnerId);
+                        // Обновляем sprint
+                        sprintMapper.update(
+                            sprint, [sprint, sprintMapper, callbackPtr](auto)
+                            {
+                                (*callbackPtr)(HttpResponse::newHttpResponse());
+                            },
+                            DB_EXCEPTION_HANDLER(*callbackPtr));
+                    },
         DB_EXCEPTION_HANDLER(*callbackPtr));
+            }
+            else
+            {
+                auto resp = HttpResponse::newHttpResponse(k400BadRequest, ContentType::CT_TEXT_PLAIN);
+                resp->setBody("Invalid User");
+                (*callbackPtr)(resp);
+            }
+        }, DB_EXCEPTION_HANDLER(*callbackPtr));
 }
 
 void EventsController::getOne(

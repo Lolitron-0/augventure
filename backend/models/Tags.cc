@@ -625,21 +625,25 @@ bool Tags::validJsonOfField(size_t index,
     }
     return true;
 }
-std::vector<std::pair<Events,EventsTags>> Tags::getEvents(const drogon::orm::DbClientPtr &clientPtr) const {
-    std::shared_ptr<std::promise<std::vector<std::pair<Events,EventsTags>>>> pro(new std::promise<std::vector<std::pair<Events,EventsTags>>>);
-    std::future<std::vector<std::pair<Events,EventsTags>>> f = pro->get_future();
-    getEvents(clientPtr, [&pro] (std::vector<std::pair<Events,EventsTags>> result) {
-        try {
-            pro->set_value(result);
-        }
-        catch (...) {
-            pro->set_exception(std::current_exception());
-        }
-    }, [&pro] (const DrogonDbException &err) {
-        pro->set_exception(std::make_exception_ptr(err));
-    });
-    return f.get();
+std::vector<std::pair<Events,EventsTags>> Tags::getEvents(const DbClientPtr &clientPtr) const {
+    const static std::string sql = "select * from events,events_tags where events_tags.tag_id = ? and events_tags.event_id = events.id";
+    Result r(nullptr);
+    {
+        auto binder = *clientPtr << sql;
+        binder << *id_ << Mode::Blocking >>
+            [&r](const Result &result) { r = result; };
+        binder.exec();
+    }
+    std::vector<std::pair<Events,EventsTags>> ret;
+    ret.reserve(r.size());
+    for (auto const &row : r)
+    {
+        ret.emplace_back(std::pair<Events,EventsTags>(
+            Events(row),EventsTags(row,Events::getColumnNumber())));
+    }
+    return ret;
 }
+
 void Tags::getEvents(const DbClientPtr &clientPtr,
                      const std::function<void(std::vector<std::pair<Events,EventsTags>>)> &rcb,
                      const ExceptionCallback &ecb) const
