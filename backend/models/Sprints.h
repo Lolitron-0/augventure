@@ -50,8 +50,8 @@ class Sprints
         static const std::string _id;
         static const std::string _state;
         static const std::string _suggestion_winner_id;
-        static const std::string _start;
         static const std::string _event_id;
+        static const std::string _start;
     };
 
     const static int primaryKeyNumber;
@@ -130,6 +130,14 @@ class Sprints
     void setSuggestionWinnerId(const uint32_t &pSuggestionWinnerId) noexcept;
     void setSuggestionWinnerIdToNull() noexcept;
 
+    /**  For column event_id  */
+    ///Get the value of the column event_id, returns the default value if the column is null
+    const uint32_t &getValueOfEventId() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<uint32_t> &getEventId() const noexcept;
+    ///Set the value of the column event_id
+    void setEventId(const uint32_t &pEventId) noexcept;
+
     /**  For column start  */
     ///Get the value of the column start, returns the default value if the column is null
     const ::trantor::Date &getValueOfStart() const noexcept;
@@ -138,14 +146,6 @@ class Sprints
     ///Set the value of the column start
     void setStart(const ::trantor::Date &pStart) noexcept;
     void setStartToNull() noexcept;
-
-    /**  For column event_id  */
-    ///Get the value of the column event_id, returns the default value if the column is null
-    const uint32_t &getValueOfEventId() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<uint32_t> &getEventId() const noexcept;
-    ///Set the value of the column event_id
-    void setEventId(const uint32_t &pEventId) noexcept;
 
 
     static size_t getColumnNumber() noexcept {  return 5;  }
@@ -184,8 +184,8 @@ class Sprints
     std::shared_ptr<uint32_t> id_;
     std::shared_ptr<std::string> state_;
     std::shared_ptr<uint32_t> suggestionWinnerId_;
-    std::shared_ptr<::trantor::Date> start_;
     std::shared_ptr<uint32_t> eventId_;
+    std::shared_ptr<::trantor::Date> start_;
     struct MetaData
     {
         const std::string colName_;
@@ -227,16 +227,16 @@ class Sprints
             sql += "suggestion_winner_id,";
             ++parametersCount;
         }
-        sql += "start,";
-        ++parametersCount;
-        if(!dirtyFlag_[3])
-        {
-            needSelection=true;
-        }
-        if(dirtyFlag_[4])
+        if(dirtyFlag_[3])
         {
             sql += "event_id,";
             ++parametersCount;
+        }
+        sql += "start,";
+        ++parametersCount;
+        if(!dirtyFlag_[4])
+        {
+            needSelection=true;
         }
         needSelection=true;
         if(parametersCount > 0)
@@ -263,14 +263,14 @@ class Sprints
             sql.append("?,");
 
         }
-        else
-        {
-            sql +="default,";
-        }
         if(dirtyFlag_[4])
         {
             sql.append("?,");
 
+        }
+        else
+        {
+            sql +="default,";
         }
         if(parametersCount > 0)
         {

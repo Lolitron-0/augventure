@@ -28,10 +28,6 @@ public:
     ADD_METHOD_TO(AuthController::signup, "api/auth/signup", Post,
                   "augventure::filters::UserExistsFilter");
     ADD_METHOD_TO(AuthController::login, "api/auth/login", Post);
-    ADD_METHOD_TO(AuthController::currentUserTest, "api/auth/profile", Get,
-                  "augventure::filters::LoginFilter");
-    ADD_METHOD_TO(AuthController::passwordReset, "api/auth/password_reset",
-                  Post, "augventure::filters::LoginFilter");
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -45,10 +41,6 @@ public:
     void login(const drogon::HttpRequestPtr& req,
                drogon::AdviceCallback&& callback,
                drogon_model::augventure_db::User&& loginUserData);
-    void currentUserTest(const drogon::HttpRequestPtr& req,
-                         drogon::AdviceCallback&& callback);
-    void passwordReset(const drogon::HttpRequestPtr& req,
-                       drogon::AdviceCallback&& callback);
 };
 } // namespace controllers
 } // namespace augventure

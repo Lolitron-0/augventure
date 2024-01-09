@@ -775,26 +775,21 @@ bool Posts::validJsonOfField(size_t index,
     }
     return true;
 }
-PostMedia Posts::getPostMedia(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from post_media where post_id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *id_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    if (r.size() == 0)
-    {
-        throw UnexpectedRows("0 rows found");
-    }
-    else if (r.size() > 1)
-    {
-        throw UnexpectedRows("Found more than one row");
-    }
-    return PostMedia(r[0]);
+PostMedia Posts::getPostMedia(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<PostMedia>> pro(new std::promise<PostMedia>);
+    std::future<PostMedia> f = pro->get_future();
+    getPostMedia(clientPtr, [&pro] (PostMedia result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
 }
-
 void Posts::getPostMedia(const DbClientPtr &clientPtr,
                          const std::function<void(PostMedia)> &rcb,
                          const ExceptionCallback &ecb) const

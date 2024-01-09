@@ -50,7 +50,6 @@ create table suggestions (
   author_id int unsigned not null,
   post_date datetime not null default now(),
   sprint_id int unsigned not null,
-  votes int not null default 0,
   constraint `fk_suggestion_author_id`
     foreign key (author_id) references users (id)
     on delete restrict

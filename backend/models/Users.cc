@@ -1274,24 +1274,21 @@ bool Users::validJsonOfField(size_t index,
     }
     return true;
 }
-std::vector<Events> Users::getEvents(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from events where author_id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *id_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    std::vector<Events> ret;
-    ret.reserve(r.size());
-    for (auto const &row : r)
-    {
-        ret.emplace_back(Events(row));
-    }
-    return ret;
+std::vector<Events> Users::getEvents(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<Events>>> pro(new std::promise<std::vector<Events>>);
+    std::future<std::vector<Events>> f = pro->get_future();
+    getEvents(clientPtr, [&pro] (std::vector<Events> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
 }
-
 void Users::getEvents(const DbClientPtr &clientPtr,
                       const std::function<void(std::vector<Events>)> &rcb,
                       const ExceptionCallback &ecb) const
@@ -1310,24 +1307,21 @@ void Users::getEvents(const DbClientPtr &clientPtr,
                }
                >> ecb;
 }
-std::vector<Suggestions> Users::getSuggestions(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from suggestions where author_id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *id_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    std::vector<Suggestions> ret;
-    ret.reserve(r.size());
-    for (auto const &row : r)
-    {
-        ret.emplace_back(Suggestions(row));
-    }
-    return ret;
+std::vector<Suggestions> Users::getSuggestions(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<Suggestions>>> pro(new std::promise<std::vector<Suggestions>>);
+    std::future<std::vector<Suggestions>> f = pro->get_future();
+    getSuggestions(clientPtr, [&pro] (std::vector<Suggestions> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
 }
-
 void Users::getSuggestions(const DbClientPtr &clientPtr,
                            const std::function<void(std::vector<Suggestions>)> &rcb,
                            const ExceptionCallback &ecb) const

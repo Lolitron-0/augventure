@@ -1,5 +1,6 @@
 #include "SuggestionsController.h"
 #include "Models.h"
+#include "Suggestions.h"
 #include "Votes.h"
 #include "controllers/PostsController.h"
 #include "controllers/SuggestionsControllerBase.h"
@@ -217,16 +218,20 @@ void SuggestionsController::create(
             }
 
             auto postJson{ initialRequestJson["content"] };
+            postJson[Posts::Cols::_suggestion_id] =
+                (*suggestionCreationResponse
+                      ->jsonObject())[Suggestions::Cols::_id];
             auto postCreationRequest{ drogon::HttpRequest::newHttpJsonRequest(
                 postJson) };
             postCreationRequest->setMethod(drogon::Post);
             DrClassMap::getSingleInstance<PostsController>()->create(
                 postCreationRequest,
                 [callbackPtr, initialRequestJson, suggestionCreationResponse,
-                 this](auto postCreationResponse)
+                 this](const auto& postCreationResponse)
                 {
                     if (postCreationResponse->statusCode() == k200OK)
                     {
+
                         (*callbackPtr)(suggestionCreationResponse);
                     }
                     else

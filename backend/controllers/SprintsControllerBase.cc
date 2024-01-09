@@ -426,8 +426,8 @@ SprintsControllerBase::SprintsControllerBase()
           "id",
           "state",
           "suggestion_winner_id",
-          "start",
-          "event_id"
+          "event_id",
+          "start"
       })
 {
    /**
@@ -439,7 +439,7 @@ SprintsControllerBase::SprintsControllerBase()
         "id", // the alias for the id column.
         "state", // the alias for the state column.
         "suggestion_winner_id", // the alias for the suggestion_winner_id column.
-        "start", // the alias for the start column.
-        "event_id"  // the alias for the event_id column.
+        "event_id", // the alias for the event_id column.
+        "start"  // the alias for the start column.
     });
 }
