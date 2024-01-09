@@ -1,5 +1,7 @@
 #pragma GCC diagnostic push
 // somehow std::stable_sort uses deprecated in C++17 std::get_temporary_buffer
+// diagnostic push/pop didn't work in place due to preamble optimization in
+// clangd (or because i'm stupid), so I just left it here (probably bad)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "Models.h"
 #include "Suggestions.h"

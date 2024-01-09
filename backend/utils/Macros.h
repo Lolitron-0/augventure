@@ -14,4 +14,22 @@
 
 #define DB_EXCEPTION_HANDLER(callback)                                         \
     [callbackCapture = (callback)](auto&& e)                                   \
-    { handleDatabaseException(e, callbackCapture); }
+    { ::augventure::utils::handleDatabaseException(e, callbackCapture); }
+
+#define INTERNAL_GET_MACRO(_1, _2, _3, NAME, ...) NAME
+#define INTERNAL_SEND_RESPONSE_WITH_CODE(callbackObj, message, code)           \
+    do                                                                         \
+    {                                                                          \
+        auto resp{ HttpResponse::newHttpResponse(code,                         \
+                                                 drogon::CT_TEXT_PLAIN) };     \
+        resp->setBody((message));                                              \
+        (callbackObj)(resp);                                                   \
+        return;                                                                \
+    } while (0);
+#define INTERNAL_SEND_RESPONSE_NO_CODE(callbackObj, message)                   \
+    INTERNAL_SEND_RESPONSE_WITH_CODE(callbackObj, message, drogon::k200OK)
+
+#define SEND_RESPONSE(...)                                                     \
+    INTERNAL_GET_MACRO(__VA_ARGS__, INTERNAL_SEND_RESPONSE_WITH_CODE,          \
+                       INTERNAL_SEND_RESPONSE_NO_CODE)                         \
+    (__VA_ARGS__)

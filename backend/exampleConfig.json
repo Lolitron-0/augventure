@@ -228,7 +228,7 @@
     "br_static": true,
     //client_max_body_size: Set the maximum body size of HTTP requests received by drogon. The default value is "1M".
     //One can set it to "1024", "1k", "10M", "1G", etc. Setting it to "" means no limit.
-    "client_max_body_size": "1M",
+    "client_max_body_size": "5M",
     //max_memory_body_size: Set the maximum body size in memory of HTTP requests received by drogon. The default value is "64K" bytes.
     //If the body size of a HTTP request exceeds this limit, the body is stored to a temporary file for processing.
     //Setting it to "" means no limit.
@@ -262,8 +262,8 @@
   ],
   //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method.
   "custom_config": {
-    "jwt-secret": "aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa",
-    "jwt-sessionDuration": 86400,
-	"host-string": "http:/127.0.0.1"
+    "jwt_secret": "aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa",
+    "jwt_session_duration": 86400,
+	"max_file_size" : 1000000 // 1M
   }
 }

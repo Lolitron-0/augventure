@@ -11,9 +11,9 @@ namespace plugins
 {
 void JWTService::initAndStart(const Json::Value& config)
 {
-    m_Secret = drogon::app().getCustomConfig()["jwt-secret"].asString();
+    m_Secret = drogon::app().getCustomConfig()["jwt_secret"].asString();
     m_SessionDuration =
-        drogon::app().getCustomConfig()["jwt-sessionDuration"].asInt();
+        drogon::app().getCustomConfig()["jwt_session_duration"].asInt();
     m_VerifierPtr = std::make_unique<JWTVerifier>(
         jwt::verify()
             .allow_algorithm(jwt::algorithm::hs256{ JWTService::m_Secret })
