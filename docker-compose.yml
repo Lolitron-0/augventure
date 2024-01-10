@@ -5,7 +5,8 @@ services:
     ports:
       - "80:80"
     depends_on: 
-      - db
+      db:
+        condition: service_healthy
   db:
     container_name: augventure-db
     image: mariadb:latest
@@ -16,6 +17,13 @@ services:
       MARIADB_DATABASE: augventure_db
     volumes:
       - ./db_init/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 1m 
+      start_interval: 10s
+      interval: 10s # prod 1m
+      timeout: 5s
+      retries: 3
   frontend:
     container_name: augventure-frontend
     build: frontend

@@ -77,7 +77,7 @@ create table sprints (
   suggestion_winner_id int unsigned unique, 
   start datetime default NOW(),
   event_id int unsigned not null,
-    constraint `fk_sprint_event_id`
+  constraint `fk_sprint_event_id`
       foreign key (event_id) references events (id)
       on delete cascade
       on update cascade,
