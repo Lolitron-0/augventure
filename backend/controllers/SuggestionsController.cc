@@ -246,3 +246,33 @@ void SuggestionsController::create(
                 });
         });
 }
+
+void SuggestionsController::addMedia(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback, PrimaryKeyType&& id)
+{
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<Suggestions> mapper{ dbClient };
+    mapper.findByPrimaryKey(
+        id,
+        [req, callbackPtr](const auto& suggestion)
+        {
+            MultiPartParser fileUploadParser{};
+            auto maxPostMedia{
+                app().getCustomConfig()["max_post_media"].asUInt()
+            };
+            if (fileUploadParser.parse(req) != 0 ||
+                fileUploadParser.getFiles().size() > maxPostMedia)
+            {
+                SEND_RESPONSE(*callbackPtr,
+                              "Must contain no more than " +
+                                  std::to_string(maxPostMedia) + " files",
+                              drogon::k400BadRequest);
+            }
+
+
+        },
+        DB_EXCEPTION_HANDLER(callback));
+}

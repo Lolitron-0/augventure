@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Models.h"
 #include "SuggestionsControllerBase.h"
 #include <drogon/HttpController.h>
 
@@ -30,6 +31,8 @@ public:
                   "augventure::filters::LoginFilter");
     ADD_METHOD_TO(SuggestionsController::create, "/api/suggestions", Post,
                   Options, "augventure::filters::LoginFilter");
+    ADD_METHOD_TO(SuggestionsController::addMedia, "/api/suggestions/{1}/add_media", Put,
+                  Options, "augventure::filters::LoginFilter");
     // ADD_METHOD_TO(SuggestionsController::update,"/api/suggestions",Put,Options,"augventure::filters::LoginFilter");
     METHOD_LIST_END
 
@@ -49,4 +52,6 @@ public:
              std::function<void(const HttpResponsePtr&)>&& callback);
     void create(const HttpRequestPtr& req,
                 std::function<void(const HttpResponsePtr&)>&& callback);
+    void addMedia(const HttpRequestPtr& req,
+                std::function<void(const HttpResponsePtr&)>&& callback, PrimaryKeyType&& id);
 };

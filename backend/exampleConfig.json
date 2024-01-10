@@ -264,6 +264,7 @@
   "custom_config": {
     "jwt_secret": "aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa-aaaa",
     "jwt_session_duration": 86400,
-	"max_file_size" : 1000000 // 1M
+	"max_file_size" : 1000000, // 1M
+	"max_post_media": 5
   }
 }
