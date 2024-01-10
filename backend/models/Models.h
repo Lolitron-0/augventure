@@ -1,11 +1,15 @@
 #pragma once
 #include "Events.h"
 #include "Posts.h"
+#include "PostMedia.h"
 #include "Sprints.h"
 #include "Users.h"
 #include "Votes.h"
+#include <cstdint>
 #include <drogon/HttpRequest.h>
+#include <drogon/HttpResponse.h>
 #include <drogon/drogon.h>
+#include <drogon/drogon_callbacks.h>
 #include <drogon/orm/Criteria.h>
 #include <drogon/orm/Exception.h>
 #include <functional>
@@ -38,10 +42,15 @@ void expandEventList(
     std::function<void(const Json::Value& result)>&& successCallback,
     drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
 
-void expandSuggestionList(const Json::Value &suggestionListJson,
-                          int8_t voteSort,
-                          std::function<void(const Json::Value &result)> &&successCallback,
-                          drogon::orm::DrogonDbExceptionCallback &&dbExceptionCallback);
+void expandSuggestionList(
+    const Json::Value& suggestionListJson, int8_t voteSort,
+    std::function<void(const Json::Value& result)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
+
+void createSeveralPostMedia(
+    const std::vector<Json::Value>& jsons, uint32_t n,
+    std::function<void(void)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
 
 inline trantor::Date dateFromJsonString(const std::string& string)
 {

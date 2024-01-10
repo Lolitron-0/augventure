@@ -11,7 +11,9 @@ namespace augventure
 namespace utils
 {
 
-bool isImageExtension(const std::string_view& extension);
+std::string getMediaTypeString(const std::string_view& extension);
+
+std::string getTimestampedFileName(const std::string_view& fileName);
 
 inline void handleDatabaseException(const drogon::orm::DrogonDbException& e,
                                     const drogon::AdviceCallback& callback)

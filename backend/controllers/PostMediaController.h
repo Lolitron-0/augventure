@@ -8,6 +8,7 @@
 #pragma once
 
 #include <drogon/HttpController.h>
+#include <drogon/HttpRequest.h>
 #include "PostMediaControllerBase.h"
 
 #include "PostMedia.h"
@@ -43,5 +44,4 @@ class PostMediaController: public drogon::HttpController<PostMediaController>, p
              std::function<void(const HttpResponsePtr &)> &&callback);
     void create(const HttpRequestPtr &req,
              std::function<void(const HttpResponsePtr &)> &&callback);
-
 };

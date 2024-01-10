@@ -14,6 +14,7 @@
 #include <json/value.h>
 #include <list>
 #include <memory>
+#include <type_traits>
 
 void getFullEventData(
     const Json::Value& eventJson,
@@ -178,95 +179,167 @@ void expandSuggestionList(
         [dbClient, suggestionIds, resultJsonPtr, authorIds, successCallbackPtr,
          voteSort, dbExceptionCallbackPtr](auto postsVec)
         {
-            Mapper<Votes> votesMapper{ dbClient };
-            votesMapper.findBy(
-                Criteria{ Votes::Cols::_suggestion_id, CompareOperator::In,
-                          suggestionIds },
-                [resultJsonPtr, authorIds, dbClient, successCallbackPtr,
-                 voteSort, dbExceptionCallbackPtr,
-                 postsList = std::list<Posts>{ postsVec.begin(),
-                                               postsVec.end() }](auto votes)
+            // find posts success clause
+            auto postsVecPtr{
+                std::make_shared<typename std::decay<decltype(postsVec)>::type>(
+                    postsVec)
+            }; // to not copy in captures
+            Mapper<PostMedia> postMediaMapper{ dbClient };
+            postMediaMapper.findBy(
+                Criteria{ PostMedia::Cols::_post_id, CompareOperator::In,
+                          std::invoke(
+                              [&postsVec]()
+                              {
+                                  std::vector<PrimaryKeyType> postIds;
+                                  for (auto& post : postsVec)
+                                      postIds.push_back(post.getValueOfId());
+                                  return postIds;
+                              }) },
+                [dbClient, suggestionIds, postsVecPtr, resultJsonPtr, authorIds,
+                 successCallbackPtr, voteSort,
+                 dbExceptionCallbackPtr](auto postMediaVec)
                 {
-                    Mapper<User> usersMapper{ dbClient };
-                    usersMapper.findBy(
-                        Criteria{ Users::Cols::_id, CompareOperator::In,
-                                  authorIds },
-                        [resultVec =
-                             std::vector<Json::Value>{ resultJsonPtr->begin(),
-                                                       resultJsonPtr->end() },
-                         successCallbackPtr, voteSort, postsList,
-                         votesList =
-                             std::list<Vote>{ votes.begin(), votes.end() }](
-                            auto authorsVec) mutable
+                    auto postMediaVecPtr{ std::make_shared<
+                        typename std::decay<decltype(postMediaVec)>::type>(
+                        postMediaVec) }; // to not copy in captures
+                    // find post media success clause
+                    Mapper<Votes> votesMapper{ dbClient };
+                    votesMapper.findBy(
+                        Criteria{ Votes::Cols::_suggestion_id,
+                                  CompareOperator::In, suggestionIds },
+                        [resultJsonPtr, authorIds, dbClient, successCallbackPtr,
+                         voteSort, dbExceptionCallbackPtr, postsVecPtr,
+                         postMediaVecPtr](auto votesVec)
                         {
-                            for (auto& responseEntryJson : resultVec)
-                            {
-                                // author
-                                auto suggestionAuthorIt{ std::find_if(
-                                    authorsVec.begin(), authorsVec.end(),
-                                    [authorId =
-                                         responseEntryJson
-                                             [Suggestions::Cols::_author_id]
-                                                 .as<PrimaryKeyType>()](
-                                        auto user) {
-                                        return user.getValueOfId() == authorId;
-                                    }) };
-                                responseEntryJson["author"] =
-                                    suggestionAuthorIt
-                                        ->toJson(); // TODO: leave only needed
-                                                    // columns
-
-                                // post
-                                auto postIt{ std::find_if(
-                                    postsList.begin(), postsList.end(),
-                                    [suggestionId =
-                                         responseEntryJson
-                                             [Suggestions::Cols::_id]
-                                                 .as<PrimaryKeyType>()](
-                                        auto post) {
-                                        return post.getValueOfSuggestionId() ==
-                                               suggestionId;
-                                    }) };
-                                responseEntryJson["post"] = postIt->toJson();
-                                postsList.erase(postIt);
-
-                                uint32_t votes{ 0 };
-                                for (auto voteIt{ votesList.begin() };
-                                     voteIt != votesList.end();)
+                            // find votes success clause
+                            Mapper<User> usersMapper{ dbClient };
+                            usersMapper.findBy(
+                                Criteria{ Users::Cols::_id, CompareOperator::In,
+                                          authorIds },
+                                [resultVec =
+                                     std::vector<Json::Value>{
+                                         resultJsonPtr->begin(),
+                                         resultJsonPtr->end() },
+                                 successCallbackPtr, voteSort,
+                                 votesList = std::list<Vote>{ votesVec.begin(),
+                                                              votesVec.end() },
+                                 postsList =
+                                     std::list<Posts>{ postsVecPtr->begin(),
+                                                       postsVecPtr->end() },
+                                 postMediaList =
+                                     std::list<PostMedia>{
+                                         postMediaVecPtr->begin(),
+                                         postMediaVecPtr->end() }](
+                                    auto authorsVec) mutable
                                 {
-                                    if (voteIt->getValueOfSuggestionId() ==
-                                        responseEntryJson
-                                            [Suggestions::Cols::_id]
-                                                .as<PrimaryKeyType>())
+                                    // find users success clause
+                                    for (auto& responseEntryJson : resultVec)
                                     {
-                                        votes += voteIt->getValueOfVoteValue();
-                                        voteIt = votesList.erase(voteIt);
+                                        // author
+                                        auto suggestionAuthorIt{ std::find_if(
+                                            authorsVec.begin(),
+                                            authorsVec.end(),
+                                            [authorId =
+                                                 responseEntryJson
+                                                     [Suggestions::Cols::
+                                                          _author_id]
+                                                         .as<PrimaryKeyType>()](
+                                                auto user) {
+                                                return user.getValueOfId() ==
+                                                       authorId;
+                                            }) };
+                                        responseEntryJson["author"] =
+                                            suggestionAuthorIt
+                                                ->toJson(); // TODO: leave only
+                                                            // needed columns
+
+                                        // post and media
+                                        auto postIt{ std::find_if(
+                                            postsList.begin(), postsList.end(),
+                                            [suggestionId =
+                                                 responseEntryJson
+                                                     [Suggestions::Cols::_id]
+                                                         .as<PrimaryKeyType>()](
+                                                auto post) {
+                                                return post.getValueOfSuggestionId() ==
+                                                       suggestionId;
+                                            }) };
+                                        responseEntryJson["post"] =
+                                            postIt->toJson();
+                                        responseEntryJson["post"]["media"] =
+                                            Json::Value{
+                                                Json::ValueType::arrayValue
+                                            };
+                                        for (auto postMediaIt{
+                                                 postMediaList.begin() };
+                                             postMediaIt !=
+                                             postMediaList.end();)
+                                        {
+                                            if (postMediaIt
+                                                    ->getValueOfPostId() ==
+                                                postIt->getValueOfId())
+                                            {
+                                                responseEntryJson
+                                                    ["post"]["media"]
+                                                        .append(postMediaIt
+                                                                    ->toJson());
+                                                postMediaIt =
+                                                    postMediaList.erase(
+                                                        postMediaIt);
+                                            }
+                                            else
+                                            {
+                                                postMediaIt++;
+                                            }
+                                        }
+                                        postsList.erase(postIt);
+
+                                        // votes
+                                        uint32_t votes{ 0 };
+                                        for (auto voteIt{ votesList.begin() };
+                                             voteIt != votesList.end();)
+                                        {
+                                            if (voteIt
+                                                    ->getValueOfSuggestionId() ==
+                                                responseEntryJson
+                                                    [Suggestions::Cols::_id]
+                                                        .as<PrimaryKeyType>())
+                                            {
+                                                votes +=
+                                                    voteIt
+                                                        ->getValueOfVoteValue();
+                                                voteIt =
+                                                    votesList.erase(voteIt);
+                                            }
+                                            else
+                                            {
+                                                voteIt++;
+                                            }
+                                        }
+                                        responseEntryJson["votes"] = votes;
                                     }
-                                    else
+                                    if (voteSort)
                                     {
-                                        voteIt++;
+                                        std::stable_sort(
+                                            resultVec.begin(), resultVec.end(),
+                                            [voteSort](auto&& s1, auto&& s2)
+                                            {
+                                                if (voteSort > 0)
+                                                    return (
+                                                        s1["votes"].asUInt() <
+                                                        s2["votes"].asUInt());
+                                                else
+                                                    return (
+                                                        s1["votes"].asUInt() >
+                                                        s2["votes"].asUInt());
+                                            });
                                     }
-                                }
-                                responseEntryJson["votes"] = votes;
-                            }
-                            if (voteSort)
-                            {
-                                std::stable_sort(
-                                    resultVec.begin(), resultVec.end(),
-                                    [voteSort](auto&& s1, auto&& s2)
-                                    {
-                                        if (voteSort > 0)
-                                            return (s1["votes"].asUInt() <
-                                                    s2["votes"].asUInt());
-                                        else
-                                            return (s1["votes"].asUInt() >
-                                                    s2["votes"].asUInt());
-                                    });
-                            }
-                            Json::Value resultJson;
-                            for (auto suggestion : resultVec)
-                                resultJson.append(suggestion);
-                            (*successCallbackPtr)(resultJson);
+                                    Json::Value resultJson;
+                                    for (auto suggestion : resultVec)
+                                        resultJson.append(suggestion);
+                                    (*successCallbackPtr)(resultJson);
+                                },
+                                *dbExceptionCallbackPtr);
                         },
                         *dbExceptionCallbackPtr);
                 },
@@ -274,4 +347,38 @@ void expandSuggestionList(
         },
         dbExceptionCallback);
 }
+
+void createSeveralPostMedia(
+    const std::vector<Json::Value>& jsons, uint32_t n,
+    std::function<void(void)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback)
+{
+    using namespace drogon_model::augventure_db;
+    using namespace drogon::orm;
+
+    auto successCallbackPtr{
+        std::make_shared<typename std::decay<decltype(successCallback)>::type>(
+            successCallback)
+    };
+    auto dbExceptionCallbackPtr{ std::make_shared<DrogonDbExceptionCallback>(
+        dbExceptionCallback) };
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<PostMedia> postMediaMapper{ dbClient };
+    PostMedia postMedia{ jsons[jsons.size() - n] };
+    postMediaMapper.insert(
+        postMedia,
+        [jsons, n, successCallbackPtr, dbExceptionCallbackPtr](auto) mutable
+        {
+            n--;
+            if (n == 0)
+            {
+                (*successCallbackPtr)();
+                return;
+            }
+            createSeveralPostMedia(jsons, n, std::move(*successCallbackPtr),
+                                   std::move(*dbExceptionCallbackPtr));
+        },
+        dbExceptionCallback);
+}
+
 #pragma GCC diagnostic pop

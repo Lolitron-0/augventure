@@ -163,7 +163,8 @@ void UsersController::uploadPfp(
             // max file size is set in client_max_body_size
             auto& file = fileUploadParser.getFiles()[0];
 
-            if (!augventure::utils::isImageExtension(file.getFileExtension()))
+            if (augventure::utils::getMediaTypeString(
+                    file.getFileExtension()) != "image")
             {
                 SEND_RESPONSE(*callbackPtr, "Not supported image type",
                               drogon::k400BadRequest);
@@ -173,11 +174,8 @@ void UsersController::uploadPfp(
             LOG_TRACE << "File's MD5 hash: " + md5;
             LOG_TRACE << "File size: " << file.fileLength();
 
-            auto timestampedFileName{ file.getFileName() };
-            auto dotIt{ timestampedFileName.find(".") };
-            auto now{ trantor::Date::now() };
-            timestampedFileName.insert(
-                dotIt, std::to_string(now.microSecondsSinceEpoch()));
+            auto timestampedFileName{ augventure::utils::getTimestampedFileName(
+                file.getFileName()) };
             file.saveAs(timestampedFileName);
 
             currentUser.setPfpUrl(app().getUploadPath() + "/" +

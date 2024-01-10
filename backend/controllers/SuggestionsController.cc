@@ -1,5 +1,7 @@
 #include "SuggestionsController.h"
 #include "Models.h"
+#include "PostMedia.h"
+#include "Posts.h"
 #include "Suggestions.h"
 #include "Votes.h"
 #include "controllers/PostsController.h"
@@ -7,6 +9,7 @@
 #include "controllers/VotesController.h"
 #include "plugins/JWTService.h"
 #include "utils/Macros.h"
+#include "utils/Utils.h"
 #include <drogon/DrClassMap.h>
 #include <drogon/HttpRequest.h>
 #include <drogon/HttpResponse.h>
@@ -254,10 +257,10 @@ void SuggestionsController::addMedia(
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
 
     auto dbClient{ drogon::app().getDbClient() };
-    Mapper<Suggestions> mapper{ dbClient };
-    mapper.findByPrimaryKey(
-        id,
-        [req, callbackPtr](const auto& suggestion)
+    Mapper<Posts> mapper{ dbClient };
+    mapper.findOne(
+        Criteria{ Posts::Cols::_suggestion_id, CompareOperator::EQ, id },
+        [req, callbackPtr](const auto& post)
         {
             MultiPartParser fileUploadParser{};
             auto maxPostMedia{
@@ -272,7 +275,34 @@ void SuggestionsController::addMedia(
                               drogon::k400BadRequest);
             }
 
+            std::vector<Json::Value> postMediaVec{};
+            for (auto& file : fileUploadParser.getFiles())
+            {
+                auto timestampedFileName{
+                    augventure::utils::getTimestampedFileName(
+                        file.getFileName())
+                };
+                file.saveAs(timestampedFileName);
+                Json::Value postMediaJson{};
+                postMediaJson[PostMedia::Cols::_post_id] = post.getValueOfId();
+                postMediaJson[PostMedia::Cols::_type] =
+                    augventure::utils::getMediaTypeString(
+                        file.getFileExtension());
+                postMediaJson[PostMedia::Cols::_url] =
+                    app().getUploadPath() + "/" + timestampedFileName;
 
+                postMediaVec.push_back(postMediaJson);
+            }
+            auto filesUploaded{ fileUploadParser.getFiles().size() };
+            createSeveralPostMedia(
+                postMediaVec, filesUploaded,
+                [callbackPtr, filesUploaded]()
+                {
+                    SEND_RESPONSE(*callbackPtr,
+                                  "Uploaded " + std::to_string(filesUploaded) +
+                                      " files");
+                },
+                DB_EXCEPTION_HANDLER(*callbackPtr));
         },
         DB_EXCEPTION_HANDLER(callback));
 }
