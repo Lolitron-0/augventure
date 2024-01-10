@@ -27,6 +27,7 @@ class PostsController: public drogon::HttpController<PostsController>, public Po
     ADD_METHOD_TO(PostsController::deleteOne,"/api/posts/{1}",Delete,Options,"augventure::filters::LoginFilter");
     ADD_METHOD_TO(PostsController::get,"/api/posts",Get,Options,"augventure::filters::LoginFilter");
     ADD_METHOD_TO(PostsController::create,"/api/posts",Post,Options,"augventure::filters::LoginFilter");
+
     //ADD_METHOD_TO(PostsController::update,"/api/posts",Put,Options,"augventure::filters::LoginFilter");
     METHOD_LIST_END
      

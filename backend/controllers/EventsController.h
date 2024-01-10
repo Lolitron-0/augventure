@@ -28,7 +28,10 @@ public:
     ADD_METHOD_TO(EventsController::create, "/api/events", Post, Options,
                   "augventure::filters::LoginFilter");
     ADD_METHOD_TO(EventsController::finishVoting,
-                  "/api/events/{1}/finish_voting", Put, Options,
+                  "/api/events/{1}/finish_voting", Patch, Options,
+                  "augventure::filters::LoginFilter");
+    ADD_METHOD_TO(EventsController::finishImplementing,
+                  "/api/events/{1}/finish_implementing", Patch, Options,
                   "augventure::filters::LoginFilter");
     // ADD_METHOD_TO(EventsController::update,"/api/events",Put,Options,"augventure::filters::LoginFilter");
     METHOD_LIST_END
@@ -47,6 +50,9 @@ public:
     void create(const HttpRequestPtr& req,
                 std::function<void(const HttpResponsePtr&)>&& callback);
     void finishVoting(const HttpRequestPtr& req,
+                      std::function<void(const HttpResponsePtr&)>&& callback,
+                      Events::PrimaryKeyType&& id);
+    void finishImplementing(const HttpRequestPtr& req,
                       std::function<void(const HttpResponsePtr&)>&& callback,
                       Events::PrimaryKeyType&& id);
 };
