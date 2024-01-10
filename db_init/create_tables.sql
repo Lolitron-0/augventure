@@ -23,9 +23,9 @@ create table events(
     description text not null default '',
     picture_url tinytext,
     start datetime not null default NOW(),
-	creation_date datetime not null default NOW(),
     author_id int unsigned NOT NULL,
 	state enum ('scheduled','in_progress','ended') NOT NULL default 'scheduled',
+	creation_date datetime not null default NOW(),
     constraint `fk_event_author_id`
       foreign key (author_id) references users (id)
       on delete restrict
@@ -75,8 +75,8 @@ create table sprints (
   id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
   state enum ('voting','implementing','ended'),
   suggestion_winner_id int unsigned unique, 
-  start datetime default NOW(),
   event_id int unsigned not null,
+  start datetime default NOW(),
   constraint `fk_sprint_event_id`
       foreign key (event_id) references events (id)
       on delete cascade

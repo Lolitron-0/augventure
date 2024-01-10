@@ -17,6 +17,7 @@ COPY . .
 WORKDIR build
 RUN cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 5
 
-WORKDIR ..
-RUN chmod +x ./compose-init.sh
-CMD ./compose-init.sh
+CMD ./augventure
+# WORKDIR ..
+# RUN chmod +x ./compose-init.sh
+# CMD ./compose-init.sh
