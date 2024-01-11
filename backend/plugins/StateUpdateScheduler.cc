@@ -15,6 +15,7 @@
 #include <memory>
 #include <thread>
 #include <trantor/utils/Date.h>
+#include <trantor/utils/Logger.h>
 #include <utility>
 
 using namespace drogon;
