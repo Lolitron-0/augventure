@@ -1,4 +1,8 @@
 #include "SprintsController.h"
+#include "Models.h"
+#include "utils/Macros.h"
+#include <drogon/HttpResponse.h>
+#include <drogon/HttpTypes.h>
 #include <string>
 
 void SprintsController::getOne(
@@ -33,7 +37,21 @@ void SprintsController::get(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr&)>&& callback)
 {
-    SprintsControllerBase::get(req, std::move(callback));
+    auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+    SprintsControllerBase::get(
+        req,
+        [callbackPtr](const auto& resp)
+        {
+            if (resp->statusCode() != k200OK || resp->jsonObject()->empty())
+            {
+                (*callbackPtr)(resp);
+                return;
+            }
+            expandSprintList(
+                *resp->jsonObject(), [callbackPtr](const auto& jsonRes)
+                { (*callbackPtr)(HttpResponse::newHttpJsonResponse(jsonRes)); },
+                DB_EXCEPTION_HANDLER(*callbackPtr));
+        });
 }
 
 void SprintsController::create(

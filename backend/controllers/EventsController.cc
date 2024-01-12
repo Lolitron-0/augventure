@@ -335,8 +335,8 @@ void EventsController::create(
     }
     EventsControllerBase::create(
         eventCreationRequest,
-        [callbackPtr, eventCreationRequest, eventRequestJson,
-         this](const HttpResponsePtr& eventCreationResponse)
+        [callbackPtr, eventCreationRequest, eventRequestJson](
+            const HttpResponsePtr &eventCreationResponse)
         {
             if (eventCreationResponse->statusCode() ==
                 drogon::k200OK) // if event creation successful
@@ -359,9 +359,8 @@ void EventsController::create(
                 sprintCreationRequest->setMethod(drogon::Post);
                 DrClassMap::getSingleInstance<SprintsController>()->create(
                     sprintCreationRequest,
-                    [callbackPtr, eventCreationResponse, eventCreationRequest,
-                     eventRequestJson,
-                     this](const HttpResponsePtr& sprintCreationResponse)
+                    [callbackPtr, eventCreationResponse, eventCreationRequest, eventRequestJson](
+                        const HttpResponsePtr &sprintCreationResponse)
                     {
                         if (sprintCreationResponse->statusCode() ==
                             k200OK) // if sprint created -> try create initial
@@ -380,10 +379,8 @@ void EventsController::create(
                             };
                             DrClassMap::getSingleInstance<PostsController>()->create(
                                 initialPostCreationRequest,
-                                [callbackPtr, eventCreationResponse,
-                                 eventRequestJson,
-                                 this](const HttpResponsePtr&
-                                           initialPostCreationResponse)
+                                [callbackPtr, eventCreationResponse, eventRequestJson](
+                                    const HttpResponsePtr &initialPostCreationResponse)
                                 {
                                     if (initialPostCreationResponse
                                             ->statusCode() == k200OK)
@@ -404,66 +401,59 @@ void EventsController::create(
                                         };
                                         firstSprintCreationRequest->setMethod(
                                             drogon::Post);
-                                        DrClassMap::getSingleInstance<
-                                            SprintsController>()
-                                            ->create(
-                                                firstSprintCreationRequest,
-                                                [callbackPtr,
-                                                 eventCreationResponse, this,
-                                                 eventRequestJson](
-                                                    auto&&
-                                                        firstSprintCreationResponse)
+                                        DrClassMap::getSingleInstance<SprintsController>()->create(
+                                            firstSprintCreationRequest,
+                                            [callbackPtr, eventCreationResponse, eventRequestJson](
+                                                auto &&firstSprintCreationResponse)
+                                            {
+                                                if (firstSprintCreationResponse->statusCode()
+                                                    == k200OK)
                                                 {
-                                                    if (firstSprintCreationResponse
-                                                            ->statusCode() ==
-                                                        k200OK)
-                                                    {
-                                                        (*callbackPtr)(
-                                                            eventCreationResponse);
-                                                    }
-                                                    else // first sprint
-                                                    // creation failed
-                                                    {
-                                                        deleteOne(
-                                                            HttpRequest::
-                                                                newHttpRequest(),
-                                                            AdviceCallback{},
-                                                            eventRequestJson
-                                                                [Events::Cols::
-                                                                     _id]
-                                                                    .as<PrimaryKeyType>());
-                                                        (*callbackPtr)(
-                                                            firstSprintCreationResponse);
-                                                    }
-                                                });
+                                                    (*callbackPtr)(eventCreationResponse);
+                                                }
+                                                else // first sprint
+                                                // creation failed
+                                                {
+                                                    auto dbClient{drogon::app().getDbClient()};
+                                                    Mapper<Event> deleteMapper{dbClient};
+                                                    deleteMapper.deleteByPrimaryKey(
+                                                        eventRequestJson[Events::Cols::_id]
+                                                            .as<PrimaryKeyType>(),
+                                                        [callbackPtr,
+                                                         firstSprintCreationResponse](auto) {
+                                                            (*callbackPtr)(
+                                                                firstSprintCreationResponse);
+                                                        },
+                                                        DB_EXCEPTION_HANDLER(*callbackPtr));
+                                                }
+                                            });
                                     }
                                     else // initial post creation failed
                                     {
-                                        deleteOne(
-                                            HttpRequest::newHttpRequest(),
-                                            AdviceCallback{},
-                                            eventRequestJson[Events::Cols::_id]
-                                                .as<PrimaryKeyType>());
-                                        (*callbackPtr)(
-                                            initialPostCreationResponse);
+                                        auto dbClient{drogon::app().getDbClient()};
+                                        Mapper<Event> deleteMapper{dbClient};
+                                        deleteMapper.deleteByPrimaryKey(
+                                            eventRequestJson[Events::Cols::_id].as<PrimaryKeyType>(),
+                                            [callbackPtr, initialPostCreationResponse](auto)
+                                            { (*callbackPtr)(initialPostCreationResponse); },
+                                            DB_EXCEPTION_HANDLER(*callbackPtr));
                                     }
                                 });
                         }
                         else // sprint creation failed
                         {
-                            deleteOne(HttpRequest::newHttpRequest(),
-                                      AdviceCallback{},
-                                      eventRequestJson[Events::Cols::_id]
-                                          .as<PrimaryKeyType>());
-                            (*callbackPtr)(sprintCreationResponse);
+                            auto dbClient{drogon::app().getDbClient()};
+                            Mapper<Event> deleteMapper{dbClient};
+                            deleteMapper.deleteByPrimaryKey(
+                                eventRequestJson[Events::Cols::_id].as<PrimaryKeyType>(),
+                                [callbackPtr, sprintCreationResponse](auto)
+                                { (*callbackPtr)(sprintCreationResponse); },
+                                DB_EXCEPTION_HANDLER(*callbackPtr));
                         }
                     });
             }
             else // event creation failed
             {
-                deleteOne(
-                    HttpRequest::newHttpRequest(), AdviceCallback{},
-                    eventRequestJson[Events::Cols::_id].as<PrimaryKeyType>());
                 (*callbackPtr)(eventCreationResponse);
             }
         });

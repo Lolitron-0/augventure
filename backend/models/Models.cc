@@ -141,10 +141,96 @@ void expandEventList(
                     (*successCallbackPtr)(*resultJsonPtr);
                 },
 
-                *dbExceptionCallbackPtr); // TODO: macros
+                *dbExceptionCallbackPtr);
         },
         *dbExceptionCallbackPtr);
 }
+
+void expandSprintList(
+    const Json::Value& sprintListJson,
+    std::function<void(const Json::Value& result)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback)
+{
+    using namespace drogon_model::augventure_db;
+    using namespace drogon::orm;
+
+    auto resultJsonPtr{ std::make_shared<Json::Value>(
+        std::move(sprintListJson)) };
+    auto successCallbackPtr{
+        std::make_shared<std::function<void(const Json::Value&)>>(
+            successCallback)
+    };
+    auto dbExceptionCallbackPtr{ std::make_shared<DrogonDbExceptionCallback>(
+        dbExceptionCallback) };
+    std::vector<PrimaryKeyType> sprintIds{};
+    for (int32_t i{ 0 }; i < resultJsonPtr->size(); i++)
+    {
+        sprintIds.push_back((*resultJsonPtr)[i]["id"].as<PrimaryKeyType>());
+    }
+
+    auto dbClient{ drogon::app().getDbClient() };
+    Mapper<Posts> postsMapper{ dbClient };
+    postsMapper.findBy(
+        Criteria{ Posts::Cols::_sprint_id, CompareOperator::In, sprintIds },
+        [successCallbackPtr, dbExceptionCallbackPtr, resultJsonPtr,
+         dbClient](auto postsVec)
+        {
+            Mapper<PostMedia> postMediaMapper{ dbClient };
+            postMediaMapper.findBy(
+                Criteria{ PostMedia::Cols::_post_id, CompareOperator::In,
+                          std::invoke(
+                              [postsVec]()
+                              {
+                                  std::vector<PrimaryKeyType> postIds{};
+                                  for (auto& post : postsVec)
+                                      postIds.push_back(post.getValueOfId());
+                                  return postIds;
+                              }) },
+                [successCallbackPtr, resultJsonPtr,
+                 postsList =
+                     std::list<Posts>{ postsVec.begin(), postsVec.end() }](
+                    auto postMediaVec) mutable
+                {
+                    auto postMediaList{ std::list<PostMedia>{
+                        postMediaVec.begin(), postMediaVec.end() } };
+                    for (auto& entry : *resultJsonPtr)
+                    {
+                        auto postIt{ std::find_if(
+                            postsList.begin(), postsList.end(),
+                            [&entry](auto&& post)
+                            {
+                                return post.getValueOfSprintId() ==
+                                       entry[Sprints::Cols::_id]
+                                           .as<PrimaryKeyType>();
+                            }) };
+                        if (postIt == postsList.end()) // not finished sprint
+                            continue;
+                        entry["post"] = postIt->toJson();
+                        entry["post"]["media"] = Json::Value{Json::ValueType::arrayValue};
+                        for (auto postMediaIt{ postMediaList.begin() };
+                             postMediaIt != postMediaList.end();)
+                        {
+                            if (postMediaIt->getValueOfPostId() ==
+                                postIt->getValueOfId())
+                            {
+                                entry["post"]["media"].append(
+                                    postMediaIt->toJson());
+                                postMediaIt = postMediaList.erase(postMediaIt);
+                            }
+                            else
+                            {
+                                postMediaIt++;
+                            }
+                        }
+                        postsList.erase(postIt);
+                    }
+                    (*successCallbackPtr)(*resultJsonPtr);
+                },
+                *dbExceptionCallbackPtr);
+        },
+        *dbExceptionCallbackPtr);
+}
+
 void expandSuggestionList(
     const Json::Value& suggestionListJson, int8_t voteSort,
     std::function<void(const Json::Value&)>&& successCallback,

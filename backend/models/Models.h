@@ -42,6 +42,10 @@ void expandEventList(
     std::function<void(const Json::Value& result)>&& successCallback,
     drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
 
+void expandSprintList(const Json::Value& sprintListJson,
+    std::function<void(const Json::Value& result)>&& successCallback,
+    drogon::orm::DrogonDbExceptionCallback&& dbExceptionCallback);
+
 void expandSuggestionList(
     const Json::Value& suggestionListJson, int8_t voteSort,
     std::function<void(const Json::Value& result)>&& successCallback,
