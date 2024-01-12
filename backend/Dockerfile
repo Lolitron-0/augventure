@@ -15,7 +15,7 @@ WORKDIR /app
 COPY . .
 
 WORKDIR build
-RUN cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 7
+RUN cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 5
 
 CMD ./augventure
 # WORKDIR ..

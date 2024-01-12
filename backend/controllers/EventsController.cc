@@ -41,10 +41,7 @@ void EventsController::finishVoting(
     auto jsonPtr{ req->jsonObject() };
     if (!jsonPtr || !jsonPtr->isMember(Sprint::Cols::_suggestion_winner_id))
     {
-        auto errResp{ HttpResponse::newHttpResponse(k400BadRequest,
-                                                    CT_TEXT_PLAIN) };
-        errResp->setBody("Request body is ill-formed");
-        (*callbackPtr)(errResp);
+        SEND_RESPONSE(callback, "Request body is ill-formed", k400BadRequest);
     }
 
     eventMapper.findByPrimaryKey(
@@ -57,20 +54,41 @@ void EventsController::finishVoting(
                 sprintMapper.findOne(
                     Criteria{ Sprints::Cols::_event_id, CompareOperator::EQ,
                               event.getValueOfId() } &&
-                    Criteria{ Sprints::Cols::_state, CompareOperator::EQ,
-                              "voting" },
+                        Criteria{ Sprints::Cols::_state, CompareOperator::EQ,
+                                  "voting" },
                     [jsonPtr, dbClient, sprintMapper,
-                        callbackPtr](Sprint sprint) mutable
+                     callbackPtr](Sprint activeSprint) mutable
                     {
-                        sprint.setState("implementing");
-                        sprint.setSuggestionWinnerId(
+                        auto suggestionWinnerId{
                             (*jsonPtr)[Sprints::Cols::_suggestion_winner_id]
-                            .as<PrimaryKeyType>());
-                        sprintMapper.update(
-                            sprint,
-                            [sprint, sprintMapper, callbackPtr](auto)
+                                .as<PrimaryKeyType>()
+                        };
+                        Mapper<Suggestions> suggestionsMapper{ dbClient };
+                        suggestionsMapper.findByPrimaryKey(
+                            suggestionWinnerId,
+                            [activeSprint, sprintMapper, suggestionWinnerId,
+                             callbackPtr](auto winnerSuggestion) mutable
                             {
-                                (*callbackPtr)(HttpResponse::newHttpResponse());
+                                if (winnerSuggestion.getValueOfSprintId() !=
+                                    activeSprint.getValueOfId())
+                                {
+                                    SEND_RESPONSE(
+                                        *callbackPtr,
+                                        "Suggestion from another sprint",
+                                        k400BadRequest);
+									return;
+                                }
+                                activeSprint.setState("implementing");
+                                activeSprint.setSuggestionWinnerId(
+                                    suggestionWinnerId);
+                                sprintMapper.update(
+                                    activeSprint,
+                                    [activeSprint, sprintMapper,
+                                     callbackPtr](auto) {
+                                        (*callbackPtr)(
+                                            HttpResponse::newHttpResponse());
+                                    },
+                                    DB_EXCEPTION_HANDLER(*callbackPtr));
                             },
                             DB_EXCEPTION_HANDLER(*callbackPtr));
                     },
@@ -87,34 +105,28 @@ void EventsController::finishVoting(
         DB_EXCEPTION_HANDLER(*callbackPtr));
 }
 
-
-void EventsController::finishImplementing(const HttpRequestPtr& req,
-                                          std::function<void(
-                                              const HttpResponsePtr&)>&&
-                                          callback, Events::PrimaryKeyType&& id)
+void EventsController::finishImplementing(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback,
+    Events::PrimaryKeyType&& id)
 {
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
 
     auto reqJson{ req->jsonObject() };
     auto currentUserId{ CURRENT_USER_ID(req) };
 
-    if (!(*reqJson)["content"])
+    if (!reqJson->isMember("content"))
     {
-        Json::Value ret;
-        ret["error"] = "No content is found in the request";
-        auto resp = HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k400BadRequest);
-        callback(resp);
+        SEND_RESPONSE(callback, "No content is found in the request",
+                      k400BadRequest);
         return;
     }
 
-    if (!(*reqJson)["is_last_sprint"])
+    if (!reqJson->isMember("is_last_sprint"))
     {
-        Json::Value ret;
-        ret["error"] = "No info about last sprint is found in the request";
-        auto resp = HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k400BadRequest);
-        (*callbackPtr)(resp);
+        SEND_RESPONSE(*callbackPtr,
+                      "No info about last sprint is found in the request",
+                      k400BadRequest);
         return;
     }
 
@@ -122,72 +134,93 @@ void EventsController::finishImplementing(const HttpRequestPtr& req,
     Mapper<Event> eventMapper{ dbClient };
     eventMapper.findOne(
         Criteria{ Events::Cols::_id, CompareOperator::EQ, id } &&
-        Criteria{
-            Events::Cols::_author_id, CompareOperator::EQ,
-            currentUserId },
-        [req, reqJson, dbClient, callbackPtr, dbClient](Event event)
+            Criteria{ Events::Cols::_author_id, CompareOperator::EQ,
+                      currentUserId },
+        [reqJson, dbClient, callbackPtr](Event event)
         {
             Mapper<Sprint> sprintMapper{ dbClient };
 
-            if ((*reqJson)["is_last_sprint"].asBool())
-            {
-                event.setState("ended");
-                Mapper<Event> eventMapper{ dbClient };
-                eventMapper.update(event, [](auto){}, DB_EXCEPTION_HANDLER(*callbackPtr));
-            }
-            else
-            {
-                Json::Value nextSprintJson;
-                nextSprintJson["event_id"] = event.getValueOfId();
-                nextSprintJson["state"] = "voting";
-                Sprints nextSprint = Sprints(nextSprintJson);
-                sprintMapper.insert(nextSprint, [](auto){}, DB_EXCEPTION_HANDLER(*callbackPtr));
-            }
-
             sprintMapper.findOne(
-                Criteria{ Sprints::Cols::_event_id,
-                          CompareOperator::EQ,
+                Criteria{ Sprints::Cols::_event_id, CompareOperator::EQ,
                           event.getValueOfId() } &&
-                Criteria{ Sprints::Cols::_state,
-                          CompareOperator::EQ,
-                          "implementing" },
-                [req, dbClient, sprintMapper,
-                    callbackPtr](Sprint sprint) mutable
+                    Criteria{ Sprints::Cols::_state, CompareOperator::EQ,
+                              "implementing" },
+                [reqJson, sprintMapper, callbackPtr,
+                 event](Sprint sprint) mutable
                 {
-                    auto reqJson{ req->jsonObject() };
                     auto postJson{ (*reqJson)["content"] };
                     postJson[Posts::Cols::_sprint_id] = sprint.getValueOfId();
                     auto postCreationRequest{
-                        drogon::HttpRequest::newHttpJsonRequest(
-                            postJson) };
-                    postCreationRequest->setMethod(drogon::Post);
+                        drogon::HttpRequest::newHttpJsonRequest(postJson)
+                    };
 
                     DrClassMap::getSingleInstance<PostsController>()->create(
                         postCreationRequest,
-                        [sprint, sprintMapper, req, callbackPtr](
-                        auto postCreationResponse) mutable
+                        [sprint, sprintMapper, reqJson, event,
+                         callbackPtr](const auto& postCreationResponse) mutable
                         {
                             if (postCreationResponse->statusCode() == k200OK)
                             {
                                 sprint.setState("ended");
                                 sprintMapper.update(
                                     sprint,
-                                    [callbackPtr, postCreationResponse](auto)
+                                    [callbackPtr, reqJson, event,
+                                     postCreationResponse,
+                                     sprintMapper](auto) mutable
                                     {
-                                        (*callbackPtr)(postCreationResponse);
+                                        if ((*reqJson)["is_last_sprint"]
+                                                .asBool())
+                                        {
+                                            event.setState("ended");
+                                            auto dbClient{
+                                                app().getDbClient()
+                                            };
+                                            Mapper<Event> eventMapper{
+                                                dbClient
+                                            };
+                                            eventMapper.update(
+                                                event,
+                                                [postCreationResponse,
+                                                 callbackPtr](auto) {
+                                                    (*callbackPtr)(
+                                                        postCreationResponse);
+                                                },
+                                                DB_EXCEPTION_HANDLER(
+                                                    *callbackPtr));
+                                        }
+                                        else
+                                        {
+                                            Json::Value nextSprintJson;
+                                            nextSprintJson["event_id"] =
+                                                event.getValueOfId();
+                                            nextSprintJson["state"] = "voting";
+                                            Sprints nextSprint{
+                                                nextSprintJson
+                                            };
+                                            sprintMapper.insert(
+                                                nextSprint,
+                                                [postCreationResponse,
+                                                 callbackPtr](auto) {
+                                                    (*callbackPtr)(
+                                                        postCreationResponse);
+                                                },
+                                                DB_EXCEPTION_HANDLER(
+                                                    *callbackPtr));
+                                        }
                                     },
                                     DB_EXCEPTION_HANDLER(*callbackPtr));
                             }
                             else
                             {
+                                // nothing bad happened
                                 (*callbackPtr)(postCreationResponse);
                             }
                         });
                 },
                 DB_EXCEPTION_HANDLER(*callbackPtr));
-        }, DB_EXCEPTION_HANDLER(*callbackPtr));
+        },
+        DB_EXCEPTION_HANDLER(*callbackPtr));
 }
-
 
 void EventsController::getOne(
     const HttpRequestPtr& req,
@@ -210,9 +243,7 @@ void EventsController::getOne(
 
             getFullEventData(
                 *resp->jsonObject(), [callbackPtr](const Json::Value& result)
-                {
-                    (*callbackPtr)(HttpResponse::newHttpJsonResponse(result));
-                },
+                { (*callbackPtr)(HttpResponse::newHttpJsonResponse(result)); },
                 DB_EXCEPTION_HANDLER(*callbackPtr));
         },
         std::move(id));
@@ -278,8 +309,7 @@ void EventsController::get(
             }
             expandEventList(
                 *resp->jsonObject(),
-                [callbackPtr](auto result)
-                {
+                [callbackPtr](auto result) {
                     (*callbackPtr)(
                         HttpResponse::newHttpJsonResponse(std::move(result)));
                 },
@@ -306,7 +336,7 @@ void EventsController::create(
     EventsControllerBase::create(
         eventCreationRequest,
         [callbackPtr, eventCreationRequest, eventRequestJson,
-            this](const HttpResponsePtr& eventCreationResponse)
+         this](const HttpResponsePtr& eventCreationResponse)
         {
             if (eventCreationResponse->statusCode() ==
                 drogon::k200OK) // if event creation successful
@@ -330,8 +360,8 @@ void EventsController::create(
                 DrClassMap::getSingleInstance<SprintsController>()->create(
                     sprintCreationRequest,
                     [callbackPtr, eventCreationResponse, eventCreationRequest,
-                        eventRequestJson,
-                        this](const HttpResponsePtr& sprintCreationResponse)
+                     eventRequestJson,
+                     this](const HttpResponsePtr& sprintCreationResponse)
                     {
                         if (sprintCreationResponse->statusCode() ==
                             k200OK) // if sprint created -> try create initial
@@ -342,98 +372,89 @@ void EventsController::create(
                             };
                             initialPostJson[Posts::Cols::_sprint_id] =
                                 (*sprintCreationResponse
-                                    ->getJsonObject())[Sprints::Cols::_id]
-                                .as<PrimaryKeyType>();
+                                      ->getJsonObject())[Sprints::Cols::_id]
+                                    .as<PrimaryKeyType>();
                             auto initialPostCreationRequest{
                                 drogon::HttpRequest::newHttpJsonRequest(
                                     initialPostJson)
                             };
-                            initialPostCreationRequest->setMethod(drogon::Post);
-                            DrClassMap::getSingleInstance<PostsController>()->
-                                create(
-                                    initialPostCreationRequest,
-                                    [callbackPtr, eventCreationResponse,
-                                        eventRequestJson,
-                                        this](const HttpResponsePtr&
-                                    initialPostCreationResponse)
-                                    {
-                                        if (initialPostCreationResponse
+                            DrClassMap::getSingleInstance<PostsController>()->create(
+                                initialPostCreationRequest,
+                                [callbackPtr, eventCreationResponse,
+                                 eventRequestJson,
+                                 this](const HttpResponsePtr&
+                                           initialPostCreationResponse)
+                                {
+                                    if (initialPostCreationResponse
                                             ->statusCode() == k200OK)
-                                        {
+                                    {
 
-                                            Json::Value firstSprintJson{};
-                                            firstSprintJson
-                                                [Sprints::Cols::_event_id] =
+                                        Json::Value firstSprintJson{};
+                                        firstSprintJson
+                                            [Sprints::Cols::_event_id] =
                                                 (*eventCreationResponse
-                                                    ->jsonObject())["id"]
-                                                .as<PrimaryKeyType>();
-                                            firstSprintJson[
-                                                    Sprints::Cols::_state] =
-                                                "voting";
-                                            auto firstSprintCreationRequest{
-                                                drogon::HttpRequest::
+                                                      ->jsonObject())["id"]
+                                                    .as<PrimaryKeyType>();
+                                        firstSprintJson[Sprints::Cols::_state] =
+                                            "voting";
+                                        auto firstSprintCreationRequest{
+                                            drogon::HttpRequest::
                                                 newHttpJsonRequest(
                                                     firstSprintJson)
-                                            };
-                                            firstSprintCreationRequest->
-                                                setMethod(
-                                                    drogon::Post);
-                                            DrClassMap::getSingleInstance<
-                                                    SprintsController>()
-                                                ->create(
-                                                    firstSprintCreationRequest,
-                                                    [callbackPtr,
-                                                        eventCreationResponse,
-                                                        this,
-                                                        eventRequestJson](
+                                        };
+                                        firstSprintCreationRequest->setMethod(
+                                            drogon::Post);
+                                        DrClassMap::getSingleInstance<
+                                            SprintsController>()
+                                            ->create(
+                                                firstSprintCreationRequest,
+                                                [callbackPtr,
+                                                 eventCreationResponse, this,
+                                                 eventRequestJson](
                                                     auto&&
-                                                    firstSprintCreationResponse)
-                                                    {
-                                                        if (
-                                                            firstSprintCreationResponse
+                                                        firstSprintCreationResponse)
+                                                {
+                                                    if (firstSprintCreationResponse
                                                             ->statusCode() ==
-                                                            k200OK)
-                                                        {
-                                                            (*callbackPtr)(
-                                                                eventCreationResponse);
-                                                        }
-                                                        else // first sprint
-                                                        // creation failed
-                                                        {
-                                                            deleteOne(
-                                                                HttpRequest::
+                                                        k200OK)
+                                                    {
+                                                        (*callbackPtr)(
+                                                            eventCreationResponse);
+                                                    }
+                                                    else // first sprint
+                                                    // creation failed
+                                                    {
+                                                        deleteOne(
+                                                            HttpRequest::
                                                                 newHttpRequest(),
-                                                                AdviceCallback
-                                                                {},
-                                                                eventRequestJson
+                                                            AdviceCallback{},
+                                                            eventRequestJson
                                                                 [Events::Cols::
-                                                                    _id]
-                                                                .as<
-                                                                    PrimaryKeyType>());
-                                                            (*callbackPtr)(
-                                                                firstSprintCreationResponse);
-                                                        }
-                                                    });
-                                        }
-                                        else // initial post creation failed
-                                        {
-                                            deleteOne(
-                                                HttpRequest::newHttpRequest(),
-                                                AdviceCallback{},
-                                                eventRequestJson[
-                                                    Events::Cols::_id]
+                                                                     _id]
+                                                                    .as<PrimaryKeyType>());
+                                                        (*callbackPtr)(
+                                                            firstSprintCreationResponse);
+                                                    }
+                                                });
+                                    }
+                                    else // initial post creation failed
+                                    {
+                                        deleteOne(
+                                            HttpRequest::newHttpRequest(),
+                                            AdviceCallback{},
+                                            eventRequestJson[Events::Cols::_id]
                                                 .as<PrimaryKeyType>());
-                                            (*callbackPtr)(
-                                                initialPostCreationResponse);
-                                        }
-                                    });
+                                        (*callbackPtr)(
+                                            initialPostCreationResponse);
+                                    }
+                                });
                         }
                         else // sprint creation failed
                         {
                             deleteOne(HttpRequest::newHttpRequest(),
                                       AdviceCallback{},
                                       eventRequestJson[Events::Cols::_id]
-                                      .as<PrimaryKeyType>());
+                                          .as<PrimaryKeyType>());
                             (*callbackPtr)(sprintCreationResponse);
                         }
                     });
