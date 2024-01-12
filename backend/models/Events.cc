@@ -22,9 +22,9 @@ const std::string Events::Cols::_title = "title";
 const std::string Events::Cols::_description = "description";
 const std::string Events::Cols::_picture_url = "picture_url";
 const std::string Events::Cols::_start = "start";
-const std::string Events::Cols::_creation_date = "creation_date";
 const std::string Events::Cols::_author_id = "author_id";
 const std::string Events::Cols::_state = "state";
+const std::string Events::Cols::_creation_date = "creation_date";
 const std::string Events::primaryKeyName = "id";
 const bool Events::hasPrimaryKey = true;
 const std::string Events::tableName = "events";
@@ -35,9 +35,9 @@ const std::vector<typename Events::MetaData> Events::metaData_={
 {"description","std::string","text",0,0,0,1},
 {"picture_url","std::string","tinytext",0,0,0,0},
 {"start","::trantor::Date","datetime",0,0,0,1},
-{"creation_date","::trantor::Date","datetime",0,0,0,1},
 {"author_id","uint32_t","int(10) unsigned",4,0,0,1},
-{"state","std::string","enum('scheduled','in_progress','ended')",0,0,0,1}
+{"state","std::string","enum('scheduled','in_progress','ended')",0,0,0,1},
+{"creation_date","::trantor::Date","datetime",0,0,0,1}
 };
 const std::string &Events::getColumnName(size_t index) noexcept(false)
 {
@@ -86,6 +86,14 @@ Events::Events(const Row &r, const ssize_t indexOffset) noexcept
                 start_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
         }
+        if(!r["author_id"].isNull())
+        {
+            authorId_=std::make_shared<uint32_t>(r["author_id"].as<uint32_t>());
+        }
+        if(!r["state"].isNull())
+        {
+            state_=std::make_shared<std::string>(r["state"].as<std::string>());
+        }
         if(!r["creation_date"].isNull())
         {
             auto timeStr = r["creation_date"].as<std::string>();
@@ -107,14 +115,6 @@ Events::Events(const Row &r, const ssize_t indexOffset) noexcept
                 }
                 creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-        if(!r["author_id"].isNull())
-        {
-            authorId_=std::make_shared<uint32_t>(r["author_id"].as<uint32_t>());
-        }
-        if(!r["state"].isNull())
-        {
-            state_=std::make_shared<std::string>(r["state"].as<std::string>());
         }
     }
     else
@@ -172,6 +172,16 @@ Events::Events(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 5;
         if(!r[index].isNull())
         {
+            authorId_=std::make_shared<uint32_t>(r[index].as<uint32_t>());
+        }
+        index = offset + 6;
+        if(!r[index].isNull())
+        {
+            state_=std::make_shared<std::string>(r[index].as<std::string>());
+        }
+        index = offset + 7;
+        if(!r[index].isNull())
+        {
             auto timeStr = r[index].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
@@ -191,16 +201,6 @@ Events::Events(const Row &r, const ssize_t indexOffset) noexcept
                 }
                 creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-        index = offset + 6;
-        if(!r[index].isNull())
-        {
-            authorId_=std::make_shared<uint32_t>(r[index].as<uint32_t>());
-        }
-        index = offset + 7;
-        if(!r[index].isNull())
-        {
-            state_=std::make_shared<std::string>(r[index].as<std::string>());
         }
     }
 
@@ -276,7 +276,23 @@ Events::Events(const Json::Value &pJson, const std::vector<std::string> &pMasque
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[5]].asString();
+            authorId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[5]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson[pMasqueradingVector[6]].isNull())
+        {
+            state_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[7]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -295,22 +311,6 @@ Events::Events(const Json::Value &pJson, const std::vector<std::string> &pMasque
                 }
                 creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-    }
-    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
-    {
-        dirtyFlag_[6] = true;
-        if(!pJson[pMasqueradingVector[6]].isNull())
-        {
-            authorId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[6]].asUInt64());
-        }
-    }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
-    {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
-        {
-            state_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
         }
     }
 }
@@ -375,9 +375,25 @@ Events::Events(const Json::Value &pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("creation_date"))
+    if(pJson.isMember("author_id"))
     {
         dirtyFlag_[5]=true;
+        if(!pJson["author_id"].isNull())
+        {
+            authorId_=std::make_shared<uint32_t>((uint32_t)pJson["author_id"].asUInt64());
+        }
+    }
+    if(pJson.isMember("state"))
+    {
+        dirtyFlag_[6]=true;
+        if(!pJson["state"].isNull())
+        {
+            state_=std::make_shared<std::string>(pJson["state"].asString());
+        }
+    }
+    if(pJson.isMember("creation_date"))
+    {
+        dirtyFlag_[7]=true;
         if(!pJson["creation_date"].isNull())
         {
             auto timeStr = pJson["creation_date"].asString();
@@ -399,22 +415,6 @@ Events::Events(const Json::Value &pJson) noexcept(false)
                 }
                 creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-    }
-    if(pJson.isMember("author_id"))
-    {
-        dirtyFlag_[6]=true;
-        if(!pJson["author_id"].isNull())
-        {
-            authorId_=std::make_shared<uint32_t>((uint32_t)pJson["author_id"].asUInt64());
-        }
-    }
-    if(pJson.isMember("state"))
-    {
-        dirtyFlag_[7]=true;
-        if(!pJson["state"].isNull())
-        {
-            state_=std::make_shared<std::string>(pJson["state"].asString());
         }
     }
 }
@@ -489,7 +489,23 @@ void Events::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[5]].asString();
+            authorId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[5]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson[pMasqueradingVector[6]].isNull())
+        {
+            state_=std::make_shared<std::string>(pJson[pMasqueradingVector[6]].asString());
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[7]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -508,22 +524,6 @@ void Events::updateByMasqueradedJson(const Json::Value &pJson,
                 }
                 creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-    }
-    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
-    {
-        dirtyFlag_[6] = true;
-        if(!pJson[pMasqueradingVector[6]].isNull())
-        {
-            authorId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[6]].asUInt64());
-        }
-    }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
-    {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
-        {
-            state_=std::make_shared<std::string>(pJson[pMasqueradingVector[7]].asString());
         }
     }
 }
@@ -587,9 +587,25 @@ void Events::updateByJson(const Json::Value &pJson) noexcept(false)
             }
         }
     }
-    if(pJson.isMember("creation_date"))
+    if(pJson.isMember("author_id"))
     {
         dirtyFlag_[5] = true;
+        if(!pJson["author_id"].isNull())
+        {
+            authorId_=std::make_shared<uint32_t>((uint32_t)pJson["author_id"].asUInt64());
+        }
+    }
+    if(pJson.isMember("state"))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson["state"].isNull())
+        {
+            state_=std::make_shared<std::string>(pJson["state"].asString());
+        }
+    }
+    if(pJson.isMember("creation_date"))
+    {
+        dirtyFlag_[7] = true;
         if(!pJson["creation_date"].isNull())
         {
             auto timeStr = pJson["creation_date"].asString();
@@ -611,22 +627,6 @@ void Events::updateByJson(const Json::Value &pJson) noexcept(false)
                 }
                 creationDate_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
             }
-        }
-    }
-    if(pJson.isMember("author_id"))
-    {
-        dirtyFlag_[6] = true;
-        if(!pJson["author_id"].isNull())
-        {
-            authorId_=std::make_shared<uint32_t>((uint32_t)pJson["author_id"].asUInt64());
-        }
-    }
-    if(pJson.isMember("state"))
-    {
-        dirtyFlag_[7] = true;
-        if(!pJson["state"].isNull())
-        {
-            state_=std::make_shared<std::string>(pJson["state"].asString());
         }
     }
 }
@@ -741,23 +741,6 @@ void Events::setStart(const ::trantor::Date &pStart) noexcept
     dirtyFlag_[4] = true;
 }
 
-const ::trantor::Date &Events::getValueOfCreationDate() const noexcept
-{
-    const static ::trantor::Date defaultValue = ::trantor::Date();
-    if(creationDate_)
-        return *creationDate_;
-    return defaultValue;
-}
-const std::shared_ptr<::trantor::Date> &Events::getCreationDate() const noexcept
-{
-    return creationDate_;
-}
-void Events::setCreationDate(const ::trantor::Date &pCreationDate) noexcept
-{
-    creationDate_ = std::make_shared<::trantor::Date>(pCreationDate);
-    dirtyFlag_[5] = true;
-}
-
 const uint32_t &Events::getValueOfAuthorId() const noexcept
 {
     const static uint32_t defaultValue = uint32_t();
@@ -772,7 +755,7 @@ const std::shared_ptr<uint32_t> &Events::getAuthorId() const noexcept
 void Events::setAuthorId(const uint32_t &pAuthorId) noexcept
 {
     authorId_ = std::make_shared<uint32_t>(pAuthorId);
-    dirtyFlag_[6] = true;
+    dirtyFlag_[5] = true;
 }
 
 const std::string &Events::getValueOfState() const noexcept
@@ -789,11 +772,28 @@ const std::shared_ptr<std::string> &Events::getState() const noexcept
 void Events::setState(const std::string &pState) noexcept
 {
     state_ = std::make_shared<std::string>(pState);
-    dirtyFlag_[7] = true;
+    dirtyFlag_[6] = true;
 }
 void Events::setState(std::string &&pState) noexcept
 {
     state_ = std::make_shared<std::string>(std::move(pState));
+    dirtyFlag_[6] = true;
+}
+
+const ::trantor::Date &Events::getValueOfCreationDate() const noexcept
+{
+    const static ::trantor::Date defaultValue = ::trantor::Date();
+    if(creationDate_)
+        return *creationDate_;
+    return defaultValue;
+}
+const std::shared_ptr<::trantor::Date> &Events::getCreationDate() const noexcept
+{
+    return creationDate_;
+}
+void Events::setCreationDate(const ::trantor::Date &pCreationDate) noexcept
+{
+    creationDate_ = std::make_shared<::trantor::Date>(pCreationDate);
     dirtyFlag_[7] = true;
 }
 
@@ -809,9 +809,9 @@ const std::vector<std::string> &Events::insertColumns() noexcept
         "description",
         "picture_url",
         "start",
-        "creation_date",
         "author_id",
-        "state"
+        "state",
+        "creation_date"
     };
     return inCols;
 }
@@ -864,17 +864,6 @@ void Events::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[5])
     {
-        if(getCreationDate())
-        {
-            binder << getValueOfCreationDate();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[6])
-    {
         if(getAuthorId())
         {
             binder << getValueOfAuthorId();
@@ -884,11 +873,22 @@ void Events::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[7])
+    if(dirtyFlag_[6])
     {
         if(getState())
         {
             binder << getValueOfState();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[7])
+    {
+        if(getCreationDate())
+        {
+            binder << getValueOfCreationDate();
         }
         else
         {
@@ -979,17 +979,6 @@ void Events::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[5])
     {
-        if(getCreationDate())
-        {
-            binder << getValueOfCreationDate();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[6])
-    {
         if(getAuthorId())
         {
             binder << getValueOfAuthorId();
@@ -999,11 +988,22 @@ void Events::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[7])
+    if(dirtyFlag_[6])
     {
         if(getState())
         {
             binder << getValueOfState();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[7])
+    {
+        if(getCreationDate())
+        {
+            binder << getValueOfCreationDate();
         }
         else
         {
@@ -1054,14 +1054,6 @@ Json::Value Events::toJson() const
     {
         ret["start"]=Json::Value();
     }
-    if(getCreationDate())
-    {
-        ret["creation_date"]=getCreationDate()->toDbStringLocal();
-    }
-    else
-    {
-        ret["creation_date"]=Json::Value();
-    }
     if(getAuthorId())
     {
         ret["author_id"]=getValueOfAuthorId();
@@ -1077,6 +1069,14 @@ Json::Value Events::toJson() const
     else
     {
         ret["state"]=Json::Value();
+    }
+    if(getCreationDate())
+    {
+        ret["creation_date"]=getCreationDate()->toDbStringLocal();
+    }
+    else
+    {
+        ret["creation_date"]=Json::Value();
     }
     return ret;
 }
@@ -1144,9 +1144,9 @@ Json::Value Events::toMasqueradedJson(
         }
         if(!pMasqueradingVector[5].empty())
         {
-            if(getCreationDate())
+            if(getAuthorId())
             {
-                ret[pMasqueradingVector[5]]=getCreationDate()->toDbStringLocal();
+                ret[pMasqueradingVector[5]]=getValueOfAuthorId();
             }
             else
             {
@@ -1155,9 +1155,9 @@ Json::Value Events::toMasqueradedJson(
         }
         if(!pMasqueradingVector[6].empty())
         {
-            if(getAuthorId())
+            if(getState())
             {
-                ret[pMasqueradingVector[6]]=getValueOfAuthorId();
+                ret[pMasqueradingVector[6]]=getValueOfState();
             }
             else
             {
@@ -1166,9 +1166,9 @@ Json::Value Events::toMasqueradedJson(
         }
         if(!pMasqueradingVector[7].empty())
         {
-            if(getState())
+            if(getCreationDate())
             {
-                ret[pMasqueradingVector[7]]=getValueOfState();
+                ret[pMasqueradingVector[7]]=getCreationDate()->toDbStringLocal();
             }
             else
             {
@@ -1218,14 +1218,6 @@ Json::Value Events::toMasqueradedJson(
     {
         ret["start"]=Json::Value();
     }
-    if(getCreationDate())
-    {
-        ret["creation_date"]=getCreationDate()->toDbStringLocal();
-    }
-    else
-    {
-        ret["creation_date"]=Json::Value();
-    }
     if(getAuthorId())
     {
         ret["author_id"]=getValueOfAuthorId();
@@ -1241,6 +1233,14 @@ Json::Value Events::toMasqueradedJson(
     else
     {
         ret["state"]=Json::Value();
+    }
+    if(getCreationDate())
+    {
+        ret["creation_date"]=getCreationDate()->toDbStringLocal();
+    }
+    else
+    {
+        ret["creation_date"]=Json::Value();
     }
     return ret;
 }
@@ -1277,14 +1277,9 @@ bool Events::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(4, "start", pJson["start"], err, true))
             return false;
     }
-    if(pJson.isMember("creation_date"))
-    {
-        if(!validJsonOfField(5, "creation_date", pJson["creation_date"], err, true))
-            return false;
-    }
     if(pJson.isMember("author_id"))
     {
-        if(!validJsonOfField(6, "author_id", pJson["author_id"], err, true))
+        if(!validJsonOfField(5, "author_id", pJson["author_id"], err, true))
             return false;
     }
     else
@@ -1294,7 +1289,12 @@ bool Events::validateJsonForCreation(const Json::Value &pJson, std::string &err)
     }
     if(pJson.isMember("state"))
     {
-        if(!validJsonOfField(7, "state", pJson["state"], err, true))
+        if(!validJsonOfField(6, "state", pJson["state"], err, true))
+            return false;
+    }
+    if(pJson.isMember("creation_date"))
+    {
+        if(!validJsonOfField(7, "creation_date", pJson["creation_date"], err, true))
             return false;
     }
     return true;
@@ -1361,6 +1361,11 @@ bool Events::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err, true))
                   return false;
           }
+        else
+        {
+            err="The " + pMasqueradingVector[5] + " column cannot be null";
+            return false;
+        }
       }
       if(!pMasqueradingVector[6].empty())
       {
@@ -1369,11 +1374,6 @@ bool Events::validateMasqueradedJsonForCreation(const Json::Value &pJson,
               if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, true))
                   return false;
           }
-        else
-        {
-            err="The " + pMasqueradingVector[6] + " column cannot be null";
-            return false;
-        }
       }
       if(!pMasqueradingVector[7].empty())
       {
@@ -1423,19 +1423,19 @@ bool Events::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(4, "start", pJson["start"], err, false))
             return false;
     }
-    if(pJson.isMember("creation_date"))
-    {
-        if(!validJsonOfField(5, "creation_date", pJson["creation_date"], err, false))
-            return false;
-    }
     if(pJson.isMember("author_id"))
     {
-        if(!validJsonOfField(6, "author_id", pJson["author_id"], err, false))
+        if(!validJsonOfField(5, "author_id", pJson["author_id"], err, false))
             return false;
     }
     if(pJson.isMember("state"))
     {
-        if(!validJsonOfField(7, "state", pJson["state"], err, false))
+        if(!validJsonOfField(6, "state", pJson["state"], err, false))
+            return false;
+    }
+    if(pJson.isMember("creation_date"))
+    {
+        if(!validJsonOfField(7, "creation_date", pJson["creation_date"], err, false))
             return false;
     }
     return true;
@@ -1581,7 +1581,7 @@ bool Events::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(!pJson.isUInt())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1593,7 +1593,7 @@ bool Events::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isUInt())
+            if(!pJson.isString())
             {
                 err="Type error in the "+fieldName+" field";
                 return false;
@@ -1617,26 +1617,22 @@ bool Events::validJsonOfField(size_t index,
     }
     return true;
 }
-Users Events::getUser(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from users where id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *authorId_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    if (r.size() == 0)
-    {
-        throw UnexpectedRows("0 rows found");
-    }
-    else if (r.size() > 1)
-    {
-        throw UnexpectedRows("Found more than one row");
-    }
-    return Users(r[0]);
-}
 
+Users Events::getUser(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<Users>> pro(new std::promise<Users>);
+    std::future<Users> f = pro->get_future();
+    getUser(clientPtr, [&pro] (Users result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
 void Events::getUser(const DbClientPtr &clientPtr,
                      const std::function<void(Users)> &rcb,
                      const ExceptionCallback &ecb) const
@@ -1660,24 +1656,21 @@ void Events::getUser(const DbClientPtr &clientPtr,
                }
                >> ecb;
 }
-std::vector<Sprints> Events::getSprints(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from sprints where event_id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *id_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    std::vector<Sprints> ret;
-    ret.reserve(r.size());
-    for (auto const &row : r)
-    {
-        ret.emplace_back(Sprints(row));
-    }
-    return ret;
+std::vector<Sprints> Events::getSprints(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<Sprints>>> pro(new std::promise<std::vector<Sprints>>);
+    std::future<std::vector<Sprints>> f = pro->get_future();
+    getSprints(clientPtr, [&pro] (std::vector<Sprints> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
 }
-
 void Events::getSprints(const DbClientPtr &clientPtr,
                         const std::function<void(std::vector<Sprints>)> &rcb,
                         const ExceptionCallback &ecb) const
@@ -1696,25 +1689,21 @@ void Events::getSprints(const DbClientPtr &clientPtr,
                }
                >> ecb;
 }
-std::vector<std::pair<Tags,EventsTags>> Events::getTags(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from tags,events_tags where events_tags.event_id = ? and events_tags.tag_id = tags.id";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *id_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    std::vector<std::pair<Tags,EventsTags>> ret;
-    ret.reserve(r.size());
-    for (auto const &row : r)
-    {
-        ret.emplace_back(std::pair<Tags,EventsTags>(
-            Tags(row),EventsTags(row,Tags::getColumnNumber())));
-    }
-    return ret;
+std::vector<std::pair<Tags,EventsTags>> Events::getTags(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<std::vector<std::pair<Tags,EventsTags>>>> pro(new std::promise<std::vector<std::pair<Tags,EventsTags>>>);
+    std::future<std::vector<std::pair<Tags,EventsTags>>> f = pro->get_future();
+    getTags(clientPtr, [&pro] (std::vector<std::pair<Tags,EventsTags>> result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
 }
-
 void Events::getTags(const DbClientPtr &clientPtr,
                      const std::function<void(std::vector<std::pair<Tags,EventsTags>>)> &rcb,
                      const ExceptionCallback &ecb) const

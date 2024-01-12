@@ -53,9 +53,9 @@ class Events
         static const std::string _description;
         static const std::string _picture_url;
         static const std::string _start;
-        static const std::string _creation_date;
         static const std::string _author_id;
         static const std::string _state;
+        static const std::string _creation_date;
     };
 
     const static int primaryKeyNumber;
@@ -151,14 +151,6 @@ class Events
     ///Set the value of the column start
     void setStart(const ::trantor::Date &pStart) noexcept;
 
-    /**  For column creation_date  */
-    ///Get the value of the column creation_date, returns the default value if the column is null
-    const ::trantor::Date &getValueOfCreationDate() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<::trantor::Date> &getCreationDate() const noexcept;
-    ///Set the value of the column creation_date
-    void setCreationDate(const ::trantor::Date &pCreationDate) noexcept;
-
     /**  For column author_id  */
     ///Get the value of the column author_id, returns the default value if the column is null
     const uint32_t &getValueOfAuthorId() const noexcept;
@@ -175,6 +167,14 @@ class Events
     ///Set the value of the column state
     void setState(const std::string &pState) noexcept;
     void setState(std::string &&pState) noexcept;
+
+    /**  For column creation_date  */
+    ///Get the value of the column creation_date, returns the default value if the column is null
+    const ::trantor::Date &getValueOfCreationDate() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<::trantor::Date> &getCreationDate() const noexcept;
+    ///Set the value of the column creation_date
+    void setCreationDate(const ::trantor::Date &pCreationDate) noexcept;
 
 
     static size_t getColumnNumber() noexcept {  return 8;  }
@@ -215,9 +215,9 @@ class Events
     std::shared_ptr<std::string> description_;
     std::shared_ptr<std::string> pictureUrl_;
     std::shared_ptr<::trantor::Date> start_;
-    std::shared_ptr<::trantor::Date> creationDate_;
     std::shared_ptr<uint32_t> authorId_;
     std::shared_ptr<std::string> state_;
+    std::shared_ptr<::trantor::Date> creationDate_;
     struct MetaData
     {
         const std::string colName_;
@@ -271,18 +271,18 @@ class Events
         {
             needSelection=true;
         }
-        sql += "creation_date,";
-        ++parametersCount;
-        if(!dirtyFlag_[5])
-        {
-            needSelection=true;
-        }
-        if(dirtyFlag_[6])
+        if(dirtyFlag_[5])
         {
             sql += "author_id,";
             ++parametersCount;
         }
         sql += "state,";
+        ++parametersCount;
+        if(!dirtyFlag_[6])
+        {
+            needSelection=true;
+        }
+        sql += "creation_date,";
         ++parametersCount;
         if(!dirtyFlag_[7])
         {
@@ -331,14 +331,14 @@ class Events
             sql.append("?,");
 
         }
-        else
-        {
-            sql +="default,";
-        }
         if(dirtyFlag_[6])
         {
             sql.append("?,");
 
+        }
+        else
+        {
+            sql +="default,";
         }
         if(dirtyFlag_[7])
         {

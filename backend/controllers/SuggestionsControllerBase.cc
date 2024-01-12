@@ -426,8 +426,7 @@ SuggestionsControllerBase::SuggestionsControllerBase()
           "id",
           "author_id",
           "post_date",
-          "sprint_id",
-          "votes"
+          "sprint_id"
       })
 {
    /**
@@ -439,7 +438,6 @@ SuggestionsControllerBase::SuggestionsControllerBase()
         "id", // the alias for the id column.
         "author_id", // the alias for the author_id column.
         "post_date", // the alias for the post_date column.
-        "sprint_id", // the alias for the sprint_id column.
-        "votes"  // the alias for the votes column.
+        "sprint_id"  // the alias for the sprint_id column.
     });
 }

@@ -20,7 +20,6 @@ const std::string Suggestions::Cols::_id = "id";
 const std::string Suggestions::Cols::_author_id = "author_id";
 const std::string Suggestions::Cols::_post_date = "post_date";
 const std::string Suggestions::Cols::_sprint_id = "sprint_id";
-const std::string Suggestions::Cols::_votes = "votes";
 const std::string Suggestions::primaryKeyName = "id";
 const bool Suggestions::hasPrimaryKey = true;
 const std::string Suggestions::tableName = "suggestions";
@@ -29,8 +28,7 @@ const std::vector<typename Suggestions::MetaData> Suggestions::metaData_={
 {"id","uint32_t","int(10) unsigned",4,1,1,1},
 {"author_id","uint32_t","int(10) unsigned",4,0,0,1},
 {"post_date","::trantor::Date","datetime",0,0,0,1},
-{"sprint_id","uint32_t","int(10) unsigned",4,0,0,1},
-{"votes","int32_t","int(11)",4,0,0,1}
+{"sprint_id","uint32_t","int(10) unsigned",4,0,0,1}
 };
 const std::string &Suggestions::getColumnName(size_t index) noexcept(false)
 {
@@ -75,15 +73,11 @@ Suggestions::Suggestions(const Row &r, const ssize_t indexOffset) noexcept
         {
             sprintId_=std::make_shared<uint32_t>(r["sprint_id"].as<uint32_t>());
         }
-        if(!r["votes"].isNull())
-        {
-            votes_=std::make_shared<int32_t>(r["votes"].as<int32_t>());
-        }
     }
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 5 > r.size())
+        if(offset + 4 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -127,18 +121,13 @@ Suggestions::Suggestions(const Row &r, const ssize_t indexOffset) noexcept
         {
             sprintId_=std::make_shared<uint32_t>(r[index].as<uint32_t>());
         }
-        index = offset + 4;
-        if(!r[index].isNull())
-        {
-            votes_=std::make_shared<int32_t>(r[index].as<int32_t>());
-        }
     }
 
 }
 
 Suggestions::Suggestions(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 4)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -191,14 +180,6 @@ Suggestions::Suggestions(const Json::Value &pJson, const std::vector<std::string
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
             sprintId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[3]].asUInt64());
-        }
-    }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
-    {
-        dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
-        {
-            votes_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[4]].asInt64());
         }
     }
 }
@@ -255,20 +236,12 @@ Suggestions::Suggestions(const Json::Value &pJson) noexcept(false)
             sprintId_=std::make_shared<uint32_t>((uint32_t)pJson["sprint_id"].asUInt64());
         }
     }
-    if(pJson.isMember("votes"))
-    {
-        dirtyFlag_[4]=true;
-        if(!pJson["votes"].isNull())
-        {
-            votes_=std::make_shared<int32_t>((int32_t)pJson["votes"].asInt64());
-        }
-    }
 }
 
 void Suggestions::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 4)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -322,14 +295,6 @@ void Suggestions::updateByMasqueradedJson(const Json::Value &pJson,
             sprintId_=std::make_shared<uint32_t>((uint32_t)pJson[pMasqueradingVector[3]].asUInt64());
         }
     }
-    if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
-    {
-        dirtyFlag_[4] = true;
-        if(!pJson[pMasqueradingVector[4]].isNull())
-        {
-            votes_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[4]].asInt64());
-        }
-    }
 }
 
 void Suggestions::updateByJson(const Json::Value &pJson) noexcept(false)
@@ -381,14 +346,6 @@ void Suggestions::updateByJson(const Json::Value &pJson) noexcept(false)
         if(!pJson["sprint_id"].isNull())
         {
             sprintId_=std::make_shared<uint32_t>((uint32_t)pJson["sprint_id"].asUInt64());
-        }
-    }
-    if(pJson.isMember("votes"))
-    {
-        dirtyFlag_[4] = true;
-        if(!pJson["votes"].isNull())
-        {
-            votes_=std::make_shared<int32_t>((int32_t)pJson["votes"].asInt64());
         }
     }
 }
@@ -466,23 +423,6 @@ void Suggestions::setSprintId(const uint32_t &pSprintId) noexcept
     dirtyFlag_[3] = true;
 }
 
-const int32_t &Suggestions::getValueOfVotes() const noexcept
-{
-    const static int32_t defaultValue = int32_t();
-    if(votes_)
-        return *votes_;
-    return defaultValue;
-}
-const std::shared_ptr<int32_t> &Suggestions::getVotes() const noexcept
-{
-    return votes_;
-}
-void Suggestions::setVotes(const int32_t &pVotes) noexcept
-{
-    votes_ = std::make_shared<int32_t>(pVotes);
-    dirtyFlag_[4] = true;
-}
-
 void Suggestions::updateId(const uint64_t id)
 {
     id_ = std::make_shared<uint32_t>(static_cast<uint32_t>(id));
@@ -493,8 +433,7 @@ const std::vector<std::string> &Suggestions::insertColumns() noexcept
     static const std::vector<std::string> inCols={
         "author_id",
         "post_date",
-        "sprint_id",
-        "votes"
+        "sprint_id"
     };
     return inCols;
 }
@@ -534,17 +473,6 @@ void Suggestions::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[4])
-    {
-        if(getVotes())
-        {
-            binder << getValueOfVotes();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
 }
 
 const std::vector<std::string> Suggestions::updateColumns() const
@@ -561,10 +489,6 @@ const std::vector<std::string> Suggestions::updateColumns() const
     if(dirtyFlag_[3])
     {
         ret.push_back(getColumnName(3));
-    }
-    if(dirtyFlag_[4])
-    {
-        ret.push_back(getColumnName(4));
     }
     return ret;
 }
@@ -598,17 +522,6 @@ void Suggestions::updateArgs(drogon::orm::internal::SqlBinder &binder) const
         if(getSprintId())
         {
             binder << getValueOfSprintId();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[4])
-    {
-        if(getVotes())
-        {
-            binder << getValueOfVotes();
         }
         else
         {
@@ -651,14 +564,6 @@ Json::Value Suggestions::toJson() const
     {
         ret["sprint_id"]=Json::Value();
     }
-    if(getVotes())
-    {
-        ret["votes"]=getValueOfVotes();
-    }
-    else
-    {
-        ret["votes"]=Json::Value();
-    }
     return ret;
 }
 
@@ -666,7 +571,7 @@ Json::Value Suggestions::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 5)
+    if(pMasqueradingVector.size() == 4)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -712,17 +617,6 @@ Json::Value Suggestions::toMasqueradedJson(
                 ret[pMasqueradingVector[3]]=Json::Value();
             }
         }
-        if(!pMasqueradingVector[4].empty())
-        {
-            if(getVotes())
-            {
-                ret[pMasqueradingVector[4]]=getValueOfVotes();
-            }
-            else
-            {
-                ret[pMasqueradingVector[4]]=Json::Value();
-            }
-        }
         return ret;
     }
     LOG_ERROR << "Masquerade failed";
@@ -757,14 +651,6 @@ Json::Value Suggestions::toMasqueradedJson(
     else
     {
         ret["sprint_id"]=Json::Value();
-    }
-    if(getVotes())
-    {
-        ret["votes"]=getValueOfVotes();
-    }
-    else
-    {
-        ret["votes"]=Json::Value();
     }
     return ret;
 }
@@ -801,18 +687,13 @@ bool Suggestions::validateJsonForCreation(const Json::Value &pJson, std::string 
         err="The sprint_id column cannot be null";
         return false;
     }
-    if(pJson.isMember("votes"))
-    {
-        if(!validJsonOfField(4, "votes", pJson["votes"], err, true))
-            return false;
-    }
     return true;
 }
 bool Suggestions::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                      const std::vector<std::string> &pMasqueradingVector,
                                                      std::string &err)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 4)
     {
         err = "Bad masquerading vector";
         return false;
@@ -860,14 +741,6 @@ bool Suggestions::validateMasqueradedJsonForCreation(const Json::Value &pJson,
             return false;
         }
       }
-      if(!pMasqueradingVector[4].empty())
-      {
-          if(pJson.isMember(pMasqueradingVector[4]))
-          {
-              if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, true))
-                  return false;
-          }
-      }
     }
     catch(const Json::LogicError &e)
     {
@@ -903,18 +776,13 @@ bool Suggestions::validateJsonForUpdate(const Json::Value &pJson, std::string &e
         if(!validJsonOfField(3, "sprint_id", pJson["sprint_id"], err, false))
             return false;
     }
-    if(pJson.isMember("votes"))
-    {
-        if(!validJsonOfField(4, "votes", pJson["votes"], err, false))
-            return false;
-    }
     return true;
 }
 bool Suggestions::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                    const std::vector<std::string> &pMasqueradingVector,
                                                    std::string &err)
 {
-    if(pMasqueradingVector.size() != 5)
+    if(pMasqueradingVector.size() != 4)
     {
         err = "Bad masquerading vector";
         return false;
@@ -943,11 +811,6 @@ bool Suggestions::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
       {
           if(!validJsonOfField(3, pMasqueradingVector[3], pJson[pMasqueradingVector[3]], err, false))
-              return false;
-      }
-      if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
-      {
-          if(!validJsonOfField(4, pMasqueradingVector[4], pJson[pMasqueradingVector[4]], err, false))
               return false;
       }
     }
@@ -1019,44 +882,28 @@ bool Suggestions::validJsonOfField(size_t index,
                 return false;
             }
             break;
-        case 4:
-            if(pJson.isNull())
-            {
-                err="The " + fieldName + " column cannot be null";
-                return false;
-            }
-            if(!pJson.isInt())
-            {
-                err="Type error in the "+fieldName+" field";
-                return false;
-            }
-            break;
         default:
             err="Internal error in the server";
             return false;
     }
     return true;
 }
-Posts Suggestions::getPost(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from posts where suggestion_id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *id_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    if (r.size() == 0)
-    {
-        throw UnexpectedRows("0 rows found");
-    }
-    else if (r.size() > 1)
-    {
-        throw UnexpectedRows("Found more than one row");
-    }
-    return Posts(r[0]);
-}
 
+Posts Suggestions::getPost(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<Posts>> pro(new std::promise<Posts>);
+    std::future<Posts> f = pro->get_future();
+    getPost(clientPtr, [&pro] (Posts result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
 void Suggestions::getPost(const DbClientPtr &clientPtr,
                           const std::function<void(Posts)> &rcb,
                           const ExceptionCallback &ecb) const
@@ -1080,26 +927,22 @@ void Suggestions::getPost(const DbClientPtr &clientPtr,
                }
                >> ecb;
 }
-Users Suggestions::getAuthor(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from users where id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *authorId_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    if (r.size() == 0)
-    {
-        throw UnexpectedRows("0 rows found");
-    }
-    else if (r.size() > 1)
-    {
-        throw UnexpectedRows("Found more than one row");
-    }
-    return Users(r[0]);
-}
 
+Users Suggestions::getAuthor(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<Users>> pro(new std::promise<Users>);
+    std::future<Users> f = pro->get_future();
+    getAuthor(clientPtr, [&pro] (Users result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
 void Suggestions::getAuthor(const DbClientPtr &clientPtr,
                             const std::function<void(Users)> &rcb,
                             const ExceptionCallback &ecb) const
@@ -1123,26 +966,22 @@ void Suggestions::getAuthor(const DbClientPtr &clientPtr,
                }
                >> ecb;
 }
-Sprints Suggestions::getSprint(const DbClientPtr &clientPtr) const {
-    const static std::string sql = "select * from sprints where id = ?";
-    Result r(nullptr);
-    {
-        auto binder = *clientPtr << sql;
-        binder << *sprintId_ << Mode::Blocking >>
-            [&r](const Result &result) { r = result; };
-        binder.exec();
-    }
-    if (r.size() == 0)
-    {
-        throw UnexpectedRows("0 rows found");
-    }
-    else if (r.size() > 1)
-    {
-        throw UnexpectedRows("Found more than one row");
-    }
-    return Sprints(r[0]);
-}
 
+Sprints Suggestions::getSprint(const drogon::orm::DbClientPtr &clientPtr) const {
+    std::shared_ptr<std::promise<Sprints>> pro(new std::promise<Sprints>);
+    std::future<Sprints> f = pro->get_future();
+    getSprint(clientPtr, [&pro] (Sprints result) {
+        try {
+            pro->set_value(result);
+        }
+        catch (...) {
+            pro->set_exception(std::current_exception());
+        }
+    }, [&pro] (const DrogonDbException &err) {
+        pro->set_exception(std::make_exception_ptr(err));
+    });
+    return f.get();
+}
 void Suggestions::getSprint(const DbClientPtr &clientPtr,
                             const std::function<void(Sprints)> &rcb,
                             const ExceptionCallback &ecb) const
