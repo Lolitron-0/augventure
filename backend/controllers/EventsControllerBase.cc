@@ -428,9 +428,9 @@ EventsControllerBase::EventsControllerBase()
           "description",
           "picture_url",
           "start",
+          "creation_date",
           "author_id",
-          "state",
-          "creation_date"
+          "state"
       })
 {
    /**
@@ -444,8 +444,8 @@ EventsControllerBase::EventsControllerBase()
         "description", // the alias for the description column.
         "picture_url", // the alias for the picture_url column.
         "start", // the alias for the start column.
+        "creation_date", // the alias for the creation_date column.
         "author_id", // the alias for the author_id column.
-        "state", // the alias for the state column.
-        "creation_date"  // the alias for the creation_date column.
+        "state"  // the alias for the state column.
     });
 }

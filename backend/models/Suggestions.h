@@ -51,6 +51,7 @@ class Suggestions
         static const std::string _author_id;
         static const std::string _post_date;
         static const std::string _sprint_id;
+        static const std::string _votes;
     };
 
     const static int primaryKeyNumber;
@@ -134,8 +135,16 @@ class Suggestions
     ///Set the value of the column sprint_id
     void setSprintId(const uint32_t &pSprintId) noexcept;
 
+    /**  For column votes  */
+    ///Get the value of the column votes, returns the default value if the column is null
+    const int32_t &getValueOfVotes() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<int32_t> &getVotes() const noexcept;
+    ///Set the value of the column votes
+    void setVotes(const int32_t &pVotes) noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 4;  }
+
+    static size_t getColumnNumber() noexcept {  return 5;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -172,6 +181,7 @@ class Suggestions
     std::shared_ptr<uint32_t> authorId_;
     std::shared_ptr<::trantor::Date> postDate_;
     std::shared_ptr<uint32_t> sprintId_;
+    std::shared_ptr<int32_t> votes_;
     struct MetaData
     {
         const std::string colName_;
@@ -183,7 +193,7 @@ class Suggestions
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[4]={ false };
+    bool dirtyFlag_[5]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -219,6 +229,12 @@ class Suggestions
             sql += "sprint_id,";
             ++parametersCount;
         }
+        sql += "votes,";
+        ++parametersCount;
+        if(!dirtyFlag_[4])
+        {
+            needSelection=true;
+        }
         needSelection=true;
         if(parametersCount > 0)
         {
@@ -247,6 +263,15 @@ class Suggestions
         {
             sql.append("?,");
 
+        }
+        if(dirtyFlag_[4])
+        {
+            sql.append("?,");
+
+        }
+        else
+        {
+            sql +="default,";
         }
         if(parametersCount > 0)
         {

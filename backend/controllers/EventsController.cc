@@ -108,6 +108,16 @@ void EventsController::finishImplementing(const HttpRequestPtr& req,
         return;
     }
 
+    if (!(*reqJson)["is_last_sprint"])
+    {
+        Json::Value ret;
+        ret["error"] = "No info about last sprint is found in the request";
+        auto resp = HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(k400BadRequest);
+        (*callbackPtr)(resp);
+        return;
+    }
+
     auto dbClient{ app().getDbClient() };
     Mapper<Event> eventMapper{ dbClient };
     eventMapper.findOne(
@@ -115,9 +125,25 @@ void EventsController::finishImplementing(const HttpRequestPtr& req,
         Criteria{
             Events::Cols::_author_id, CompareOperator::EQ,
             currentUserId },
-        [req, dbClient, callbackPtr](Event event)
+        [req, reqJson, dbClient, callbackPtr, dbClient](Event event)
         {
             Mapper<Sprint> sprintMapper{ dbClient };
+
+            if ((*reqJson)["is_last_sprint"].asBool())
+            {
+                event.setState("ended");
+                Mapper<Event> eventMapper{ dbClient };
+                eventMapper.update(event, [](auto){}, DB_EXCEPTION_HANDLER(*callbackPtr));
+            }
+            else
+            {
+                Json::Value nextSprintJson;
+                nextSprintJson["event_id"] = event.getValueOfId();
+                nextSprintJson["state"] = "voting";
+                Sprints nextSprint = Sprints(nextSprintJson);
+                sprintMapper.insert(nextSprint, [](auto){}, DB_EXCEPTION_HANDLER(*callbackPtr));
+            }
+
             sprintMapper.findOne(
                 Criteria{ Sprints::Cols::_event_id,
                           CompareOperator::EQ,
@@ -146,10 +172,9 @@ void EventsController::finishImplementing(const HttpRequestPtr& req,
                                 sprint.setState("ended");
                                 sprintMapper.update(
                                     sprint,
-                                    [callbackPtr](auto)
+                                    [callbackPtr, postCreationResponse](auto)
                                     {
-                                        (*callbackPtr)(
-                                            HttpResponse::newHttpResponse());
+                                        (*callbackPtr)(postCreationResponse);
                                     },
                                     DB_EXCEPTION_HANDLER(*callbackPtr));
                             }
