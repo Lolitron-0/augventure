@@ -6,7 +6,7 @@ import Vuelidate from 'vuelidate'
 
 const app = createApp(App)
 
-app.use(Vuelidate);
+//app.use(Vuelidate);
 components.forEach(component => {
     app.component(component.name, component)
 })
