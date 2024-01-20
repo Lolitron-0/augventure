@@ -1,22 +1,36 @@
 <template>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-  <div class="wrapper">
+  <div class="body_empty">
+    <div class="wrapper" @submit.prevent="submitHandler">
     <span class="bg-animate"></span>
 
     <div class="form-box login">
       <h2>Login</h2>
       <form action="#">
         <div class="input-box">
-          <input type="text" id="email" required>
-          <label>Email</label>
-          <i class='bx bxs-user'></i>
+          <input
+              id="email"
+              type="text"
+              required
+              v-model.trim="email"
+              :class="{ 'is-invalid': !$v.email.required }"
+
+          >
+          <label>Username</label>
+          <i class='bx bxs-user' ></i>
         </div>
         <div class="input-box">
-          <input type="password" id="password" required>
+          <input
+              type="password"
+              required
+              v-model.trim="password"
+              :class="{ 'is-invalid': !$v.password.required }"
+          >
           <label>Password</label>
-          <i class='bx bxs-lock-alt'></i>
+          <i class='bx bxs-lock-alt' ></i>
         </div>
-        <button @click="loginRequest()" class="btn">Login</button>
+<!--        <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>-->
+        <button type="submit" class="btn">Login</button>
         <div class="logreg-link">
           <p>Don't have an account? <router-link to="register">Sign Up</router-link></p>
         </div>
@@ -28,35 +42,37 @@
     </div>
 
   </div>
+  </div>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router';
-const router = useRouter()
-
-function loginRequest() {
-  var xhr = new XMLHttpRequest();
-  var url = "/api/auth/login";
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4 &&
-      xhr.status === 200 &&
-      JSON.parse(xhr.responseText).result === "ok") {
-      router.push("/profile")
-    }
-  };
-  var data = JSON.stringify({
-    user: {
-      email: document.getElementById("email").value,
-      password_hash: document.getElementById("password").value,
+<script>
+import {email, required, minLength} from 'vuelidate/lib/validators'
+import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
+  export default {
+    name: 'login',
+    data: () => ({
+      email: '',
+      password: ''
+    }),
+    validations: {
+      email: {email, required},
+      password: {required, minLength: minLength(8)}
     },
-  });
-  xhr.send(data);
-}
+    methods: {
+      exportTypedArrayMethod,
+      submitHandler() {
+        if (this.$v.$invalid)
+        {
+          this.$v.$touch()
+          return
+        }
+        this.$router.push('/')
+      },
+    }
+  }
 </script>
 
-<style>
+<style scoped>
 * {
   margin: 0;
   padding: 0;
@@ -64,7 +80,7 @@ function loginRequest() {
   font-family: 'Poppins', sans-serif;
 }
 
-body {
+.body_empty {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -87,8 +103,7 @@ body {
   top: 0;
   width: 50%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  display: flex;flex-direction: column;
   justify-content: center;
 }
 
@@ -111,7 +126,7 @@ body {
 }
 
 
-.input-box input {
+.input-box input{
   width: 100%;
   height: 100%;
   background: transparent;
@@ -195,20 +210,20 @@ body {
   top: 0;
 }
 
-.form-box .logreg-link {
+.form-box .logreg-link{
   font-size: 14.5px;
   color: #fff;
   text-align: center;
   margin: 20px 0 10px;
 }
 
-.logreg-link p a {
+.logreg-link p a{
   color: #32b8c2;
   text-decoration: none;
   font-weight: 600;
 }
 
-.logreg-link p a:hover {
+.logreg-link p a:hover{
   text-decoration: underline;
 }
 

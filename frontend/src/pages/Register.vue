@@ -1,6 +1,7 @@
 <template>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-  <div class="wrapper">
+  <div class="body_empty">
+    <div class="wrapper" @submit.prevent="submitHandler">
     <span class="bg-animate"></span>
     <span class="bg-animate2"></span>
 
@@ -8,21 +9,21 @@
       <h2>Sign Up</h2>
       <form action="#">
         <div class="input-box">
-          <input type="text" id="username" required>
+          <input type="text" required>
           <label>Username</label>
           <i class='bx bxs-user' ></i>
         </div>
         <div class="input-box">
-          <input type="text" id="email" required>
+          <input type="text" required>
           <label>Email</label>
           <i class='bx bxs-envelope'></i>
         </div>
         <div class="input-box">
-          <input type="password" id="password" required>
+          <input type="password" required>
           <label>Password</label>
           <i class='bx bxs-lock-alt' ></i>
         </div>
-        <button type="submit" @click="signupRequest()" class="btn">Sign Up</button>
+        <button type="submit" class="btn">Sign Up</button>
         <div class="logreg-link">
           <p>Already have an account? <router-link to="login">Login</router-link></p>
         </div>
@@ -34,41 +35,16 @@
     </div>
 
   </div>
-
+  </div>
 </template>
 
-<script setup>
+<script>
+  export default {
 
-import { useRouter } from 'vue-router';
-const router = useRouter()
-
-function signupRequest() {
-  var xhr = new XMLHttpRequest();
-  var url = "/api/auth/signup";
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.onreadystatechange = function () {
-    alert(xhr.responseText)
-    if (xhr.readyState === 4 &&
-      xhr.status === 200 &&
-      JSON.parse(xhr.responseText).result === "ok") {
-      router.push("/login")
-    }
-  };
-  var data = JSON.stringify({
-    user: {
-      username: document.getElementById("username").value,
-      email: document.getElementById("email").value,
-      password_hash: document.getElementById("password").value,
-    },
-  });
-  xhr.send(data);
-}
-
+  }
 </script>
 
 <style scoped>
-
 * {
   margin: 0;
   padding: 0;
@@ -76,7 +52,7 @@ function signupRequest() {
   font-family: 'Poppins', sans-serif;
 }
 
-body {
+.body_empty {
   display: flex;
   justify-content: center;
   align-items: center;
