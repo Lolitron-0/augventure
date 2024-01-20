@@ -11,8 +11,10 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 .notifications{
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   width: 100vw;
   height: 100vh;
   position: relative;

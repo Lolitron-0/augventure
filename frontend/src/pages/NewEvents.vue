@@ -70,8 +70,10 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 .back {
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   position: fixed;
   width: 100vw;
   max-height: 100vh;
@@ -89,7 +91,7 @@ export default {
   width: 100%;
   height: 8%;
   //border: 1px solid green;
-  border-bottom: 2px solid #24292F;
+  border-bottom: 2px solid var(--border-dark-gray-color);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -110,7 +112,7 @@ export default {
   align-items: center;
 }
 .page_title{
-  color: #587DFF;
+  color: var(--title-color);
   font-size: 18px;
   font-weight: 400;
 }
@@ -124,23 +126,23 @@ export default {
 .title_text, .description_text,
 .picture_text, .status_text{
   font-size: 16px;
-  color: #587DFF;
+  color: var(--title-color);
   font-weight: 300;
 }
 .input_form_for_title{
-  background-color: #0d1117;
-  border: 1px solid #868686;
+  background-color: var(--background-app-color);
+  border: 1px solid var(--border-light-gray-color);
   width: 100%;
   height: 30px;
   margin-top: 10px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   padding: 0 10px;
 }
 
 .form_for_picture{
   width: 100%;
   height: 70px;
-  border: 1px solid #858585;
+  border: 1px solid var(--border-light-gray-color);
   justify-content: center;
   align-items: center;
   display: flex;
@@ -167,17 +169,17 @@ export default {
 }
 .download_vector{
   font-size: 30px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   cursor: pointer;
 }
 
 .textarea_form_for_description{
-  background-color: #0d1117;
-  border: 1px solid #868686;
+  background-color: var(--background-app-color);
+  border: 1px solid var(--border-light-gray-color);
   width: 100%;
   height: 100px;
   margin-top: 10px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   resize: vertical;
   overflow: auto;
   padding: 0 10px;
@@ -202,13 +204,13 @@ export default {
   z-index: -1;
 }
 .custom_radio{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   display: inline-block;
   width: 15px;
   height: 15px;
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   border-radius: 50%;
-  border: 2px solid #cfcfcf;
+  border: 2px solid var(--text-wight-color);
   vertical-align: text-top;
   position: relative;
 }
@@ -217,9 +219,9 @@ export default {
   //display: inline-block;
   width: 10px;
   height: 10px;
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   border-radius: 50%;
-  border: 3.5px solid #587DFF;
+  border: 3.5px solid var(--text-turquoise-color);
 
   position: absolute;
   left: 50%;
@@ -233,12 +235,12 @@ export default {
 }
 
 .time_now_vector, .time_later_vector{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   font-size: 30px;
   cursor: pointer;
 }
 .text_for_state_form{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   font-weight: 200;
   font-size: 16px;
   padding-left: 15px;
@@ -259,7 +261,7 @@ export default {
   font-weight: 300;
   justify-content: center;
   align-items: center;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   font-size: 16px;
 }
 

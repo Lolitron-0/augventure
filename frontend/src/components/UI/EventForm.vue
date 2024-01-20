@@ -30,15 +30,16 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
 
 .event_form {
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   display: flex;
   justify-content: space-between;
   width: 95%;
   height: 130px;
   margin: 5px;
-  border: .4px solid #858585;
+  border: .4px solid var(--border-light-gray-color);
   border-radius: 5px;
   padding: 5px;
   gap: 5px;
@@ -64,16 +65,16 @@ export default {
   display: flex;
   justify-content: left;
   gap: 10px;
-  color: #858585;
+  color: var(--content-event);
   padding-bottom: 10px;
 }
 .title_event{
-  color: #0e73bd;
+  color: var(--title-event-color);
   font-size: 16px;
   padding-bottom: 10px;
 }
 .description_event{
-  color: #858585;
+  color: var(--description-event);
   padding-bottom: 10px;
 }
 .stars_event{
@@ -83,7 +84,7 @@ export default {
   font-size: 16px;
 }
 .content_art, .content_boobs, .content_tag{
-  border: 1px solid #858585;
+  border: 1px solid var(--border-light-gray-color);
   border-radius: 10px;
   padding: 2px 7px;
 }

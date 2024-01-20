@@ -148,18 +148,19 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
 
 .header {
   width: 100%;
   position: fixed;
   padding: 5px 60px;
-  background: #24292F;
+  background: var(--navbar-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
   left: 0;
   top: 0;
-  border-bottom: 2px solid #858585;
+  border-bottom: 2px solid var(--border-light-gray-color);
   z-index: 1000;
 }
 .nav_left {
@@ -171,7 +172,7 @@ export default {
 .ellipse_nav_logo {
   width: 30px;
   height: 30px;
-  border: solid 1px #858585;
+  border: solid 1px var(--border-light-gray-color);
   box-sizing: border-box;
   background-color: #0e73bd;
   cursor: pointer;
@@ -186,7 +187,7 @@ export default {
 }
 
 .nav_menu ul li a{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   font-size: 16px;
   transition: .3s;
   display: block;
@@ -195,8 +196,8 @@ export default {
 }
 
 .nav_menu ul li a:hover{
-  color: #31a0a8;
-  background: #081b29;
+  color: var(--text-turquoise-color);
+  background: var(--background-btn-color);
 }
 .main_menu_text:hover {
   border-radius: 5px;
@@ -205,7 +206,7 @@ export default {
   position: absolute;
   left: 0;
   width: 180px;
-  background: #24292F;
+  background: var(--navbar-color);
   display: none;
 }
 .nav_menu ul li ul li{
@@ -230,7 +231,7 @@ export default {
   //flex-shrink: 0;
 }
 .search_form_show {
-  border: 1px solid #cfcfcf;
+  border: 1px solid var(--text-wight-color);
   display: flex;
   padding: 0 20px 0 5px;
   justify-content: center;
@@ -244,7 +245,7 @@ export default {
 
 
 .search_form_not_show {
-  border: 1px solid #cfcfcf;
+  border: 1px solid var(--text-wight-color);
   display: flex;
   padding: 0 20px 0 5px;
   justify-content: center;
@@ -263,12 +264,12 @@ export default {
   font-size: 16px;
   padding-left: 5px;
   background-color: transparent;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
 }
 
 .search_vector {
   background-color: transparent;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   font-size: 18px;
   cursor: pointer;
   padding: 5px;
@@ -287,20 +288,20 @@ export default {
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  border: 1px solid #cfcfcf;
-  color: #cfcfcf;
+  border: 1px solid var(--text-wight-color);
+  color: var(--text-wight-color);
   cursor: pointer;
   transition: .3s;
   //flex-shrink: 0;
 }
 .bell_vector:hover {
-  color: #32B8C2;
-  border: 1px solid #32B8C2;
+  color: var(--text-turquoise-color);
+  border: 1px solid var(--text-turquoise-color);
 }
 .user_logo {
   width: 32px;
   height: 32px;
-  border: solid 0.1rem #858585;
+  border: solid 0.1rem var(--border-light-gray-color);
   box-sizing: border-box;
   background-size: 100% 100%;
   background-repeat: no-repeat;

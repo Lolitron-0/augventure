@@ -1,10 +1,7 @@
 <template>
   <div class="back">
     <div class="settings">
-      <div class="info">
-        <div class="ellipse_nav_logo"></div>
-        <div class="profile_nickname">Nickname</div>
-      </div>
+      <info-block-for-profile></info-block-for-profile>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="block_about_private_information">
@@ -87,15 +84,18 @@ import MyButton from "@/components/UI/MyButton.vue";
 import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
 import EmailForm from "@/components/UI/EmailForm.vue";
+import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 export default {
-  components: {EmailForm, MyButton, EventForm, ProfileNavbar}
+  components: {InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar}
 
 }
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 .back {
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   position: fixed;
   width: 100vw;
   max-height: 100vh;
@@ -155,21 +155,21 @@ border: solid 1px #858585;
 }
 .input_form_for_name, .input_form_for_surname{
   padding: 0 10px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   width: 100%;
   height: 30px;
-  background-color: #0d1117;
-  border: 1px solid #858585;
+  background-color: var(--background-app-color);
+  border: 1px solid var(--border-light-gray-color);
   margin-bottom: 15px;
 }
 
 .textarea_form_for_aboutMe{
   padding: 0 10px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   width: 100%;
   height: 80px;
-  background-color: #0d1117;
-  border: 1px solid #858585;
+  background-color: var(--background-app-color);
+  border: 1px solid var(--border-light-gray-color);
   margin-bottom: 15px;
   resize: vertical;
   overflow: auto;
@@ -187,18 +187,18 @@ border: solid 1px #858585;
   border: none;
   justify-content: center;
   align-items: center;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
 
 }
 .block_about_private_information{
-  border-bottom: 1px solid #24292F;
+  border-bottom: 1px solid var(--border-dark-gray-color);
   padding-bottom: 15px;
 }
 
 .form_picture{
   width: 100%;
 //border: 1px solid #31a0a8;
-  border-bottom: 1px solid #24292F;
+  border-bottom: 1px solid var(--border-dark-gray-color);
   padding-bottom: 15px;
   margin-top: 15px;
   margin-bottom: 15px;
@@ -206,14 +206,14 @@ border: solid 1px #858585;
 
 .picture_text{
   font-size: 16px;
-  color: #587DFF;
+  color: var(--title-color);
   font-weight: 300;
 }
 
 .form_for_picture{
   width: 100%;
   height: 160px;
-  border: 1px solid #858585;
+  border: 1px solid var(--border-light-gray-color);
   justify-content: center;
   align-items: center;
   display: flex;
@@ -225,7 +225,7 @@ border: solid 1px #858585;
   width: 0;
   height: 0;
   position: absolute;
-  background-color: #858585;
+  //background-color: #858585;
   opacity: 0;
   z-index: -1;
   cursor: pointer;
@@ -245,7 +245,7 @@ border: solid 1px #858585;
   height: 150px;
   position: absolute;
   left: 15px;
-  border: solid 1px #858585;
+  border: solid 1px var(--border-light-gray-color);
   box-sizing: border-box;
   background-color: #0e73bd;
   //cursor: pointer;
@@ -254,7 +254,7 @@ border: solid 1px #858585;
 
 }
 .TextBlock_in_container{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   //border: 1px solid red;
   width: 80%;
   height: 100%;
@@ -270,19 +270,19 @@ border: solid 1px #858585;
   cursor: pointer;
 }
 .text_in_containerPicture:hover{
-  color: #587DFF;
+  color: var(--text-turquoise-color)
 }
 
 .block_about_email{
   width: 100%;
   //border: 1px solid red;
-  border-bottom: 1px solid #24292F;
+  border-bottom: 1px solid var(--border-dark-gray-color);
   padding-bottom: 15px;
   margin-bottom: 15px;
 }
 
 .text_for_email{
-  color: #587DFF;
+  color: var(--text-wight-color);
   font-size: 18px;
   padding-bottom: 10px;
 }
@@ -291,10 +291,10 @@ border: solid 1px #858585;
   margin-top: 15px;
   width: 100%;
   height: 40px;
-  background-color: #0d1117;
-  border: 1px solid #858585;
+  background-color: var(--background-app-color);
+  border: 1px solid var(--border-light-gray-color);
   padding-left: 10px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
 }
 
 .container_for_btn_addEmail{
@@ -311,7 +311,7 @@ border: solid 1px #858585;
   height: 30px;
   justify-content: center;
   align-items: center;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
 }
 
 .block_about_password{
@@ -321,18 +321,18 @@ border: solid 1px #858585;
   border-bottom: 1px solid #24292F;
 }
 .new_password_title, .forget_password_title {
-  color: #587DFF;
+  color: var(--text-wight-color);
   font-size: 18px;
   margin-bottom: 10px;
 }
 .input_form_for_password{
   width: 100%;
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   height: 40px;
-  border: 1px solid #858585;
+  border: 1px solid var(--border-light-gray-color);
   margin-bottom: 10px;
   padding-left: 10px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   font-size: 17px;
 }
 .block_for_btn_savePassword{
@@ -346,23 +346,23 @@ border: solid 1px #858585;
   width: 200px;
   height: 30px;
   border: none;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   justify-content: center;
   align-items: center;
 }
 .text_forget_password{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   margin-bottom: 10px;
   font-size: 16px;
 }
 
 .input_form_for_email{
   width: 100%;
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   padding-left: 10px;
   height: 40px;
-  border: 1px solid #858585;
-  color: #cfcfcf;
+  border: 1px solid var(--border-light-gray-color);
+  color: var(--text-wight-color);
   margin-bottom: 10px;
 }
 
@@ -385,7 +385,7 @@ border: solid 1px #858585;
 
 .text_warning{
   font-size: 18px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   justify-content: center;
   display: flex;
 }

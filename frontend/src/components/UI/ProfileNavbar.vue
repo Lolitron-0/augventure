@@ -56,33 +56,34 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
 
 .ProfileNavbar{
   display: flex;
   justify-content: left;
   gap: 50px;
-  border-bottom: 1px solid #858585;
+  border-bottom: 1px solid var(--border-light-gray-color);
   padding: 5px 10px;
   margin-bottom: 5px;
 }
 .rout_nav_text {
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   text-decoration: none;
   transition: .3s;
 }
 .active {
-  color: #31a0a8;
+  color: var(--text-turquoise-color);
   text-decoration: none;
   transition: .3s;
 }
 .rout_nav_text:hover{
-  color: #31a0a8;
+  color: var(--text-turquoise-color);
 }
 .block_text_navigation{
   display: flex;
   flex-direction: row;
   gap: 10px;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   padding: 5px;
 }
 

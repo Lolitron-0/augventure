@@ -1,31 +1,7 @@
 <template>
   <div class="back">
     <div class="profile">
-      <div class="info">
-        <div class="min_fersion">
-          <div class="ellipse_nav_logo"></div>
-          <div class="profile_nickname">Nickname</div>
-        </div>
-        <hr class="first_hr">
-        <div class="user_info">
-          <div class="your_subscribers">
-            <i class="ri-user-star-line"></i>
-            23.1k
-          </div>
-          <div class="profile_info_users_events">
-            <i class="ri-git-branch-line"></i>
-            24
-          </div>
-          <div class="subscriptions">
-            <i class='bx bxs-star'></i>
-            98
-          </div>
-        </div>
-        <hr>
-        <div class="user_description">
-          Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
-        </div>
-      </div>
+      <info-block-for-profile></info-block-for-profile>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="form_for_btn_new"><router-link :to="{ name: 'newEvents'}"><button class="btn_new">New</button></router-link></div>
@@ -54,21 +30,33 @@
   import MyButton from "@/components/UI/MyButton.vue";
   import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
   import EventForm from "@/components/UI/EventForm.vue";
+  import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
+  import axios from 'axios'
   export default {
-    components: {EventForm, ProfileNavbar, MyButton},
+    components: {InfoBlockForProfile, EventForm, ProfileNavbar, MyButton},
+    async mounted() {
+      axios.get("/api/events").then(function (resp) {
+        console.log(resp.data)
+      }).catch(function (err) {
+        console.log(err)
+      })
+    }
   }
 </script>
 
 <style scoped>
+@import '@/styles.css';
+
 hr {
   margin-top: 5px;
-  background-color: #858585;
+  background-color: var(--border-light-gray-color);
   padding: .3px;
-  border: #858585;
+  border: var(--border-light-gray-color);
 }
 
 .back {
-  background-color: #0d1117;
+  //background-color: #0d1117;
+  background-color: var(--background-app-color);
   position: fixed;
   width: 100vw;
   max-height: 100vh;
@@ -109,7 +97,7 @@ hr {
   padding-bottom: 90%;
   max-width: 256px;
   max-height: 256px;
-  border: solid 1px #858585;
+  border: solid 1px var(--border-light-gray-color);
   box-sizing: border-box;
   background-color: #0e73bd;
   cursor: pointer;
@@ -155,7 +143,8 @@ hr {
 .btn_new {
   font-size: 14px;
   letter-spacing: 1px;
-  background: #587DFF;
+  //background: var(--text-turquoise-color);
+  background: green;
   padding: 2px 5px;
   text-decoration: none;
 //text-transform: uppercase;
@@ -169,9 +158,9 @@ hr {
   position: absolute;
 }
 
-.btn_new:hover {
+/*.btn_new:hover {
   background-color: #31a0a8;
-}
+}*/
 .form_for_btn_new{
   width: 870px;
   height: 40px;

@@ -14,6 +14,8 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 .profileNavbar {
   position: absolute;
   top: 100px;

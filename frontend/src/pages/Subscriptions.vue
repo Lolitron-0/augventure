@@ -1,10 +1,7 @@
 <template>
   <div class="back">
     <div class="subscriptions">
-      <div class="info">
-        <div class="ellipse_nav_logo"></div>
-        <div class="profile_nickname">Nickname</div>
-      </div>
+      <info-block-for-profile></info-block-for-profile>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
       </div>
@@ -14,16 +11,19 @@
 
 <script>
 import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
+import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 
 export default {
-  components: {ProfileNavbar}
+  components: {InfoBlockForProfile, ProfileNavbar}
 
 }
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 .back {
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   position: fixed;
   width: 100vw;
   max-height: 100vh;

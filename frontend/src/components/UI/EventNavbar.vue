@@ -34,6 +34,8 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 .eventNavbar{
   //border: 1px solid red;
   width: 100%;
@@ -48,12 +50,12 @@ export default {
   border: none;
   justify-content: center;
   align-items: center;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
 }
 
 .rout_event_nav_text{
   text-decoration: none;
-  color: #cfcfcf;
+  color: var(--text-wight-color);
 }
 
 .active{
@@ -62,8 +64,8 @@ export default {
   border: none;
   justify-content: center;
   align-items: center;
-  color: #cfcfcf;
-  background-color: #31a0a8;
+  color: var(--text-wight-color);
+  background-color: var(--text-turquoise-color);
 }
 
 @media (max-width: 992px) {

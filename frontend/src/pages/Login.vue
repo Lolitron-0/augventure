@@ -2,74 +2,79 @@
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <div class="body_empty">
     <div class="wrapper" @submit.prevent="submitHandler">
-    <span class="bg-animate"></span>
+      <span class="bg-animate"></span>
 
-    <div class="form-box login">
-      <h2>Login</h2>
-      <form action="#">
-        <div class="input-box">
-          <input
-              id="email"
-              type="text"
-              required
-              v-model.trim="email"
-              :class="{ 'is-invalid': !$v.email.required }"
+      <div class="form-box login">
+        <h2>Login</h2>
+        <form action="#">
+          <div class="input-box">
+            <input id="email" type="text" required v-model.trim="email">
+            <!-- PROPERTY OF INPUT  :class="{ 'is-invalid': !$v.email.required }"  -->
 
-          >
-          <label>Username</label>
-          <i class='bx bxs-user' ></i>
-        </div>
-        <div class="input-box">
-          <input
-              type="password"
-              required
-              v-model.trim="password"
-              :class="{ 'is-invalid': !$v.password.required }"
-          >
-          <label>Password</label>
-          <i class='bx bxs-lock-alt' ></i>
-        </div>
-<!--        <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>-->
-        <button type="submit" class="btn">Login</button>
-        <div class="logreg-link">
-          <p>Don't have an account? <router-link to="register">Sign Up</router-link></p>
-        </div>
-      </form>
+            <label>Username</label>
+            <i class='bx bxs-user'></i>
+          </div>
+          <div class="input-box">
+            <input type="password" required v-model.trim="password">
+            <!-- :class="{ 'is-invalid': !$v.password.required }" -->
+            <label>Password</label>
+            <i class='bx bxs-lock-alt'></i>
+          </div>
+          <!--        <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>-->
+          <button type="submit" class="btn">Login</button>
+          <div class="logreg-link">
+            <p>Don't have an account? <router-link to="register">Sign Up</router-link></p>
+          </div>
+        </form>
+      </div>
+      <div class="info-text login">
+        <h2>WELCOME BACK</h2>
+        <p>Augventure welcomes you!</p>
+      </div>
+
     </div>
-    <div class="info-text login">
-      <h2>WELCOME BACK</h2>
-      <p>Augventure welcomes you!</p>
-    </div>
-
-  </div>
   </div>
 </template>
 
 <script>
-import {email, required, minLength} from 'vuelidate/lib/validators'
-import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
-  export default {
-    name: 'login',
-    data: () => ({
-      email: '',
-      password: ''
-    }),
-    validations: {
-      email: {email, required},
-      password: {required, minLength: minLength(8)}
-    },
-    methods: {
-      exportTypedArrayMethod,
-      submitHandler() {
-        if (this.$v.$invalid)
-        {
-          this.$v.$touch()
-          return
+import { email, required, minLength } from 'vuelidate/lib/validators'
+import { exportTypedArrayMethod } from "core-js/internals/array-buffer-view-core";
+import axios from 'axios'
+
+export default {
+  name: 'login',
+  data: () => ({
+    email: '',
+    password: ''
+  }),
+  validations: {
+    email: { email, required },
+    password: { required, minLength: minLength(8) }
+  },
+  methods: {
+    exportTypedArrayMethod,
+    submitHandler() {
+      axios.post("/api/auth/login", {
+        user: {
+          email: this.email,
+          password: this.password
         }
+      }).then(function (resp) {
+        console.log(resp.data)
+        // probably you need to save access token for later use (i.e. in cookies) and pass it in Authorization header
         this.$router.push('/')
-      },
-    }
+      }).catch(function (err) {
+        console.log(err)
+      })
+      // if (this.$v.$invalid)
+      // {
+      //   this.$v.$touch()
+      //   return
+      // }
+      // this.$router.push('/')
+    },
   }
+}
 </script>
 
 <style scoped>
@@ -94,7 +99,7 @@ import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
   height: 450px;
   background: transparent;
   border: 2px solid #31a0a8;
-  //box-shadow: 0 0 25px #0ef;
+  /* box-shadow: 0 0 25px #0ef; */
   overflow: hidden;
 }
 
@@ -103,7 +108,8 @@ import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
   top: 0;
   width: 50%;
   height: 100%;
-  display: flex;flex-direction: column;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 
@@ -126,7 +132,7 @@ import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
 }
 
 
-.input-box input{
+.input-box input {
   width: 100%;
   height: 100%;
   background: transparent;
@@ -200,7 +206,7 @@ import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
   left: 0;
   width: 100%;
   height: 300%;
-  //background: linear-gradient(#081b29, #0ef, #081b29, #0ef);
+  /* background: linear-gradient(#081b29, #0ef, #081b29, #0ef); */
   background: #32b8c2;
   z-index: -1;
   transition: .5s;
@@ -210,20 +216,20 @@ import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
   top: 0;
 }
 
-.form-box .logreg-link{
+.form-box .logreg-link {
   font-size: 14.5px;
   color: #fff;
   text-align: center;
   margin: 20px 0 10px;
 }
 
-.logreg-link p a{
+.logreg-link p a {
   color: #32b8c2;
   text-decoration: none;
   font-weight: 600;
 }
 
-.logreg-link p a:hover{
+.logreg-link p a:hover {
   text-decoration: underline;
 }
 

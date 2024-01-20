@@ -1,0 +1,20 @@
+:root {
+
+    --background-app-color: #0d1117;
+    --background-login-color: #081b29;
+
+    --background-btn-color: #081b29;
+    --text-wight-color: #cfcfcf;
+    --text-turquoise-color: #31a0a8;
+    --title-event-color: #31a0a8;
+    --navbar-color: #24292F;
+    --border-light-gray-color: #858585;
+    --border-dark-gray-color: #24292F;
+    --user-description: #858585;
+    --profile-nickname: #cfcfcf;
+    --user-info: #cfcfcf;
+    --content-event: #858585;
+    --description-event: #858585;
+
+    --title-color: #cfcfcf;
+}

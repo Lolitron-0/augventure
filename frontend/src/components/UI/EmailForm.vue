@@ -20,24 +20,26 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 .form_for_email{
   width: 100%;
   height: 40px;
-  background-color: #0d1117;
-  border: 1px solid #858585;
+  background-color: var(--background-app-color);
+  border: 1px solid var(--border-light-gray-color);
   position: relative;
 }
 .block_for_textEmail{
   width: 40%;
   height: 40px;
-  border-right: 1px solid #858585;
+  border-right: 1px solid var(--border-light-gray-color);
   display: flex;
   align-items: center;
   position: absolute;
   left: 0;
 }
 .text_email{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   padding-left: 10px;
 
 }
@@ -54,7 +56,7 @@ export default {
 }
 
 .btn_email{
-  color: #cfcfcf;
+  color: var(--text-wight-color);
   width: 200px;
   height: 25px;
   border: none;

@@ -40,11 +40,18 @@
 
 <script>
   export default {
+    methods: {
 
+      submitHandler() {
+        this.$router.push('/')
+      },
+    }
   }
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
 * {
   margin: 0;
   padding: 0;

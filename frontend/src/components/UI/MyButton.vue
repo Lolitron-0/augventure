@@ -11,12 +11,14 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles.css";
+
   .btn {
     //display: inline-block;
     display: flex;
     //font-size: 14px;
     letter-spacing: 1px;
-    background: #081b29;
+    background: var(--background-btn-color);
     //padding: 10px 30px;
     text-decoration: none;
     //text-transform: uppercase;
@@ -27,6 +29,6 @@ export default {
   }
 
   .btn:hover {
-    background-color: #31a0a8;
+    background-color: var(--text-turquoise-color);
   }
 </style>

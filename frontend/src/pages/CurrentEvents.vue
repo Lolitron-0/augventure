@@ -37,8 +37,10 @@ export default {
 </script >
 
 <style scoped>
+@import "@/styles.css";
+
 .back {
-  background-color: #0d1117;
+  background-color: var(--background-app-color);
   position: fixed;
   width: 100vw;
   max-height: 100vh;
@@ -56,7 +58,7 @@ export default {
   width: 100%;
   height: 8%;
 //border: 1px solid green;
-  border-bottom: 2px solid #24292F;
+  border-bottom: 2px solid var(--border-light-gray-color);
   display: flex;
   justify-content: center;
   align-items: center;
