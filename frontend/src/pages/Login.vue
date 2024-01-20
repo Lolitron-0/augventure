@@ -94,7 +94,7 @@ import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
   height: 450px;
   background: transparent;
   border: 2px solid #31a0a8;
-  //box-shadow: 0 0 25px #0ef;
+  /* box-shadow: 0 0 25px #0ef; */
   overflow: hidden;
 }
 
@@ -200,7 +200,7 @@ import {exportTypedArrayMethod} from "core-js/internals/array-buffer-view-core";
   left: 0;
   width: 100%;
   height: 300%;
-  //background: linear-gradient(#081b29, #0ef, #081b29, #0ef);
+  /* background: linear-gradient(#081b29, #0ef, #081b29, #0ef); */
   background: #32b8c2;
   z-index: -1;
   transition: .5s;
