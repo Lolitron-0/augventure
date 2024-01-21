@@ -51,21 +51,26 @@ export default {
 }
 .currentEvents  {
   width: 90vw;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   position: absolute;
 }
 .form_for_eventNav{
   width: 100%;
   height: 8%;
+<<<<<<< HEAD
 //border: 1px solid green;
   border-bottom: 2px solid var(--border-light-gray-color);
+=======
+  /* border: 1px solid green; */
+  border-bottom: 2px solid #24292F;
+>>>>>>> e30a13990d76036161a19587e4f2db5dab34e90a
   display: flex;
   justify-content: center;
   align-items: center;
   padding-bottom: 10px;
 }
 .form_for_eventForm{
-  //border: 1px solid green;
+  /* border: 1px solid green; */
   width: 100%;
   padding: 2%;
 

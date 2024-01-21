@@ -84,21 +84,26 @@ export default {
 }
 .newEvents  {
   width: 90vw;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   position: absolute;
 }
 .form_for_eventNav{
   width: 100%;
   height: 8%;
+<<<<<<< HEAD
   //border: 1px solid green;
   border-bottom: 2px solid var(--border-dark-gray-color);
+=======
+  /* border: 1px solid green; */
+  border-bottom: 2px solid #24292F;
+>>>>>>> e30a13990d76036161a19587e4f2db5dab34e90a
   display: flex;
   justify-content: center;
   align-items: center;
   padding-bottom: 10px;
 }
 .form_for_createEvent{
-  //border: 1px solid yellow;
+  /* border: 1px solid yellow; */
   height: 92%;
   width: 100%;
   padding: 10px;
@@ -106,7 +111,7 @@ export default {
 
 .title_for_createEvent{
   width: 100%;
-  //border: 1px solid #31a0a8;
+  /* border: 1px solid #31a0a8; */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -120,7 +125,7 @@ export default {
 .form_title, .form_description,
 .form_picture, .container_for_status{
   width: 100%;
-  //border: 1px solid #31a0a8;
+  /* border: 1px solid #31a0a8; */
   margin-top: 15px;
 }
 .title_text, .description_text,
@@ -153,7 +158,7 @@ export default {
   width: 0;
   height: 0;
   position: absolute;
-  //background-color: #858585;
+  /* background-color: #858585; */
   opacity: 0;
   z-index: -1;
   cursor: pointer;
@@ -161,7 +166,7 @@ export default {
 .label_for_picture{
   width: 100%;
   height: 100%;
-  //background-color: #cfcfcf;
+  /* background-color: #cfcfcf; */
   justify-content: center;
   align-items: center;
   display: flex;
@@ -189,7 +194,7 @@ export default {
 .status_event{
   margin-top: 10px;
   width: 100%;
-  //border: 1px solid green;
+  /* border: 1px solid green; */
   display: flex;
   gap: 15px;
   align-items: center;
@@ -216,7 +221,7 @@ export default {
 }
 .custom_radio::before{
   content: '';
-  //display: inline-block;
+  /* display: inline-block; */
   width: 10px;
   height: 10px;
   background-color: var(--background-app-color);
@@ -249,7 +254,7 @@ export default {
 
 .container_btn{
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   margin-top: 10px;
   padding: 5px;
 }

@@ -48,14 +48,14 @@ export default {
   display: flex;
   flex-direction: column;
   width: 30%;
-  //border: 1px solid green;
+  /* border: 1px solid green; */
   font-size: 16px;
   justify-content: center;
   align-items: center;
 
 }
 .body_event{
-  //border: 1px solid green;
+  /* border: 1px solid green; */
   width: 70%;
   font-size: 14px;
   align-items: center;
