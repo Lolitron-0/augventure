@@ -10,12 +10,14 @@ FROM drogonframework/drogon:latest
 #  mv clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04 clang_18 && \
 #  echo ‘export PATH=/clang_18/bin:$PATH’ >> ~/.bashrc && \
 #  echo ‘export LD_LIBRARY_PATH=/clang_18/lib:$LD_LIBRARY_PATH’ >> ~/.bashrc
+WORKDIR /
+RUN apt-get update && apt-get install ninja-build
 
 WORKDIR /app
 COPY . .
 
 WORKDIR build
-RUN cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --parallel 5
+RUN cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja .. && cmake --build . --parallel 5
 
 CMD ./augventure
 # WORKDIR ..
