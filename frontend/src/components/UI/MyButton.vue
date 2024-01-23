@@ -14,17 +14,17 @@ export default {
 @import "@/styles.css";
 
   .btn {
-    //display: inline-block;
+    /* display: inline-block; */
     display: flex;
-    //font-size: 14px;
+    /* font-size: 14px; */
     letter-spacing: 1px;
     background: var(--background-btn-color);
-    //padding: 10px 30px;
+    /* padding: 10px 30px; */
     text-decoration: none;
-    //text-transform: uppercase;
+    /* text-transform: uppercase; */
     border-radius: 10px;
     transition: .6s;
-    //border: none;
+    /* border: none; */
     cursor: pointer;
   }
 

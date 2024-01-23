@@ -57,22 +57,6 @@
   </div>
 </template>
 <script>
-<<<<<<< HEAD
-  import MyButton from "@/components/UI/MyButton.vue";
-  import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
-  import EventForm from "@/components/UI/EventForm.vue";
-  import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
-  import axios from 'axios'
-  export default {
-    components: {InfoBlockForProfile, EventForm, ProfileNavbar, MyButton},
-    async mounted() {
-      axios.get("/api/events").then(function (resp) {
-        console.log(resp.data)
-      }).catch(function (err) {
-        console.log(err)
-      })
-    }
-=======
 import MyButton from "@/components/UI/MyButton.vue";
 import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
@@ -87,7 +71,6 @@ export default {
     }).catch(function (err) {
       console.log(err)
     })
->>>>>>> e30a13990d76036161a19587e4f2db5dab34e90a
   }
 }
 </script>
@@ -103,7 +86,7 @@ hr {
 }
 
 .back {
-  //background-color: #0d1117;
+  /* background-color: #0d1117; */
   background-color: var(--background-app-color);
   position: fixed;
   width: 100vw;
@@ -197,7 +180,7 @@ hr {
 .btn_new {
   font-size: 14px;
   letter-spacing: 1px;
-  //background: var(--text-turquoise-color);
+  /* background: var(--text-turquoise-color); */
   background: green;
   padding: 2px 5px;
   text-decoration: none;
@@ -214,14 +197,8 @@ hr {
 
 /*.btn_new:hover {
   background-color: #31a0a8;
-<<<<<<< HEAD
 }*/
 .form_for_btn_new{
-=======
-}
-
-.form_for_btn_new {
->>>>>>> e30a13990d76036161a19587e4f2db5dab34e90a
   width: 870px;
   height: 40px;
   margin-bottom: 5px;
