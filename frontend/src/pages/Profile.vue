@@ -1,37 +1,7 @@
 <template>
   <div class="back">
     <div class="profile">
-<<<<<<< HEAD
       <info-block-for-profile></info-block-for-profile>
-=======
-      <div class="info">
-        <div class="min_fersion">
-          <div class="ellipse_nav_logo"></div>
-          <div class="profile_nickname">Nickname</div>
-        </div>
-        <hr class="first_hr">
-        <div class="user_info">
-          <div class="your_subscribers">
-            <i class="ri-user-star-line"></i>
-            23.1k
-          </div>
-          <div class="profile_info_users_events">
-            <i class="ri-git-branch-line"></i>
-            24
-          </div>
-          <div class="subscriptions">
-            <i class='bx bxs-star'></i>
-            98
-          </div>
-        </div>
-        <hr>
-        <div class="user_description">
-          Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
-          aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo
-          enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
-        </div>
-      </div>
->>>>>>> e30a13990d76036161a19587e4f2db5dab34e90a
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="form_for_btn_new"><router-link :to="{ name: 'newEvents' }"><button

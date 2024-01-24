@@ -90,13 +90,8 @@ export default {
 .form_for_eventNav{
   width: 100%;
   height: 8%;
-<<<<<<< HEAD
-  //border: 1px solid green;
-  border-bottom: 2px solid var(--border-dark-gray-color);
-=======
   /* border: 1px solid green; */
   border-bottom: 2px solid #24292F;
->>>>>>> e30a13990d76036161a19587e4f2db5dab34e90a
   display: flex;
   justify-content: center;
   align-items: center;
