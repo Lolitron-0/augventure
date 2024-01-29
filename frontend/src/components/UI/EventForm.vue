@@ -2,8 +2,8 @@
   <router-link style="text-decoration: none" :to="{ name: 'eventsMain' }">
     <div class="event_form" id="event-form">
       <div class="body_event" id="body_event">
-        <div class="title_event" id="title-event">Event3</div>
-        <div class="description_event" id="description_event">My cool short description</div>
+        <div class="title_event" id="title-event">{{ this.title }}</div>
+        <div class="description_event" id="description_event">{{ this.description }}</div>
         <div class="content_event" id="content_event">
           <div class="content_art" id="content_art">art</div>
           <div class="content_boobs" id="content_boobs">boobs</div>
@@ -15,9 +15,7 @@
         </div>
       </div>
       <div class="state_event" id="state_event">
-        Timed event!
-        02:39:01
-        remaining
+        {{ this.state }}
       </div>
     </div>
   </router-link>
@@ -25,7 +23,7 @@
 
 <script>
 export default {
-
+  props: ['title', 'description', 'state'],
 }
 </script>
 
