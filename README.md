@@ -20,8 +20,3 @@ The platform helps creators respond to audience requests and receive feedback. T
      * **backend:80** - адрес бэкенда
      * **frontend:3000** - адрес Vue приложения (фронтенд)
      * **db:3306** - адрес базы данных
-## Note:
-Only examples of configs with secret keys are provided, files to be copied and renamed: \
-`backend/exampleConfig.json` -> `backend/config.json` \
-`backend/models/exampleModel.json` -> `backend/models/model.json` \
-For building with docker compose uncomment the "host":"db" line in backend/config.json
