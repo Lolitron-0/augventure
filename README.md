@@ -6,7 +6,7 @@ The platform helps creators respond to audience requests and receive feedback. T
 
 ## Локальный запуск
 Для развертывания сервиса необходимы [Docker](https://docs.docker.com/engine/install/) и [Docker Compose](https://docs.docker.com/compose/).
-  1. `git clone https://github.com/Lolitron-0/augventure`
+  1. `git clone --recurse-submodules https://github.com/Lolitron-0/augventure`
   2. `cd augventure`
   3. `docker compose up`
      * Запуск всех контейнеров может занять некоторое время, так как они зависят от контейнера базы данных. Сервис полностью запущен, когда развернут фронтенд.
