@@ -10,7 +10,8 @@ The platform helps creators respond to audience requests and receive feedback. T
 
 **Важно:** для запуска необходимы файлы конфигурации с секретными ключами. В репозитории предоставлены шаблоны для этих файлов, которые требуется скопировать и переименовать: \
 `backend/exampleConfig.json` -> `backend/config.json` \
-`backend/models/exampleModel.json` -> `backend/models/model.json`
+`backend/models/exampleModel.json` -> `backend/models/model.json` \
+Для развертывания при помощи docker compose требуется раскомментировать строку `"host":"db"` в файле `backend/config.json` 
   1. `git clone --recurse-submodules https://github.com/Lolitron-0/augventure`
   2. `cd augventure`
   3. `docker compose up`
