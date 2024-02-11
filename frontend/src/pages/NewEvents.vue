@@ -51,7 +51,7 @@
         </div>
 
         <div class="container_btn">
-          <my-button class="btn_create">Create</my-button>
+          <my-button class="btn_create" @click="createEvent">Create</my-button>
         </div>
       </div>
     </div>
@@ -62,9 +62,36 @@
 import EventNavbar from "@/components/UI/EventNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
 import MyButton from "@/components/UI/MyButton.vue";
+import axios from 'axios'
 
 export default {
-  components: {MyButton, EventForm, EventNavbar}
+  components: {MyButton, EventForm, EventNavbar},
+
+  data() {
+    return {
+      title: '',
+      description: '',
+      status: 'now' // Установка значения по умолчанию
+    }
+  },
+  methods: {
+    async createEvent() {
+      try {
+        // Отправляем запрос на создание события на сервер
+        const response = await axios.post('/api/events', {
+          title: this.title,
+          description: this.description,
+          status: this.status
+        })
+        console.log('Событие успешно создано:', response.data)
+        // Переход на страницу профиля после создания события
+        this.$router.push({ name: 'profile' })
+      } catch (error) {
+        console.error('Ошибка при создании события:', error)
+        // Обработка ошибок
+      }
+    }
+  }
 
 }
 </script>

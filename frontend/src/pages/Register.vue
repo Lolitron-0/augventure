@@ -1,52 +1,68 @@
 <template>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <div class="body_empty">
-    <div class="wrapper" @submit.prevent="submitHandler">
-    <span class="bg-animate"></span>
-    <span class="bg-animate2"></span>
+    <div class="wrapper" @submit.prevent="register">
+      <span class="bg-animate"></span>
+      <span class="bg-animate2"></span>
 
-    <div class="form-box register">
-      <h2>Sign Up</h2>
-      <form action="#">
-        <div class="input-box">
-          <input type="text" required>
-          <label>Username</label>
-          <i class='bx bxs-user' ></i>
-        </div>
-        <div class="input-box">
-          <input type="text" required>
-          <label>Email</label>
-          <i class='bx bxs-envelope'></i>
-        </div>
-        <div class="input-box">
-          <input type="password" required>
-          <label>Password</label>
-          <i class='bx bxs-lock-alt' ></i>
-        </div>
-        <button type="submit" class="btn">Sign Up</button>
-        <div class="logreg-link">
-          <p>Already have an account? <router-link to="login">Login</router-link></p>
-        </div>
-      </form>
-    </div>
-    <div class="info-text register">
-      <h2>Join the 'Augventure' team</h2>
-      <p>Augventure welcomes you!</p>
-    </div>
+      <div class="form-box register">
+        <h2>Sign Up</h2>
+        <form action="#">
+          <div class="input-box">
+            <input type="text" required>
+            <label>Username</label>
+            <i class='bx bxs-user' ></i>
+          </div>
+          <div class="input-box">
+            <input type="text" required>
+            <label>Email</label>
+            <i class='bx bxs-envelope'></i>
+          </div>
+          <div class="input-box">
+            <input type="password" required>
+            <label>Password</label>
+            <i class='bx bxs-lock-alt' ></i>
+          </div>
+          <button type="submit" class="btn">Sign Up</button>
+          <div class="logreg-link">
+            <p>Already have an account? <router-link to="login">Login</router-link></p>
+          </div>
+        </form>
+      </div>
+      <div class="info-text register">
+        <h2>Join the 'Augventure' team</h2>
+        <p>Augventure welcomes you!</p>
+      </div>
 
-  </div>
+    </div>
   </div>
 </template>
 
 <script>
-  export default {
-    methods: {
+import axios from 'axios'
 
-      submitHandler() {
-        this.$router.push('/')
-      },
+export default {
+  methods: {
+    async register() {
+      try {
+        const response = await axios.post('http://localhost:80/api/auth/signup', {
+          user: {
+            email: this.email,
+            username: this.username,
+            password: this.password
+          }
+        });
+        console.log('Registration successful');
+        // Реализация логики после успешной регистрации
+        // Например, переход на страницу входа или автоматический вход пользователя
+      } catch (error) {
+        console.error('Registration failed:', error);
+        // Обработка ошибок регистрации
+        // Например, вывод сообщения об ошибке пользователю
+      }
     }
   }
+}
 </script>
 
 <style scoped>

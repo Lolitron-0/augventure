@@ -4,44 +4,73 @@
       <info-block-for-profile></info-block-for-profile>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
-        <div class="form_for_btn_new"><router-link :to="{ name: 'newEvents' }"><button
-              class="btn_new">New</button></router-link></div>
+        <div class="form_for_btn_new">
+          <router-link :to="{ name: 'newEvents' }">
+            <button class="btn_new">New</button>
+          </router-link>
+        </div>
         <div class="container_for_event_forms">
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
-          <event-form></event-form>
+          <event-form
+            v-for="(event, index) in events"
+            :key="index"
+            :title="event.title"
+            :description="event.description"
+            :state="event.state"
+            :likes="event.likes"
+          />
+
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script>
 import MyButton from "@/components/UI/MyButton.vue";
 import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
 import axios from 'axios'
+import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 
 export default {
-  components: { EventForm, ProfileNavbar, MyButton },
+  components: {InfoBlockForProfile, EventForm, ProfileNavbar, MyButton },
 
-  async mounted() {
-    axios.get("/api/events").then(function (resp) {
-      console.log(resp.data)
-    }).catch(function (err) {
-      console.log(err)
-    })
-  }
+  data() {
+    return {
+      events: [
+        {
+          title: "1 event",
+          description: "описание 1",
+          state: "state 1",
+          likes: 90,
+        },
+        {
+          title: "2 event",
+          description: "описание 2",
+          state: "state 2",
+          likes: 70,
+        },
+        {
+          title: "3 event",
+          description: "описание 3",
+          state: "state 3",
+          likes: -4,
+        },
+        {
+          title: "4 event",
+          description: "описание 4",
+          state: "state 4",
+          likes: 132,
+        },
+        {
+          title: "5 event",
+          description: "описание 5",
+          state: "state 5",
+          likes: 36,
+        },
+      ]
+    }
+  },
 }
 </script>
 

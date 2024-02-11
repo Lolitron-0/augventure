@@ -1,26 +1,108 @@
+<!--<template>-->
+<!--  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>-->
+<!--  <div class="body_empty">-->
+<!--    <div class="wrapper" @submit.prevent="login">-->
+<!--      <span class="bg-animate"></span>-->
+
+<!--      <div class="form-box login">-->
+<!--        <h2>Login</h2>-->
+<!--        <form action="#">-->
+<!--          <div class="input-box">-->
+<!--            <input id="email" type="text" required v-model.trim="user.email">-->
+<!--            &lt;!&ndash; PROPERTY OF INPUT  :class="{ 'is-invalid': !$v.email.required }"  &ndash;&gt;-->
+
+<!--            <label>Username</label>-->
+<!--            <i class='bx bxs-user'></i>-->
+<!--          </div>-->
+<!--          <div class="input-box">-->
+<!--            <input type="password" required v-model.trim="user.password">-->
+<!--            &lt;!&ndash; :class="{ 'is-invalid': !$v.password.required }" &ndash;&gt;-->
+<!--            <label>Password</label>-->
+<!--            <i class='bx bxs-lock-alt'></i>-->
+<!--          </div>-->
+<!--&lt;!&ndash;              <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>&ndash;&gt;-->
+<!--          <button type="submit" class="btn">Login</button>-->
+<!--          <div class="logreg-link">-->
+<!--            <p>Don't have an account? <router-link to="register">Sign Up</router-link></p>-->
+<!--          </div>-->
+<!--        </form>-->
+<!--      </div>-->
+<!--      <div class="info-text login">-->
+<!--        <h2>WELCOME BACK</h2>-->
+<!--        <p>Augventure welcomes you!</p>-->
+<!--      </div>-->
+
+<!--    </div>-->
+<!--  </div>-->
+<!--</template>-->
+
+<!--<script>-->
+<!--import { email, required, minLength } from 'vuelidate/lib/validators'-->
+<!--import { exportTypedArrayMethod } from "core-js/internals/array-buffer-view-core";-->
+<!--import axios from 'axios'-->
+
+<!--export default {-->
+<!--  name: 'login',-->
+<!--  data() {-->
+<!--    return {-->
+<!--      user: {-->
+<!--        email: '',-->
+<!--        password: ''-->
+<!--      }-->
+<!--    }-->
+<!--  },-->
+<!--  validations: {-->
+<!--    user: {-->
+<!--      email: { email, required },-->
+<!--      password: { required, minLength: minLength(8) }-->
+<!--    }-->
+<!--  },-->
+<!--  methods: {-->
+<!--    async login() {-->
+<!--      try {-->
+<!--        const response = await this.$api.auth.login({-->
+<!--          user: {-->
+<!--            email: this.user.email,-->
+<!--            password: this.user.password-->
+<!--          }-->
+<!--        });-->
+<!--        const { token, user } = response.data;-->
+<!--        localStorage.setItem('token', token);-->
+<!--        // Сохраняем информацию о пользователе в хранилище, если это необходимо-->
+<!--        // localStorage.setItem('user', JSON.stringify(user));-->
+<!--        // Переход на другую страницу, например, профиль пользователя-->
+<!--        this.$router.push({ name: 'profile' });-->
+<!--      } catch (error) {-->
+<!--        console.log(error.response.data);-->
+<!--      }-->
+<!--    }-->
+<!--  }-->
+<!--}-->
+<!--</script>-->
+
 <template>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   <div class="body_empty">
-    <div class="wrapper" @submit.prevent="submitHandler">
+    <div class="wrapper" @submit.prevent="login">
       <span class="bg-animate"></span>
 
       <div class="form-box login">
         <h2>Login</h2>
         <form action="#">
           <div class="input-box">
-            <input id="email" type="text" required v-model.trim="email">
+            <input id="email" type="text" required v-model.trim="user.email">
             <!-- PROPERTY OF INPUT  :class="{ 'is-invalid': !$v.email.required }"  -->
 
             <label>Username</label>
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
-            <input type="password" required v-model.trim="password">
+            <input type="password" required v-model.trim="user.password">
             <!-- :class="{ 'is-invalid': !$v.password.required }" -->
             <label>Password</label>
             <i class='bx bxs-lock-alt'></i>
           </div>
-          <!--        <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>-->
+          <!--              <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>-->
           <button type="submit" class="btn">Login</button>
           <div class="logreg-link">
             <p>Don't have an account? <router-link to="register">Sign Up</router-link></p>
@@ -43,36 +125,43 @@ import axios from 'axios'
 
 export default {
   name: 'login',
-  data: () => ({
-    email: '',
-    password: ''
-  }),
+  data() {
+    return {
+      user: {
+        email: '',
+        password: ''
+      }
+    }
+  },
   validations: {
-    email: { email, required },
-    password: { required, minLength: minLength(8) }
+    user: {
+      email: { email, required },
+      password: { required, minLength: minLength(8) }
+    }
   },
   methods: {
-    exportTypedArrayMethod,
-    submitHandler() {
-      axios.post("/api/auth/login", {
-        user: {
-          email: this.email,
-          password: this.password
+    async login() {
+      try {
+        const response = await this.$api.auth.login({
+          user: {
+            email: this.user.email,
+            password: this.user.password
+          }
+        });
+        if (response && response.data) {
+          const { token, user } = response.data;
+          localStorage.setItem('token', token);
+          // Сохраняем информацию о пользователе в хранилище, если это необходимо
+          // localStorage.setItem('user', JSON.stringify(user));
+          // Переход на другую страницу, например, профиль пользователя
+          this.$router.push({ name: 'profile' });
+        } else {
+          console.log('Response data is undefined');
         }
-      }).then(function (resp) {
-        console.log(resp.data)
-        // probably you need to save access token for later use (i.e. in cookies) and pass it in Authorization header
-        this.$router.push('/')
-      }).catch(function (err) {
-        console.log(err)
-      })
-      // if (this.$v.$invalid)
-      // {
-      //   this.$v.$touch()
-      //   return
-      // }
-      // this.$router.push('/')
-    },
+      } catch (error) {
+        console.log(error.response.data);
+      }
+    }
   }
 }
 </script>

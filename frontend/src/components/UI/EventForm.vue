@@ -11,7 +11,7 @@
         </div>
         <div class="stars_event" id="stars_event">
           <i class='bx bxs-star'></i>
-          98
+          {{ this.likes }}
         </div>
       </div>
       <div class="state_event" id="state_event">
@@ -23,7 +23,8 @@
 
 <script>
 export default {
-  props: ['title', 'description', 'state'],
+  props: ['title', 'description', 'state', 'likes'],
+
 }
 </script>
 
