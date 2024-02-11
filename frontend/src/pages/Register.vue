@@ -9,17 +9,17 @@
         <h2>Sign Up</h2>
         <form action="#">
           <div class="input-box">
-            <input type="text" required>
+            <input type="text" required v-model.trim="user.username">
             <label>Username</label>
             <i class='bx bxs-user' ></i>
           </div>
           <div class="input-box">
-            <input type="text" required>
+            <input type="text" required v-model.trim="user.email">
             <label>Email</label>
             <i class='bx bxs-envelope'></i>
           </div>
           <div class="input-box">
-            <input type="password" required>
+            <input type="password" required v-model.trim="user.password">
             <label>Password</label>
             <i class='bx bxs-lock-alt' ></i>
           </div>
@@ -57,6 +57,7 @@ export default {
           user: {
             email: this.user.email,
             username: this.user.username,
+            password: this.user.password
           }
         });
         // await this.$api.auth.signUp({

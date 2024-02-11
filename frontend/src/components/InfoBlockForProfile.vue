@@ -2,7 +2,7 @@
   <div class="info">
     <div class="min_fersion">
       <div class="ellipse_nav_logo"></div>
-      <div class="profile_nickname">Nickname</div>
+      <div class="profile_nickname">{{ this.nickname }}</div>
     </div>
     <hr class="first_hr">
     <div class="user_info">
@@ -21,25 +21,27 @@
     </div>
     <hr>
     <div class="user_description">
-      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
+      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
+      aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo
+      enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
     </div>
   </div>
 </template>
 
 <script>
 export default {
-
+  props: ['nickname',]
 }
 </script>
 
 <style scoped>
 @import "@/styles.css";
 
-.info{
+.info {
   position: absolute;
   top: 0;
   left: 0;
-//border: 1px solid #31a0a8;
+  //border: 1px solid #31a0a8;
   width: 25%;
   height: 80vh;
   padding: 2%;
@@ -47,39 +49,38 @@ export default {
 
 .ellipse_nav_logo {
   width: 90%;
-  height: 0;
-  padding-bottom: 90%;
-  max-width: 256px;
-  max-height: 256px;
-  border: solid 1px #858585;
+  border: 1px solid #858585;
   box-sizing: border-box;
   background-color: #0e73bd;
   cursor: pointer;
   border-radius: 50%;
+  aspect-ratio: 1;
 }
 
-.profile_nickname{
+.profile_nickname {
   margin-top: 10px;
   color: var(--profile-nickname);
-//border: 1px solid red;
+  //border: 1px solid red;
   font-size: 22px;
 }
+
 .user_info {
   margin-top: 10px;
   color: var(--user-info);
-//border: 1px solid red;
+  //border: 1px solid red;
   display: flex;
   gap: 20%;
   justify-content: center;
 }
+
 .user_description {
   margin-top: 10px;
   color: var(--user-description);
-//border: 1px solid red;
+  //border: 1px solid red;
   font-size: 14px;
 }
 
-.your_subscribers{
+.your_subscribers {
   display: flex;
   flex-direction: column;
 }
@@ -96,7 +97,7 @@ export default {
 
 @media (max-width: 768px) {
 
-  .info{
+  .info {
     top: 0;
     left: 0;
     width: 100%;
@@ -105,38 +106,43 @@ export default {
     flex-direction: row;
     gap: 5px;
   }
+
   .ellipse_nav_logo {
     width: 130px;
     height: 130px;
     padding-bottom: 0;
   }
-  .profile_nickname{
+
+  .profile_nickname {
     margin-left: 0;
-  //border: 1px solid red;
+    //border: 1px solid red;
     top: 20%;
     font-size: 20px;
   }
-  .first_hr{
+
+  .first_hr {
     display: none;
   }
+
   .user_info {
-  //border: 1px solid red;
+    //border: 1px solid red;
     margin-top: 0;
     gap: 25px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
+
   .user_description {
     margin-top: 0;
     padding: 5px;
     color: var(--user-description);
-  //border: 1px solid red;
+    //border: 1px solid red;
     font-size: 14px;
     flex: 1;
   }
 
-  .your_subscribers, .profile_info_users_events, .subscriptions{
+  .your_subscribers, .profile_info_users_events, .subscriptions {
     display: flex;
     gap: 5px;
     flex-direction: row;
