@@ -39,29 +39,41 @@
 </template>
 
 <script>
-import axios from 'axios'
-
+import axios from "axios";
 export default {
+  data() {
+    return {
+      user: {
+        email: '',
+        username: '',
+        password: ''
+      }
+    };
+  },
   methods: {
     async register() {
       try {
-        const response = await axios.post('http://localhost:80/api/auth/signup', {
+        await axios.post('/api/auth/signup', {
           user: {
-            email: this.email,
-            username: this.username,
-            password: this.password
+            email: this.user.email,
+            username: this.user.username,
           }
         });
-        console.log('Registration successful');
-        // Реализация логики после успешной регистрации
-        // Например, переход на страницу входа или автоматический вход пользователя
+        // await this.$api.auth.signUp({
+        //   user: {
+        //     email: this.user.email,
+        //     username: this.user.username,
+        //     password: this.user.password
+        //   }
+        // });
+        // Если регистрация прошла успешно, переходите на другую страницу, например, страницу входа
+        // this.$router.push({ name: 'login' });
       } catch (error) {
-        console.error('Registration failed:', error);
-        // Обработка ошибок регистрации
-        // Например, вывод сообщения об ошибке пользователю
+        console.log('Registration failed:', error);
       }
     }
   }
+
 }
 </script>
 

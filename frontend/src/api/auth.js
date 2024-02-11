@@ -3,7 +3,7 @@ export default function(instance) {
         login(payload) {
             return instance.post('auth/login', payload)
         },
-        signUp() {
+        signUp(payload) {
             return instance.post('auth/signup', payload)
         },
         logout() {
