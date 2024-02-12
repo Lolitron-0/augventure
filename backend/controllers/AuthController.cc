@@ -2,6 +2,7 @@
 #include "plugins/JWTService.h"
 #include "plugins/SMTPMail.h"
 #include "utils/Macros.h"
+#include "utils/Utils.h"
 #include <drogon/HttpResponse.h>
 #include <drogon/HttpTypes.h>
 #include <drogon/orm/Mapper.h>
@@ -103,6 +104,9 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
                 response->setStatusCode(drogon::k202Accepted);
                 (*response->jsonObject())["token"] = token;
                 (*response->jsonObject())["user"] = user.toJson();
+                augventure::utils::filterUserData(
+                    (*response->jsonObject())["user"]);
+
                 if (req->session()->find("session_token"))
                 {
                     req->session()->modify<std::string>(
@@ -113,14 +117,13 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
                 {
                     req->session()->insert("session_token", token);
                 }
+                (*callbackPtr)(response);
             }
             else
             {
-                response->setStatusCode(k401Unauthorized);
-                response->setContentTypeCode(CT_TEXT_PLAIN);
-                response->setBody("wrong_password");
+                SEND_RESPONSE(*callbackPtr, "wrong_password",
+                              drogon::k401Unauthorized);
             }
-            (*callbackPtr)(response);
         },
         [=](const DrogonDbException& e)
         {
@@ -142,7 +145,6 @@ void AuthController::login(const drogon::HttpRequestPtr& req,
             (*callbackPtr)(resp);
         });
 }
-
 
 } // namespace controllers
 } // namespace augventure

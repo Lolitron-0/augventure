@@ -11,6 +11,7 @@
 #include <string>
 #include <trantor/utils/Date.h>
 #include <trantor/utils/Logger.h>
+#include <utility>
 
 void UsersController::getOne(
     const HttpRequestPtr& req,
@@ -126,7 +127,8 @@ void UsersController::profile(
             auto response{ drogon::HttpResponse::newHttpJsonResponse(
                 Json::Value{}) };
             (*response->jsonObject())["user"] = currentUser.toJson();
-            LOG_TRACE << "currentUser : ok";
+            augventure::utils::filterUserData(
+                (*response->jsonObject())["user"]);
             (*callbackPtr)(response);
         },
         [=](const DrogonDbException& e)
@@ -174,7 +176,7 @@ void UsersController::uploadPfp(
             LOG_TRACE << "File's MD5 hash: " + md5;
             LOG_TRACE << "File size: " << file.fileLength();
 
-            auto timestampedFileName{ augventure::utils::getTimestampedFileName(
+            auto timestampedFileName{ augventure::utils::getUniqueFileName(
                 file.getFileName()) };
             file.saveAs(timestampedFileName);
 

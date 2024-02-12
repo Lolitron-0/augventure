@@ -69,7 +69,7 @@ void PostsController::addMedia(
             for (auto& file : fileUploadParser.getFiles())
             {
                 auto timestampedFileName{
-                    augventure::utils::getTimestampedFileName(
+                    augventure::utils::getUniqueFileName(
                         file.getFileName())
                 };
                 file.saveAs(timestampedFileName);

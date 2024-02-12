@@ -2,6 +2,7 @@
 #include <drogon/drogon.h>
 #include <drogon/drogon_callbacks.h>
 #include <drogon/orm/Exception.h>
+#include <json/value.h>
 #include <string>
 #include <string_view>
 
@@ -13,7 +14,9 @@ namespace utils
 
 std::string getMediaTypeString(const std::string_view& extension);
 
-std::string getTimestampedFileName(const std::string_view& fileName);
+std::string getUniqueFileName(const std::string_view& fileName);
+
+void filterUserData(Json::Value& userData);
 
 inline void handleDatabaseException(const drogon::orm::DrogonDbException& e,
                                     const drogon::AdviceCallback& callback)

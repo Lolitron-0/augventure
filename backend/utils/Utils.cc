@@ -1,6 +1,8 @@
 #include "Utils.h"
 #include <algorithm>
 #include <cctype>
+#include <drogon/utils/Utilities.h>
+#include <models/Users.h>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -36,16 +38,22 @@ std::string getMediaTypeString(const std::string_view& extension)
     }
 }
 
-std::string getTimestampedFileName(const std::string_view& fileName)
+std::string getUniqueFileName(const std::string_view& fileName)
 {
-    std::string timestampedFileName{ fileName };
-    auto dotIt{ timestampedFileName.find(".") };
+    std::string uniqueFileName{ fileName };
+    auto dotIt{ uniqueFileName.find(".") };
     if (dotIt == std::string::npos)
         throw std::logic_error{ "File name without extension!" };
-    auto now{ trantor::Date::now() };
-    timestampedFileName.insert(
-        dotIt, "---" + std::to_string(now.microSecondsSinceEpoch()));
-    return timestampedFileName;
+    uniqueFileName.insert(dotIt, "---" + drogon::utils::genRandomString(20));
+    return uniqueFileName;
+}
+
+void filterUserData(Json::Value& userData)
+{
+    using namespace drogon_model::augventure_db;
+    userData.removeMember(Users::Cols::_auth_code);
+    userData.removeMember(Users::Cols::_id);
+    userData.removeMember(Users::Cols::_password);
 }
 
 } // namespace utils

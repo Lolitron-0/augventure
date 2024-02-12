@@ -6,6 +6,7 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "Models.h"
 #include "Suggestions.h"
+#include "utils/Utils.h"
 #include <cstdint>
 #include <drogon/orm/Criteria.h>
 #include <drogon/orm/Exception.h>
@@ -206,7 +207,8 @@ void expandSprintList(
                         if (postIt == postsList.end()) // not finished sprint
                             continue;
                         entry["post"] = postIt->toJson();
-                        entry["post"]["media"] = Json::Value{Json::ValueType::arrayValue};
+                        entry["post"]["media"] =
+                            Json::Value{ Json::ValueType::arrayValue };
                         for (auto postMediaIt{ postMediaList.begin() };
                              postMediaIt != postMediaList.end();)
                         {
@@ -335,9 +337,9 @@ void expandSuggestionList(
                                                        authorId;
                                             }) };
                                         responseEntryJson["author"] =
-                                            suggestionAuthorIt
-                                                ->toJson(); // TODO: leave only
-                                                            // needed columns
+                                            suggestionAuthorIt->toJson();
+                                        augventure::utils::filterUserData(
+                                            responseEntryJson["author"]);
 
                                         // post and media
                                         auto postIt{ std::find_if(

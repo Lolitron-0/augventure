@@ -279,7 +279,7 @@ void SuggestionsController::addMedia(
             for (auto& file : fileUploadParser.getFiles())
             {
                 auto timestampedFileName{
-                    augventure::utils::getTimestampedFileName(
+                    augventure::utils::getUniqueFileName(
                         file.getFileName())
                 };
                 file.saveAs(timestampedFileName);
@@ -289,7 +289,7 @@ void SuggestionsController::addMedia(
                     augventure::utils::getMediaTypeString(
                         file.getFileExtension());
                 postMediaJson[PostMedia::Cols::_url] =
-                    app().getUploadPath() + "/" + timestampedFileName;
+                    app().getUploadPath().substr(1) + "/" + timestampedFileName;
 
                 postMediaVec.push_back(postMediaJson);
             }
