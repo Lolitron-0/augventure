@@ -40,25 +40,21 @@ export default {
     const user = JSON.parse(localStorage.getItem('user'));
     return {
       user: user,
-      events: [],
     }
   },
-  async mounted() {
-    const options = {
-      method: "GET",
-      url: "/api/events",
-      headers: {
-        Authorization:
-            localStorage.getItem("token")
-      },
-    };
-    const events = await axios.request(options);
+  async beforeMount() {
+    const events = await this.$api.events.filterEvents({
+      "filter": [ // or array
+        [ // and array
+          ["state", "in", ["in_progress", "scheduled"]] //criteria
+        ]
+      ]
+    });
     for (const entry of events.data) {
       let descString = entry.event.description
       if (descString.length > 30) {
         descString = descString.slice(0, 30) + "..."
       }
-
       this.events.push({
         title: entry.event.title,
         description: descString,
