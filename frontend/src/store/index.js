@@ -1,14 +1,12 @@
-import { createStore } from 'vuex'
+import Vuex from 'vuex'
 
-export default createStore({
+export default new Vuex.Store({
   state: {
-  },
-  getters: {
+    count: 0
   },
   mutations: {
-  },
-  actions: {
-  },
-  modules: {
+    increment (state) {
+      state.count++
+    }
   }
 })

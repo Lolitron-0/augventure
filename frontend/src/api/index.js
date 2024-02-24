@@ -4,5 +4,5 @@ import eventsModule from "@/api/events"
 
 export default {
     auth: authModule(instance),
-    events: eventsModule(instance)
+    // events: eventsModule(instance)
 }

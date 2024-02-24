@@ -3,9 +3,12 @@
     <div class="profile">
       <info-block-for-profile
           :nickname="user.username"
+          :description="aboutMe"
+          :name="name"
+          :surname="surname"
       />
       <div class="body">
-        <profile-navbar class="profileNavbar"></profile-navbar>
+        <profile-navbar class="profileNavbar"/>
         <div class="form_for_btn_new">
           <router-link :to="{ name: 'newEvents' }">
             <button class="btn_new">New</button>
@@ -32,7 +35,7 @@ import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
 import axios from 'axios'
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
-
+import info from "@/info_user/info"
 export default {
   components: {InfoBlockForProfile, EventForm, ProfileNavbar, MyButton},
 
@@ -41,32 +44,50 @@ export default {
     return {
       user: user,
       events: [],
+      name: '',
+      surname: '',
+      aboutMe: ''
     }
   },
-  async mounted() {
-    const options = {
-      method: "GET",
-      url: "/api/events",
-      headers: {
-        Authorization:
-            localStorage.getItem("token")
-      },
-    };
-    const events = await axios.request(options);
-    for (const entry of events.data) {
-      let descString = entry.event.description
-      if (descString.length > 30) {
-        descString = descString.slice(0, 30) + "..."
-      }
-
-      this.events.push({
-        title: entry.event.title,
-        description: descString,
-        state: entry.event.state,
-        likes: 6
-      })
+  methods: {
+    loadSavedData() {
+      // Загружаем сохраненные значения из localStorage
+      this.name = localStorage.getItem('name') || '';
+      this.surname = localStorage.getItem('surname') || '';
+      this.aboutMe = localStorage.getItem('aboutMe') || '';
     }
+  },
+  created() {
+    // Загружаем сохраненные значения из localStorage при создании компонента
+    this.loadSavedData();
   }
+  // async mounted() {
+  //   this.savedName = localStorage.getItem('name') || '';
+  //   this.savedSurname = localStorage.getItem('surname') || '';
+  //   this.savedAboutMe = localStorage.getItem('aboutMe') || '';
+  //   const options = {
+  //     method: "GET",
+  //     url: "/api/events",
+  //     headers: {
+  //       Authorization:
+  //           localStorage.getItem("token")
+  //     },
+  //   };
+  //   const events = await axios.request(options);
+  //   for (const entry of events.data) {
+  //     let descString = entry.event.description
+  //     if (descString.length > 30) {
+  //       descString = descString.slice(0, 30) + "..."
+  //     }
+  //
+  //     this.events.push({
+  //       title: entry.event.title,
+  //       description: descString,
+  //       state: entry.event.state,
+  //       likes: 6
+  //     })
+  //   };
+  // },
 }
 </script>
 

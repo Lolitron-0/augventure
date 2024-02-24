@@ -1,7 +1,9 @@
 <template>
   <div class="back">
     <div class="subscriptions">
-      <info-block-for-profile></info-block-for-profile>
+      <info-block-for-profile
+          :nickname="user.username"
+      />
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
       </div>
@@ -14,7 +16,14 @@ import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 
 export default {
-  components: {InfoBlockForProfile, ProfileNavbar}
+  components: {InfoBlockForProfile, ProfileNavbar},
+  data() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return {
+      user: user,
+      events: [],
+    }
+  },
 
 }
 </script>
