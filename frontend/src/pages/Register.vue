@@ -53,7 +53,7 @@ export default {
   methods: {
     async register() {
       try {
-        await axios.post('/api/auth/signup', {
+        await this.$api.auth.signUp({
           user: {
             email: this.user.email,
             username: this.user.username,

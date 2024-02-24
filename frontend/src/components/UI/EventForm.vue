@@ -6,7 +6,7 @@
         <div class="description_event" id="description_event">{{ this.description }}</div>
         <div class="content_event" id="content_event">
           <div class="content_art" id="content_art">art</div>
-          <div class="content_boobs" id="content_boobs">boobs</div>
+          <div class="content_boobs" id="content_boobs">hello</div>
           <div class="content_tag" id="content_tag">long long tag</div>
         </div>
         <div class="stars_event" id="stars_event">

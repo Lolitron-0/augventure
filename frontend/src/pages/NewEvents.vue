@@ -11,13 +11,19 @@
 
         <div class="form_title">
           <h3 class="title_text">Title</h3>
-          <input type="text" class="input_form_for_title" required>
+          <input type="text" class="input_form_for_title" required v-model.trim="event.title">
         </div>
 
         <div class="form_description">
           <h3 class="description_text">Description</h3>
-          <textarea name="message" rows="15" cols="50"
-                    class="textarea_form_for_description" required></textarea>
+          <textarea name="message" rows="15" cols="50" class="textarea_form_for_description" required
+            v-model.trim="event.description"></textarea>
+        </div>
+
+        <div class="form_description">
+          <h3 class="description_text">Initial content</h3>
+          <textarea name="message" rows="15" cols="50" class="textarea_form_for_description" required
+            v-model.trim="initial_post.text_content"></textarea>
         </div>
 
         <div class="form_picture">
@@ -33,17 +39,13 @@
         <div class="container_for_status">
           <h3 class="status_text">Status</h3>
           <label class="status_event">
-            <input type="radio" name="status" value="now"
-                   class="real_radio"
-                   required>
+            <input type="radio" name="status" value="now" class="real_radio" required>
             <span class="custom_radio"></span>
             <i class='bx bxs-stopwatch time_now_vector'></i>
             <p class="text_for_state_form">The event will start immediately after the creation is completed</p>
           </label>
           <label class="status_event">
-            <input type="radio" name="status" value="later"
-                   class="real_radio"
-                   required>
+            <input type="radio" name="status" value="later" class="real_radio" required>
             <span class="custom_radio"></span>
             <i class='bx bx-time-five time_later_vector'></i>
             <p class="text_for_state_form">The event will start later</p>
@@ -64,31 +66,45 @@ import EventForm from "@/components/UI/EventForm.vue";
 import MyButton from "@/components/UI/MyButton.vue";
 import axios from 'axios'
 
+function formatDate(date) {
+  const hrs0 = '0' + date.getUTCHours()
+  const mins0 = '0' + date.getUTCMinutes()
+  const secs0 = '0' + date.getUTCSeconds()
+  const hrs = hrs0.substring(hrs0.length-2)
+  const mins = mins0.substring(mins0.length-2)
+  const secs = secs0.substring(secs0.length-2)
+  return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} ${hrs}:${mins}:${secs}`
+}
+
 export default {
-  components: {MyButton, EventForm, EventNavbar},
+  components: { MyButton, EventForm, EventNavbar },
 
   data() {
     return {
-      title: '',
-      description: '',
-      status: 'now' // Установка значения по умолчанию
+      event:
+      {
+        title: '',
+        description: '',
+        start: formatDate(new Date(new Date().getTime() - 1000)),
+        state: 'in_progress'
+      },
+      initial_post:
+      {
+        text_content: ''
+      }
     }
   },
   methods: {
     async createEvent() {
       try {
-        // Отправляем запрос на создание события на сервер
-        const response = await axios.post('/api/events', {
-          title: this.title,
-          description: this.description,
-          status: this.status
+        const response = await this.$api.events.createEvent({
+          event: this.event,
+          initial_post: this.initial_post
         })
         console.log('Событие успешно создано:', response.data)
-        // Переход на страницу профиля после создания события
         this.$router.push({ name: 'profile' })
       } catch (error) {
         console.error('Ошибка при создании события:', error)
-        // Обработка ошибок
       }
     }
   }
@@ -109,12 +125,14 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
 }
-.newEvents  {
+
+.newEvents {
   width: 90vw;
   /* border: 1px solid red; */
   position: absolute;
 }
-.form_for_eventNav{
+
+.form_for_eventNav {
   width: 100%;
   height: 8%;
   /* border: 1px solid green; */
@@ -124,39 +142,47 @@ export default {
   align-items: center;
   padding-bottom: 10px;
 }
-.form_for_createEvent{
+
+.form_for_createEvent {
   /* border: 1px solid yellow; */
   height: 92%;
   width: 100%;
   padding: 10px;
 }
 
-.title_for_createEvent{
+.title_for_createEvent {
   width: 100%;
   /* border: 1px solid #31a0a8; */
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.page_title{
+
+.page_title {
   color: var(--title-color);
   font-size: 18px;
   font-weight: 400;
 }
 
-.form_title, .form_description,
-.form_picture, .container_for_status{
+.form_title,
+.form_description,
+.form_picture,
+.container_for_status {
   width: 100%;
   /* border: 1px solid #31a0a8; */
   margin-top: 15px;
 }
-.title_text, .description_text,
-.picture_text, .status_text{
+
+.title_text,
+.description_text,
+.picture_text,
+.status_text {
   font-size: 16px;
   color: var(--title-color);
   font-weight: 300;
 }
-.input_form_for_title{
+
+.input_form_for_title {
   background-color: var(--background-app-color);
   border: 1px solid var(--border-light-gray-color);
   width: 100%;
@@ -166,7 +192,7 @@ export default {
   padding: 0 10px;
 }
 
-.form_for_picture{
+.form_for_picture {
   width: 100%;
   height: 70px;
   border: 1px solid var(--border-light-gray-color);
@@ -176,7 +202,8 @@ export default {
   margin-top: 10px;
   padding: 0;
 }
-.input_form_for_picture{
+
+.input_form_for_picture {
   width: 0;
   height: 0;
   position: absolute;
@@ -185,7 +212,8 @@ export default {
   z-index: -1;
   cursor: pointer;
 }
-.label_for_picture{
+
+.label_for_picture {
   width: 100%;
   height: 100%;
   /* background-color: #cfcfcf; */
@@ -194,13 +222,14 @@ export default {
   display: flex;
   cursor: pointer;
 }
-.download_vector{
+
+.download_vector {
   font-size: 30px;
   color: var(--text-wight-color);
   cursor: pointer;
 }
 
-.textarea_form_for_description{
+.textarea_form_for_description {
   background-color: var(--background-app-color);
   border: 1px solid var(--border-light-gray-color);
   width: 100%;
@@ -213,7 +242,7 @@ export default {
 }
 
 
-.status_event{
+.status_event {
   margin-top: 10px;
   width: 100%;
   /* border: 1px solid green; */
@@ -222,7 +251,8 @@ export default {
   align-items: center;
   padding: 2px 5px;
 }
-.real_radio{
+
+.real_radio {
   cursor: pointer;
   width: 0;
   height: 0;
@@ -230,7 +260,8 @@ export default {
   opacity: 0;
   z-index: -1;
 }
-.custom_radio{
+
+.custom_radio {
   color: var(--text-wight-color);
   display: inline-block;
   width: 15px;
@@ -241,7 +272,8 @@ export default {
   vertical-align: text-top;
   position: relative;
 }
-.custom_radio::before{
+
+.custom_radio::before {
   content: '';
   /* display: inline-block; */
   width: 10px;
@@ -257,16 +289,19 @@ export default {
 
   display: none;
 }
-.real_radio:checked + .custom_radio::before{
+
+.real_radio:checked+.custom_radio::before {
   display: inline-block;
 }
 
-.time_now_vector, .time_later_vector{
+.time_now_vector,
+.time_later_vector {
   color: var(--text-wight-color);
   font-size: 30px;
   cursor: pointer;
 }
-.text_for_state_form{
+
+.text_for_state_form {
   color: var(--text-wight-color);
   font-weight: 200;
   font-size: 16px;
@@ -274,13 +309,14 @@ export default {
   cursor: pointer;
 }
 
-.container_btn{
+.container_btn {
   width: 100%;
   /* border: 1px solid red; */
   margin-top: 10px;
   padding: 5px;
 }
-.btn_create{
+
+.btn_create {
   width: 150px;
   height: 30px;
   border: none;
@@ -294,8 +330,7 @@ export default {
 
 @media (max-width: 768px) {
 
-  .text_for_state_form{
+  .text_for_state_form {
     font-size: 15px;
   }
-}
-</style>
+}</style>

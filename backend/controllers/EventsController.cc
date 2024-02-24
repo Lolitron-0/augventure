@@ -367,7 +367,7 @@ void EventsController::create(
                         // post
                         {
                             auto initialPostJson{
-                                eventRequestJson["initialPost"]
+                                eventRequestJson["initial_post"]
                             };
                             initialPostJson[Posts::Cols::_sprint_id] =
                                 (*sprintCreationResponse

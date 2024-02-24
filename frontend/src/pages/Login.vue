@@ -93,7 +93,7 @@
             <input id="email" type="text" required v-model.trim="user.email">
             <!-- PROPERTY OF INPUT  :class="{ 'is-invalid': !$v.email.required }"  -->
 
-            <label>Username</label>
+            <label>Email</label>
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
@@ -151,9 +151,7 @@ export default {
         if (response && response.data) {
           const { token, user } = response.data;
           localStorage.setItem('token', token);
-          // Сохраняем информацию о пользователе в хранилище, если это необходимо
           localStorage.setItem('user', JSON.stringify(user));
-          // Переход на другую страницу, например, профиль пользователя
           this.$router.push({ name: 'profile' });
         } else {
           console.log('Response data is undefined', response);
