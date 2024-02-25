@@ -150,6 +150,7 @@ export default {
         });
         if (response && response.data) {
           const { token, user } = response.data;
+          console.log(user);
           localStorage.setItem('token', token);
           localStorage.setItem('user', JSON.stringify(user));
           this.$router.push({ name: 'profile' });

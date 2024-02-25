@@ -1,7 +1,7 @@
 <template>
   <div class="back">
     <div class="profile">
-      <info-block-for-profile :nickname="user.username" />
+      <info-block-for-profile :nickname="user.username" :bio="user.bio" :photo="user.pfp_url"/>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="form_for_btn_new">
@@ -22,7 +22,6 @@
 import MyButton from "@/components/UI/MyButton.vue";
 import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
-import axios from 'axios'
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 
 export default {
@@ -46,7 +45,6 @@ export default {
         ]
       });
       console.log(events);
-
       for (const entry of events.data) {
         let descString = entry.event.description
         if (descString.length > 30) {

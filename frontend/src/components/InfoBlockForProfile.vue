@@ -1,7 +1,7 @@
 <template>
   <div class="info">
     <div class="min_fersion">
-      <div class="ellipse_nav_logo"></div>
+      <div class="ellipse_nav_logo" style="background-image: image('./ava.jpeg')"></div>
       <div class="profile_nickname">{{ this.nickname }}</div>
     </div>
     <hr class="first_hr">
@@ -21,16 +21,14 @@
     </div>
     <hr>
     <div class="user_description">
-      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
-      aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo
-      enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
+      {{ this.bio }}
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['nickname',]
+  props: ['nickname', 'bio', 'photo']
 }
 </script>
 

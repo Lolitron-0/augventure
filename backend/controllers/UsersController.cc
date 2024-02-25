@@ -141,6 +141,14 @@ void UsersController::profile(
         });
 }
 
+void UsersController::profileUpdate(
+    const HttpRequestPtr& req,
+    std::function<void(const HttpResponsePtr&)>&& callback)
+{
+    auto currentUserId{ CURRENT_USER_ID(req) }; // filter guarantees result
+    UsersControllerBase::updateOne(req, std::move(callback), std::move(currentUserId));
+}
+
 void UsersController::uploadPfp(
     const HttpRequestPtr& req,
     std::function<void(const HttpResponsePtr&)>&& callback)

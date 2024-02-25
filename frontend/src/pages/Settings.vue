@@ -1,7 +1,7 @@
 <template>
   <div class="back">
     <div class="settings">
-      <info-block-for-profile></info-block-for-profile>
+      <info-block-for-profile :nickname="user.username" :bio="user.bio" :photo="user.pfp_url"/>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="block_about_private_information">
@@ -86,8 +86,14 @@ import EventForm from "@/components/UI/EventForm.vue";
 import EmailForm from "@/components/UI/EmailForm.vue";
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 export default {
-  components: {InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar}
+  components: {InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar},
 
+  data() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return {
+      user: user
+    }
+  }
 }
 </script>
 
