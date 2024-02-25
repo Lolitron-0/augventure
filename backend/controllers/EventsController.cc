@@ -308,6 +308,7 @@ void EventsController::get(
     auto bodyRequest{ HttpRequest::newHttpJsonRequest(body) };
     bodyRequest->setParameter(
         "sort", req->getOptionalParameter<std::string>("sort").value_or(""));
+
     LOG_INFO << bodyRequest->jsonObject()->toStyledString();
     EventsControllerBase::get(
         bodyRequest,

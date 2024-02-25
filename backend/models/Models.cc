@@ -138,7 +138,7 @@ void expandEventList(
                             if (sprintPostIt != postsList.cend())
                                 postsList.erase(sprintPostIt);
                         }
-                        eventEntry["event"].removeMember(Events::Cols::_id);
+                        //eventEntry["event"].removeMember(Events::Cols::_id);
                     }
                     (*successCallbackPtr)(*resultJsonPtr);
                 },

@@ -40,7 +40,7 @@ export default {
       const events = await this.$api.events.filterEvents({
         "filter": [ // or array
           [ // and array
-            //["state", "in", ["in_progress", "scheduled"]],
+            ["state", "in", ["in_progress", "scheduled"]],
             ["author_id", "=", this.user.id]
           ]
         ]
