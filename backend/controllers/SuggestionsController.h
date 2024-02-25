@@ -7,11 +7,6 @@
 #include "Suggestions.h"
 using namespace drogon;
 using namespace drogon_model::augventure_db;
-/**
- * @brief this class is created by the drogon_ctl command.
- * this class is a restful API controller for reading and writing the
- * suggestions table.
- */
 
 class SuggestionsController
     : public drogon::HttpController<SuggestionsController>,

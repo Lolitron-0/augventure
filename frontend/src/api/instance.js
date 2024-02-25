@@ -1,21 +1,12 @@
 import axios from "axios";
 
 const instance = axios.create({
-    baseURL: '/api/',
-})
+	baseURL: "/api/",
+});
 
-const token_instance = axios.create({
-    baseURL: '/api/',
-})
-const token_interceptor = token_instance.interceptors.request.use(
-    config => {
-        config.headers.Authorization = localStorage.getItem("token")
-        return config
-    },
-    error => {
-        return Promise.reject(error)
-    }
-)
+instance.interceptors.request.use(function (config) {
+    console.log("int");
+    return config;
+  });
 
-
-export default instance
+export default instance;

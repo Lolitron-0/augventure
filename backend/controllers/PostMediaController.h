@@ -14,10 +14,7 @@
 #include "PostMedia.h"
 using namespace drogon;
 using namespace drogon_model::augventure_db;
-/**
- * @brief this class is created by the drogon_ctl command.
- * this class is a restful API controller for reading and writing the post_media table.
- */
+
 
 class PostMediaController: public drogon::HttpController<PostMediaController>, public PostMediaControllerBase
 {

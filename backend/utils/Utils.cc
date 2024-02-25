@@ -52,7 +52,7 @@ void filterUserData(Json::Value& userData)
 {
     using namespace drogon_model::augventure_db;
     userData.removeMember(Users::Cols::_auth_code);
-    userData.removeMember(Users::Cols::_id);
+    //userData.removeMember(Users::Cols::_id);
     userData.removeMember(Users::Cols::_password);
 }
 
