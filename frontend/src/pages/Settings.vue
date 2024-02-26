@@ -7,7 +7,7 @@
         <div class="block_about_private_information">
           <input type="text" class="input_form_for_name" :placeholder="profileData.username" v-model.trim="profileData.username">
           <textarea name="message" rows="15" cols="50"
-                    class="textarea_form_for_aboutMe" :placeholder="profileData.bio" v-model.trim="profileData.bio"></textarea>
+                    class="textarea_form_for_aboutMe" v-model.trim="profileData.bio"></textarea>
           <div class="container_for_btn">
             <my-button class="btn_save" v-on:click="this.updateProfile">Save changes</my-button>
           </div>
@@ -95,32 +95,30 @@ export default {
     return {
       user: user,
       profileData: {
-        username: user.username,
-        bio: user.bio,
+        username: "",
+        bio: "",
       }
     }
   },
   methods: {
     async updateProfile() {
       try {
+        console.log(this)
         const response = await this.$api.users.updateProfile({
-          username: this.user.username,
-          bio: this.user.bio
+          username: this.profileData.username,
+          bio: this.profileData.bio
         });
         if (response && response.data){
           this.user.username = this.profileData.username
           this.user.bio = this.profileData.bio
+          localStorage.setItem('user', JSON.stringify(this.user));
         }
-        this.profileData.username = "";
-        this.profileData.bio = "";
+        this.$router.push({ name: 'settings' });
       } catch (error) {
-        console.log(error.message);
+        console.log(error);
       }
     }
   },
-  async beforeMount() {
-
-  }
 }
 </script>
 

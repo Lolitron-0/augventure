@@ -43,7 +43,6 @@ export default {
           ]
         ]
       });
-      console.log(events);
       for (const entry of events.data) {
         let descString = entry.event.description
         if (descString.length > 30) {

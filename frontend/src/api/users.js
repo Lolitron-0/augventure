@@ -1,10 +1,10 @@
 export default function(instance) {
     return {
         myProfile() {
-            return instance.get('auth/users/me')
+            return instance.get('users/me')
         },
         updateProfile(payload) {
-            return instance.put('auth/users/me', payload)
-        }
+            return instance.put('users/me', payload)
+        },
     }
 }

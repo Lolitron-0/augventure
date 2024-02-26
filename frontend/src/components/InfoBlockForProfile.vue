@@ -1,7 +1,7 @@
 <template>
   <div class="info">
     <div class="min_fersion">
-      <div class="ellipse_nav_logo"></div>
+      <img :src="'http://backend'+this.photo" alt="" class="ellipse_nav_logo"/>
       <div class="profile_nickname">{{ this.nickname }}</div>
     </div>
     <hr class="first_hr">
