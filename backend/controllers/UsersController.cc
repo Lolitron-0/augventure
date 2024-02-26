@@ -195,8 +195,11 @@ void UsersController::uploadPfp(
             mapper.update(
                 currentUser,
                 [callbackPtr, pfpPath = currentUser.getValueOfPfpUrl()](auto)
-                { 
-                    SEND_RESPONSE(*callbackPtr, "New pfp url: " + pfpPath); 
+                {
+                    Json::Value jsonObj{};
+                    jsonObj["pfp_url"] = pfpPath;
+                    auto resp{HttpResponse::newHttpJsonResponse(jsonObj)};
+                    (*callbackPtr)(resp);
                 },
                 DB_EXCEPTION_HANDLER(*callbackPtr));
         },

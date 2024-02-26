@@ -6,5 +6,8 @@ export default function(instance) {
         updateProfile(payload) {
             return instance.put('users/me', payload)
         },
+        uploadPFP(payload, headers) {
+            return instance.put('users/me/upload_pfp', payload, headers)
+        }
     }
 }

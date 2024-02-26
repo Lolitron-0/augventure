@@ -1,30 +1,32 @@
 <template>
   <div class="back">
     <div class="settings">
-      <info-block-for-profile :nickname="user.username" :bio="user.bio" :photo="user.pfp_url"/>
+      <info-block-for-profile v-bind:nickname.sync="user.username" :bio="user.bio" :photo="user.pfp_url"/>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
-        <div class="block_about_private_information">
-          <input type="text" class="input_form_for_name" :placeholder="profileData.username" v-model.trim="profileData.username">
-          <textarea name="message" rows="15" cols="50"
-                    class="textarea_form_for_aboutMe" v-model.trim="profileData.bio"></textarea>
-          <div class="container_for_btn">
-            <my-button class="btn_save" v-on:click="this.updateProfile">Save changes</my-button>
-          </div>
-        </div>
 
         <div class="form_picture">
           <p class="picture_text">Profile picture</p>
           <div class="form_for_picture">
-            <input type="file" id="file"
+            <input type="file" id="file" accept="image/png, image/gif, image/jpeg"
                    name="logo_for_profile" class="input_form_for_picture">
-            <div class="ellipse_logo"></div>
+            <img :src="user.pfp_url" alt="" class="ellipse_logo"/>
             <div class="TextBlock_in_container">
               <label for="file" class="label_for_picture">
                 <p class="text_in_containerPicture">Download</p>
               </label>
               <p class="text_in_containerPicture">Remove</p>
             </div>
+          </div>
+        </div>
+
+        <div class="block_about_private_information">
+          <input type="text" class="input_form_for_name" :placeholder="profileData.username"
+                 v-model.trim="profileData.username">
+          <textarea name="message" rows="15" cols="50" :placeholder="profileData.bio"
+                    class="textarea_form_for_aboutMe" v-model.trim="profileData.bio"></textarea>
+          <div class="container_for_btn">
+            <my-button class="btn_save" v-on:click="this.updateProfile">Save changes</my-button>
           </div>
         </div>
 
@@ -86,6 +88,7 @@ import EventForm from "@/components/UI/EventForm.vue";
 import EmailForm from "@/components/UI/EmailForm.vue";
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 import profile from "@/pages/Profile.vue";
+import FormData from 'form-data'
 
 export default {
   components: {InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar},
@@ -95,8 +98,8 @@ export default {
     return {
       user: user,
       profileData: {
-        username: "",
-        bio: "",
+        username: user.username,
+        bio: user.bio,
       }
     }
   },
@@ -108,16 +111,31 @@ export default {
           username: this.profileData.username,
           bio: this.profileData.bio
         });
-        if (response && response.data){
-          this.user.username = this.profileData.username
-          this.user.bio = this.profileData.bio
+        this.user.username = this.profileData.username
+        this.user.bio = this.profileData.bio
+        localStorage.setItem('user', JSON.stringify(this.user));
+      } catch (error) {
+        console.log(error.message);
+      }
+      try {
+        if (document.getElementById("file").files.length) {
+          let file = document.getElementById("file").files[0];
+          let data = new FormData();
+          data.append('file', file, file.name);
+          const response = await this.$api.users.uploadPFP(data, {
+            headers: {
+              'accept': 'application/json',
+              'Accept-Language': 'en-US,en;q=0.8',
+              'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
+            }
+          });
+          this.user.pfp_url = response.data.pfp_url;
           localStorage.setItem('user', JSON.stringify(this.user));
         }
-        this.$router.push({ name: 'settings' });
       } catch (error) {
-        console.log(error);
+        console.log(error.message);
       }
-    }
+    },
   },
 }
 </script>
