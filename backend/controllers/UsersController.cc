@@ -146,8 +146,8 @@ void UsersController::profileUpdate(
     std::function<void(const HttpResponsePtr&)>&& callback)
 {
     auto currentUserId{ CURRENT_USER_ID(req) }; // filter guarantees result
-    UsersControllerBase::updateOne(req, std::move(callback),
-                                   std::move(currentUserId));
+    (*req->jsonObject())[User::Cols::_id] = currentUserId;
+    UsersControllerBase::updateOne(req, std::move(callback), std::move(currentUserId));
 }
 
 void UsersController::uploadPfp(
