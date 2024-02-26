@@ -105,7 +105,7 @@
           <!--              <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>-->
           <button type="submit" class="btn">Login</button>
           <div class="logreg-link">
-            <p>Don't have an account? <router-link to="register">Sign Up</router-link></p>
+            <p>Don't have an account? <router-link :to="{ name: 'register' }">Sign Up</router-link></p>
           </div>
         </form>
       </div>
