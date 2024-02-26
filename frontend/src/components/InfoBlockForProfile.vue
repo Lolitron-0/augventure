@@ -1,10 +1,8 @@
 <template>
   <div class="info">
     <div class="min_fersion">
-      <div class="ellipse_nav_logo">
-<!--        <img src="./uploads/testpfp-&#45;&#45;1704807495865128.jpg">-->
-      </div>
-      <div class="profile_nickname">{{ this.nickname }} {{ this.name }} {{ this.surname}}</div>
+      <div class="ellipse_nav_logo"></div>
+      <div class="profile_nickname">{{ this.nickname }}</div>
     </div>
     <hr class="first_hr">
     <div class="user_info">
@@ -23,14 +21,16 @@
     </div>
     <hr>
     <div class="user_description">
-      {{ this.description }}
+      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
+      aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo
+      enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['nickname', 'description', 'name', 'surname'],
+  props: ['nickname',]
 }
 </script>
 

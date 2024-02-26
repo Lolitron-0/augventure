@@ -123,19 +123,19 @@ const routes = [
     component: Settings
   },
   {
-    path: '/currentEvents/eventsMain',
+    path: '/currentEvents/:id/eventsMain',
     name: 'eventsMain',
     meta: { state: 'main' },
     component: EventsMain
   },
   {
-    path: '/currentEvents/voting',
+    path: '/currentEvents/:id/voting',
     name: 'voting',
     meta: { state: 'main' },
     component: Voting
   },
   {
-    path: '/currentEvents/sprints',
+    path: '/currentEvents/:id/sprints',
     name: 'sprints',
     meta: { state: 'main' },
     component: Sprints

@@ -45,7 +45,7 @@
         <div class="side_header_left">
           <div class="ellipse_nav_logo"></div>
 
-          <p class="side_nick">{{ this.nickname }}</p>
+          <p class="side_nick">Nickname</p>
         </div>
 
         <i class='bx bx-x sidebar_x' @click="ShowSidebar"></i>
@@ -90,8 +90,7 @@
     <hr>
       <div class="side_sign_out">
         <router-link :to="{ name: 'login' }" tag="button" style="text-decoration: none">
-<!--        @click.prevent="logout"-->
-          <my-button @click="ShowSidebar"  class="btn_side">
+          <my-button @click="ShowSidebar" class="btn_side">
             <i class='bx bx-log-out sign_out_vector' ></i>
             <p class="sign_out_text">Sign out</p>
           </my-button>
@@ -105,7 +104,6 @@
 import MyButton from "@/components/UI/MyButton.vue";
 
 export default {
-  props: ['nickname'],
   components: {MyButton},
   data() {
     return {
@@ -135,17 +133,6 @@ export default {
       // Если ширина экрана стала больше 768px и бургер-меню скрыто, то показываем меню
       if (window.innerWidth > 768 && !this.show) {
         this.show = true;
-      }
-    },
-    async logout() {
-      try {
-        await this.$api.auth.logout();
-        // После успешного выхода из системы, очистите локальное хранилище и перенаправьте пользователя на страницу входа или на другую нужную страницу
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        this.$router.push({ name: 'login' });
-      } catch (error) {
-        console.log('Logout failed:', error);
       }
     }
   },

@@ -1,21 +1,16 @@
 <template>
   <div class="back">
     <div class="settings">
-        <info-block-for-profile
-          :nickname="user.username"
-          :description="aboutMe"
-          :name="name"
-          :surname="surname"
-      />
+      <info-block-for-profile></info-block-for-profile>
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="block_about_private_information">
-          <input type="text" v-model="user_name" class="input_form_for_name" placeholder="Your name">
-          <input type="text" v-model="user_surname" class="input_form_for_surname" placeholder="Surname">
-          <textarea name="message" rows="15" cols="50" v-model="user_aboutMe"
+          <input type="text" class="input_form_for_name" placeholder="Your name">
+          <input type="text" class="input_form_for_surname" placeholder="Surname">
+          <textarea name="message" rows="15" cols="50"
                     class="textarea_form_for_aboutMe" placeholder="About me"></textarea>
           <div class="container_for_btn">
-            <my-button @click="saveChanges" class="btn_save">Save changes</my-button>
+            <my-button class="btn_save">Save changes</my-button>
           </div>
         </div>
 
@@ -70,6 +65,15 @@
             <my-button class="btn_delete_account">Delete your account</my-button>
           </div>
         </div>
+
+<!--        <div class="modal">-->
+<!--          <div class="modal_box">-->
+<!--            <h3 class="modal_title">-->
+<!--              Do you want to delete your account? There will be no turning back. Please rest assured.-->
+<!--            </h3>-->
+<!--            <my-button class="btn_delete_modalBox">Delete</my-button>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
     </div>
   </div>
@@ -81,59 +85,8 @@ import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
 import EmailForm from "@/components/UI/EmailForm.vue";
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
-
 export default {
-  components: {InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar},
-  data() {
-    const user = JSON.parse(localStorage.getItem('user'));
-    return {
-      user: user,
-      events: [],
-      name: '',
-      surname: '',
-      aboutMe: '',
-      savedName: '',
-      savedSurname: '',
-      savedAboutMe: '',
-      saveClicked: false
-    }
-  },
-  created() {
-    this.loadSavedData();
-  },
-  methods: {
-    saveChanges() {
-      this.savedName = this.user_name;
-      this.savedSurname = this.user_surname;
-      this.savedAboutMe = this.user_aboutMe;
-
-      // Устанавливаем флаг в true
-      this.saveClicked = true;
-
-      // Очищаем значения полей формы
-      this.user_name = '';
-      this.user_surname = '';
-      this.user_aboutMe = '';
-    },
-    loadSavedData() {
-      // Загружаем сохраненные значения из localStorage
-      if (!this.saveClicked) { // Проверяем, была ли нажата кнопка сохранения
-        this.name = localStorage.getItem('name') || '';
-        this.surname = localStorage.getItem('surname') || '';
-        this.aboutMe = localStorage.getItem('aboutMe') || '';
-      } else {
-        // Если кнопка сохранения была нажата, используем временные переменные
-        this.name = this.savedName;
-        this.surname = this.savedSurname;
-        this.aboutMe = this.savedAboutMe;
-
-        // Сохраняем значения в localStorage после успешного сохранения формы
-        localStorage.setItem('name', this.savedName);
-        localStorage.setItem('surname', this.savedSurname);
-        localStorage.setItem('aboutMe', this.savedAboutMe);
-      }
-    }
-  }
+  components: {InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar}
 
 }
 </script>
@@ -288,22 +241,30 @@ border: solid 1px #858585;
 }
 
 .ellipse_logo{
-  width: 150px;
-  height: 150px;
-  position: absolute;
-  left: 15px;
-  border: solid 1px var(--border-light-gray-color);
+  //width: 150px;
+  //height: 150px;
+  //position: absolute;
+  //left: 15px;
+  //border: solid 1px var(--border-light-gray-color);
+  //box-sizing: border-box;
+  //background-color: #0e73bd;
+  ////cursor: pointer;
+  //border-radius: 50%;
+  //padding-left: 15px;
+
+  height: 90%;
+  border: 1px solid #858585;
   box-sizing: border-box;
   background-color: #0e73bd;
-  //cursor: pointer;
+  cursor: pointer;
   border-radius: 50%;
-  padding-left: 15px;
+  aspect-ratio: 1;
 
 }
 .TextBlock_in_container{
   color: var(--text-wight-color);
-  //border: 1px solid red;
-  width: 80%;
+  border: 1px solid red;
+  width:  80%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -521,7 +482,7 @@ border: solid 1px #858585;
 
   .TextBlock_in_container{
     width: 100%;
-    //border: 1px solid red;
+    border: 1px solid red;
   }
 }
 @media (max-width: 800px) {

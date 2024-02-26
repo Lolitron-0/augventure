@@ -1,12 +1,12 @@
 <template>
-  <router-link style="text-decoration: none" :to="{ name: 'eventsMain' }">
+  <router-link style="text-decoration: none" :to="{ name: 'eventsMain', params: {id: this.id} }">
     <div class="event_form" id="event-form">
       <div class="body_event" id="body_event">
         <div class="title_event" id="title-event">{{ this.title }}</div>
         <div class="description_event" id="description_event">{{ this.description }}</div>
         <div class="content_event" id="content_event">
           <div class="content_art" id="content_art">art</div>
-          <div class="content_boobs" id="content_boobs">boobs</div>
+          <div class="content_boobs" id="content_boobs">hello</div>
           <div class="content_tag" id="content_tag">long long tag</div>
         </div>
         <div class="stars_event" id="stars_event">
@@ -23,7 +23,7 @@
 
 <script>
 export default {
-  props: ['title', 'description', 'state', 'likes'],
+  props: ['title', 'description', 'state', 'likes', 'id'],
 
 }
 </script>

@@ -1,9 +1,6 @@
 <template>
 
-  <navbar
-      v-if="showNavbar"
-      :nickname="user.username"
-  />
+  <navbar v-if="showNavbar"></navbar>
   <div id="app">
     <router-view @updateCurrentPage="updateCurrentPage"/>
   </div>
@@ -15,10 +12,8 @@
   export default {
     components: {Navbar},
     data() {
-      const user = JSON.parse(localStorage.getItem('user'));
       return {
-        currentPageMeta: { state: 'main' },
-        user: user,
+        currentPageMeta: { state: 'main' }
       };
     },
     computed: {

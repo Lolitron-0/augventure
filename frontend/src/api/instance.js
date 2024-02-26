@@ -1,7 +1,12 @@
 import axios from "axios";
 
 const instance = axios.create({
-    baseURL: '/api/',
-})
+	baseURL: "/api/",
+});
 
-export default instance
+instance.interceptors.request.use(function (config) {
+    console.log("int");
+    return config;
+  });
+
+export default instance;

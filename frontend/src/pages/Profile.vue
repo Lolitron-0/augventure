@@ -1,28 +1,17 @@
 <template>
   <div class="back">
     <div class="profile">
-      <info-block-for-profile
-          :nickname="user.username"
-          :description="aboutMe"
-          :name="name"
-          :surname="surname"
-      />
+      <info-block-for-profile :nickname="user.username" />
       <div class="body">
-        <profile-navbar class="profileNavbar"/>
+        <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="form_for_btn_new">
           <router-link :to="{ name: 'newEvents' }">
             <button class="btn_new">New</button>
           </router-link>
         </div>
         <div class="container_for_event_forms">
-          <event-form
-              v-for="(event, index) in events"
-              :key="index"
-              :title="event.title"
-              :description="event.description"
-              :state="event.state"
-              :likes="event.likes"
-          />
+          <event-form v-for="(event, index) in events" :key="index" :title="event.title" :description="event.description"
+            :state="event.state" :likes="event.likes" />
         </div>
       </div>
     </div>
@@ -35,59 +24,46 @@ import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
 import axios from 'axios'
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
-import info from "@/info_user/info"
+
 export default {
-  components: {InfoBlockForProfile, EventForm, ProfileNavbar, MyButton},
+  components: { InfoBlockForProfile, EventForm, ProfileNavbar, MyButton },
 
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
     return {
       user: user,
       events: [],
-      name: '',
-      surname: '',
-      aboutMe: ''
     }
   },
-  methods: {
-    loadSavedData() {
-      // Загружаем сохраненные значения из localStorage
-      this.name = localStorage.getItem('name') || '';
-      this.surname = localStorage.getItem('surname') || '';
-      this.aboutMe = localStorage.getItem('aboutMe') || '';
+  async beforeMount() {
+    try {
+      const events = await this.$api.events.filterEvents({
+        "filter": [ // or array
+          [ // and array
+            //["state", "in", ["in_progress", "scheduled"]],
+            ["author_id", "=", this.user.id]
+          ]
+        ]
+      });
+
+      console.log(events);
+
+      for (const entry of events.data) {
+        let descString = entry.event.description
+        if (descString.length > 30) {
+          descString = descString.slice(0, 30) + "..."
+        }
+        this.events.push({
+          title: entry.event.title,
+          description: descString,
+          state: entry.event.state,
+          likes: 6
+        })
+      }
+    } catch (error) {
+      console.log('failed:', error);
     }
-  },
-  created() {
-    // Загружаем сохраненные значения из localStorage при создании компонента
-    this.loadSavedData();
   }
-  // async mounted() {
-  //   this.savedName = localStorage.getItem('name') || '';
-  //   this.savedSurname = localStorage.getItem('surname') || '';
-  //   this.savedAboutMe = localStorage.getItem('aboutMe') || '';
-  //   const options = {
-  //     method: "GET",
-  //     url: "/api/events",
-  //     headers: {
-  //       Authorization:
-  //           localStorage.getItem("token")
-  //     },
-  //   };
-  //   const events = await axios.request(options);
-  //   for (const entry of events.data) {
-  //     let descString = entry.event.description
-  //     if (descString.length > 30) {
-  //       descString = descString.slice(0, 30) + "..."
-  //     }
-  //
-  //     this.events.push({
-  //       title: entry.event.title,
-  //       description: descString,
-  //       state: entry.event.state,
-  //       likes: 6
-  //     })
-  //   };
-  // },
 }
 </script>
 

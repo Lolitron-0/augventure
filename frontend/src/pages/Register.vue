@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "@axios";
 export default {
   data() {
     return {
@@ -53,13 +53,13 @@ export default {
   methods: {
     async register() {
       try {
-      //   await axios.post('/api/auth/signup', {
-      //     user: {
-      //       email: this.user.email,
-      //       username: this.user.username,
-      //       password: this.user.password
-      //     }
-      //   });
+        // await this.$api.auth.signUp({
+        //   user: {
+        //     email: this.user.email,
+        //     username: this.user.username,
+        //     password: this.user.password
+        //   }
+        // });
         await this.$api.auth.signUp({
           user: {
             email: this.user.email,
