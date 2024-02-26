@@ -146,7 +146,8 @@ void UsersController::profileUpdate(
     std::function<void(const HttpResponsePtr&)>&& callback)
 {
     auto currentUserId{ CURRENT_USER_ID(req) }; // filter guarantees result
-    UsersControllerBase::updateOne(req, std::move(callback), std::move(currentUserId));
+    UsersControllerBase::updateOne(req, std::move(callback),
+                                   std::move(currentUserId));
 }
 
 void UsersController::uploadPfp(
@@ -188,13 +189,15 @@ void UsersController::uploadPfp(
                 file.getFileName()) };
             file.saveAs(timestampedFileName);
 
-            currentUser.setPfpUrl(app().getUploadPath() + "/" +
+            currentUser.setPfpUrl(app().getUploadPath().substr(1) + "/" +
                                   timestampedFileName);
 
             mapper.update(
                 currentUser,
                 [callbackPtr, pfpPath = currentUser.getValueOfPfpUrl()](auto)
-                { SEND_RESPONSE(*callbackPtr, "New pfp url: " + pfpPath); },
+                { 
+                    SEND_RESPONSE(*callbackPtr, "New pfp url: " + pfpPath); 
+                },
                 DB_EXCEPTION_HANDLER(*callbackPtr));
         },
         DB_EXCEPTION_HANDLER(callback));

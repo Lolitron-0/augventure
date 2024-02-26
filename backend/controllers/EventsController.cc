@@ -303,13 +303,11 @@ void EventsController::get(
     Json::Value body;
     reader.parse(req->getOptionalParameter<std::string>("filter").value_or(""),
                  body);
-    LOG_INFO << body.toStyledString();
 
     auto bodyRequest{ HttpRequest::newHttpJsonRequest(body) };
     bodyRequest->setParameter(
         "sort", req->getOptionalParameter<std::string>("sort").value_or(""));
 
-    LOG_INFO << bodyRequest->jsonObject()->toStyledString();
     EventsControllerBase::get(
         bodyRequest,
         [callbackPtr](const HttpResponsePtr& resp)

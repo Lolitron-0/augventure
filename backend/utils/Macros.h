@@ -29,8 +29,11 @@
 #define INTERNAL_SEND_RESPONSE_NO_CODE(callbackObj, message)                   \
     INTERNAL_SEND_RESPONSE_WITH_CODE(callbackObj, message, drogon::k200OK)
 
+#define INTERNAL_EXPAND(x) x
+
 /// callback, message, code
 #define SEND_RESPONSE(...)                                                     \
-    INTERNAL_GET_MACRO(__VA_ARGS__, INTERNAL_SEND_RESPONSE_WITH_CODE,          \
+    INTERNAL_EXPAND(INTERNAL_GET_MACRO(__VA_ARGS__,                             \
+                                      INTERNAL_SEND_RESPONSE_WITH_CODE,          \
                        INTERNAL_SEND_RESPONSE_NO_CODE)                         \
-    (__VA_ARGS__)
+    (__VA_ARGS__))
