@@ -158,7 +158,6 @@ export default {
           console.log('Response data is undefined', response);
         }
       } catch (error) {
-
         console.log(error.message);
       }
     }

@@ -22,10 +22,9 @@
 import ProfileNavbar from "@/components/UI/ProfileNavbar.vue";
 import InfoBlockForProfile from "@/components/InfoBlockForProfile.vue";
 import EventForm from "@/components/UI/EventForm.vue";
-import MyButton from "@/components/UI/MyButton.vue";
 
 export default {
-  components: { InfoBlockForProfile, EventForm, ProfileNavbar,  },
+  components: { InfoBlockForProfile, EventForm, ProfileNavbar, },
 
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
