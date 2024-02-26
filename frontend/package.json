@@ -15,7 +15,8 @@
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuelidate": "^0.7.7",
-    "vuex": "^4.0.0"
+    "vuex": "^4.0.0",
+    "form-data": "latest"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",

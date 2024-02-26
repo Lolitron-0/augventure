@@ -97,20 +97,20 @@ void expandEventList(
                     Json::Value tmp;
                     std::list<Sprint> eventSprints;
 
-                    for (auto& event : *resultJsonPtr)
+                    for (auto& eventEntry : *resultJsonPtr)
                     {
-                        tmp = event;
-                        event = Json::Value{};
-                        event["event"] = std::move(tmp);
+                        tmp = eventEntry;
+                        eventEntry = Json::Value{};
+                        eventEntry["event"] = std::move(tmp);
 
                         eventSprints.clear();
                         std::copy_if(
                             sprintsList.cbegin(), sprintsList.cend(),
                             std::front_inserter(eventSprints),
-                            [&event](const auto& sprint)
+                            [&eventEntry](const auto& sprint)
                             {
                                 return sprint.getValueOfEventId() ==
-                                       event["event"][Events::Cols::_id]
+                                       eventEntry["event"][Events::Cols::_id]
                                            .as<PrimaryKeyType>();
                             });
 
@@ -120,7 +120,7 @@ void expandEventList(
                         {
 
                             // probably need to erase from first vector
-                            event["sprints"][i] = sprintIt->toJson();
+                            eventEntry["sprints"][i] = sprintIt->toJson();
 
                             auto sprintPostIt{ std::find_if(
                                 postsList.cbegin(), postsList.cend(),
@@ -129,15 +129,16 @@ void expandEventList(
                                            sprintIt->getValueOfId();
                                 }) };
 
-                            event["sprints"][i]["post"] =
+                            eventEntry["sprints"][i]["post"] =
                                 (sprintPostIt != postsList.cend()
                                      ? sprintPostIt->toJson()
                                      : Json::nullValue);
 
-                            sprintIt = sprintsList.erase(sprintIt);
+                            sprintIt = eventSprints.erase(sprintIt);
                             if (sprintPostIt != postsList.cend())
                                 postsList.erase(sprintPostIt);
                         }
+                        //eventEntry["event"].removeMember(Events::Cols::_id);
                     }
                     (*successCallbackPtr)(*resultJsonPtr);
                 },

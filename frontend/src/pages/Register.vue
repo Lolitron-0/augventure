@@ -53,13 +53,6 @@ export default {
   methods: {
     async register() {
       try {
-        // await this.$api.auth.signUp({
-        //   user: {
-        //     email: this.user.email,
-        //     username: this.user.username,
-        //     password: this.user.password
-        //   }
-        // });
         await this.$api.auth.signUp({
           user: {
             email: this.user.email,
@@ -67,8 +60,15 @@ export default {
             password: this.user.password
           }
         });
+        // await this.$api.auth.signUp({
+        //   user: {
+        //     email: this.user.email,
+        //     username: this.user.username,
+        //     password: this.user.password
+        //   }
+        // });
         // Если регистрация прошла успешно, переходите на другую страницу, например, страницу входа
-        this.$router.push({ name: 'login' });
+        // this.$router.push({ name: 'login' });
       } catch (error) {
         console.log('Registration failed:', error);
       }

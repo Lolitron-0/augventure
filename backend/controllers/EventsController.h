@@ -6,11 +6,6 @@
 #include "Events.h"
 using namespace drogon;
 using namespace drogon_model::augventure_db;
-/**
- * @brief this class is created by the drogon_ctl command.
- * this class is a restful API controller for reading and writing the events
- * table.
- */
 
 class EventsController : public drogon::HttpController<EventsController>,
                          public EventsControllerBase
@@ -33,7 +28,6 @@ public:
     ADD_METHOD_TO(EventsController::finishImplementing,
                   "/api/events/{1}/finish_implementing", Patch, Options,
                   "augventure::filters::LoginFilter");
-    // ADD_METHOD_TO(EventsController::update,"/api/events",Put,Options,"augventure::filters::LoginFilter");
     METHOD_LIST_END
 
     void getOne(const HttpRequestPtr& req,

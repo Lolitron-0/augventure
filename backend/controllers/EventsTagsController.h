@@ -13,10 +13,6 @@
 #include "EventsTags.h"
 using namespace drogon;
 using namespace drogon_model::augventure_db;
-/**
- * @brief this class is created by the drogon_ctl command.
- * this class is a restful API controller for reading and writing the events_tags table.
- */
 
 class EventsTagsController: public drogon::HttpController<EventsTagsController>, public EventsTagsControllerBase
 {

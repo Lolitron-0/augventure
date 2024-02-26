@@ -24,6 +24,8 @@ public:
                   "augventure::filters::LoginFilter");
     ADD_METHOD_TO(UsersController::profile, "/api/users/me", Get, Options,
                   "augventure::filters::LoginFilter");
+    ADD_METHOD_TO(UsersController::profileUpdate, "/api/users/me", Put, Options,
+                      "augventure::filters::LoginFilter");
     ADD_METHOD_TO(UsersController::passwordReset, "api/users/me/password_reset",
                   Put, "augventure::filters::LoginFilter");
     ADD_METHOD_TO(UsersController::uploadPfp, "/api/users/me/upload_pfp", Put,
@@ -45,6 +47,8 @@ public:
     void create(const HttpRequestPtr& req,
                 std::function<void(const HttpResponsePtr&)>&& callback);
     void profile(const drogon::HttpRequestPtr& req,
+                 drogon::AdviceCallback&& callback);
+    void profileUpdate(const drogon::HttpRequestPtr& req,
                  drogon::AdviceCallback&& callback);
     void passwordReset(const HttpRequestPtr& req,
                        std::function<void(const HttpResponsePtr&)>&& callback);

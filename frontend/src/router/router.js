@@ -26,13 +26,13 @@ const routes = [
     component: Login
   },
   {
-    path: '/register',
+    path: '/signup',
     name: 'register',
     meta: { state: 'empty' },
     component: Register
   },
   {
-    path: '/profile',
+    path: '/users/me',
     name: 'profile',
     meta: { state: 'main' },
     component: Profile
@@ -68,13 +68,13 @@ const routes = [
     component: Updates
   },
   {
-    path: '/newEvents',
+    path: '/events/new',
     name: 'newEvents',
     meta: { state: 'main' },
     component: NewEvents
   },
   {
-    path: '/currentEvents',
+    path: '/events/current',
     name: 'currentEvents',
     meta: { state: 'main' },
     component: CurrentEvents
@@ -85,7 +85,7 @@ const routes = [
     meta: { state: 'main' },
     component: Voting
   },
-  {
+  { // todo
     path: '/eventsMain',
     name: 'eventsMain',
     meta: { state: 'main' },
@@ -105,37 +105,49 @@ const routes = [
     component: MyEvents
   },
   {
-    path: '/profile/archive',
+    path: '/users/me/archive',
     name: 'archive',
     meta: { state: 'main' },
     component: Archive
   },
-  {
-    path: '/profile/subscriptions',
+  { 
+    path: '/users/me/subscriptions',
     name: 'subscriptions',
     meta: { state: 'main' },
     component: Subscriptions
   },
   {
-    path: '/profile/settings',
+    path: '/users/me/settings',
     name: 'settings',
     meta: { state: 'main' },
     component: Settings
   },
   {
+<<<<<<< HEAD
     path: '/currentEvents/:id/eventsMain',
+=======
+    path: '/events/current/eventsMain',
+>>>>>>> 7a63c61e38ecf583e0460ad4a74a68c0cbfdc729
     name: 'eventsMain',
     meta: { state: 'main' },
     component: EventsMain
   },
   {
+<<<<<<< HEAD
     path: '/currentEvents/:id/voting',
+=======
+    path: '/events/current/voting',
+>>>>>>> 7a63c61e38ecf583e0460ad4a74a68c0cbfdc729
     name: 'voting',
     meta: { state: 'main' },
     component: Voting
   },
   {
+<<<<<<< HEAD
     path: '/currentEvents/:id/sprints',
+=======
+    path: '/events/current/sprints',
+>>>>>>> 7a63c61e38ecf583e0460ad4a74a68c0cbfdc729
     name: 'sprints',
     meta: { state: 'main' },
     component: Sprints

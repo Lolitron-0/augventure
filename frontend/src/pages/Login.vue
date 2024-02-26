@@ -23,7 +23,7 @@
           <!--              <router-link to="profile"><button type="submit" class="btn">Login</button></router-link>-->
           <button type="submit" class="btn">Login</button>
           <div class="logreg-link">
-            <p>Don't have an account? <router-link to="register">Sign Up</router-link></p>
+            <p>Don't have an account? <router-link :to="{ name: 'register' }">Sign Up</router-link></p>
           </div>
         </form>
       </div>
@@ -68,6 +68,7 @@ export default {
         });
         if (response && response.data) {
           const { token, user } = response.data;
+          console.log(user);
           localStorage.setItem('token', token);
           localStorage.setItem('user', JSON.stringify(user));
           this.$router.push({ name: 'profile' });
@@ -75,7 +76,6 @@ export default {
           console.log('Response data is undefined', response);
         }
       } catch (error) {
-
         console.log(error.message);
       }
     }
