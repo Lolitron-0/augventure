@@ -175,7 +175,7 @@ export default {
 
 .settings {
   position: absolute;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   width: 85vw;
   height: 80vh;
 }
@@ -184,7 +184,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  //border: 1px solid #31a0a8;
+  /* border: 1px solid #31a0a8; */
   width: 25%;
   height: 80vh;
   padding: 2%;
@@ -194,7 +194,7 @@ export default {
   position: absolute;
   top: 0;
   left: 25%;
-  //border: 1px solid #cfcfcf;
+  /* border: 1px solid #cfcfcf; */
   width: 75%;
   padding: 0 10px 50px 10px;
 }
@@ -215,7 +215,7 @@ export default {
 .profile_nickname {
   margin-top: 10px;
   color: #0e73bd;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   font-size: 22px;
 }
 
@@ -248,7 +248,7 @@ export default {
 
 .container_for_btn {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   justify-content: right;
   display: flex;
   gap: 1rem;
@@ -271,7 +271,7 @@ export default {
 
 .form_picture {
   width: 100%;
-  //border: 1px solid #31a0a8;
+  /* border: 1px solid #31a0a8; */
   border-bottom: 1px solid var(--border-dark-gray-color);
   padding-bottom: 15px;
   margin-top: 15px;
@@ -300,14 +300,14 @@ export default {
   width: 0;
   height: 0;
   position: absolute;
-  //background-color: #858585;
+  /* background-color: #858585; */
   opacity: 0;
   z-index: -1;
   cursor: pointer;
 }
 
 .label_for_picture {
-  //background-color: #cfcfcf;
+  /* background-color: #cfcfcf; */
   justify-content: space-between;
   align-items: center;
   display: flex;
@@ -323,7 +323,7 @@ export default {
   border: solid 1px var(--border-light-gray-color);
   box-sizing: border-box;
   background-color: #0e73bd;
-  //cursor: pointer;
+  /* cursor: pointer; */
   border-radius: 50%;
   padding-left: 15px;
 
@@ -331,7 +331,7 @@ export default {
 
 .TextBlock_in_container {
   color: var(--text-wight-color);
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   width: 80%;
   height: 100%;
   display: flex;
@@ -353,7 +353,7 @@ export default {
 
 .block_about_email {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   border-bottom: 1px solid var(--border-dark-gray-color);
   padding-bottom: 15px;
   margin-bottom: 15px;
@@ -378,7 +378,7 @@ export default {
 .container_for_btn_addEmail {
   margin-top: 10px;
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   display: flex;
   justify-content: right;
 }
@@ -394,7 +394,7 @@ export default {
 
 .block_about_password {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   padding-bottom: 5px;
   border-bottom: 1px solid #24292F;
 }
@@ -419,7 +419,7 @@ export default {
 
 .block_for_btn_savePassword {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   display: flex;
   justify-content: right;
   margin-bottom: 10px;
@@ -456,7 +456,7 @@ export default {
   justify-content: center;
   padding: 15px 0;
   flex-direction: column;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   gap: 15px;
 }
 
@@ -536,7 +536,7 @@ export default {
 }*/
 @media (max-width: 992px) {
   .info {
-    //border: 1px solid #31a0a8;
+    /* border: 1px solid #31a0a8; */
     width: 0;
     height: 0;
     opacity: 0;
@@ -544,7 +544,7 @@ export default {
 
   .body {
     left: 0;
-    //border: 1px solid #cfcfcf;
+    /* border: 1px solid #cfcfcf; */
     width: 100%;
     padding: 0 0 50px 0;
   }
