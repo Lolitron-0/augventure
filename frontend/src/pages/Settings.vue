@@ -148,10 +148,10 @@ export default {
     },
 
     changePfpPreview(event) {
-      var oFReader = new FileReader();
-      oFReader.readAsDataURL(document.getElementById("pfp-input").files[0]);
-      oFReader.onload = (oFREvent) => {
-        this.profileData.pfpPreview = oFREvent.target.result;
+      let fileReader = new FileReader();
+      fileReader.readAsDataURL(document.getElementById("pfp-input").files[0]);
+      fileReader.onload = (frEvent) => {
+        this.profileData.pfpPreview = frEvent.target.result;
       };
     }
   },
