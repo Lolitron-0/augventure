@@ -296,7 +296,7 @@ export default {
 }
 
 .ellipse_logo {
-  width: 90%;
+  height: 90%;
   border: 1px solid #858585;
   box-sizing: border-box;
   background-color: #0e73bd;
@@ -307,7 +307,7 @@ export default {
 
 .TextBlock_in_container {
   color: var(--text-wight-color);
-  border: 1px solid red;
+  //border: 1px solid red;
   width:  80%;
   height: 100%;
   display: flex;

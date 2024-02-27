@@ -74,7 +74,7 @@ const routes = [
     component: NewEvents
   },
   {
-    path: '/events/current',
+    path: '/events/current/:id',
     name: 'currentEvents',
     meta: { state: 'main' },
     component: CurrentEvents
@@ -123,31 +123,19 @@ const routes = [
     component: Settings
   },
   {
-<<<<<<< HEAD
-    path: '/currentEvents/:id/eventsMain',
-=======
     path: '/events/current/eventsMain',
->>>>>>> 7a63c61e38ecf583e0460ad4a74a68c0cbfdc729
     name: 'eventsMain',
     meta: { state: 'main' },
     component: EventsMain
   },
   {
-<<<<<<< HEAD
-    path: '/currentEvents/:id/voting',
-=======
     path: '/events/current/voting',
->>>>>>> 7a63c61e38ecf583e0460ad4a74a68c0cbfdc729
     name: 'voting',
     meta: { state: 'main' },
     component: Voting
   },
   {
-<<<<<<< HEAD
-    path: '/currentEvents/:id/sprints',
-=======
     path: '/events/current/sprints',
->>>>>>> 7a63c61e38ecf583e0460ad4a74a68c0cbfdc729
     name: 'sprints',
     meta: { state: 'main' },
     component: Sprints

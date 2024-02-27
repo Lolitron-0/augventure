@@ -1,11 +1,7 @@
 <template>
   <div class="back">
     <div class="profile">
-<<<<<<< HEAD
-      <info-block-for-profile :nickname="user.username" />
-=======
       <info-block-for-profile :nickname="user.username" :bio="user.bio" :photo="user.pfp_url"/>
->>>>>>> 7a63c61e38ecf583e0460ad4a74a68c0cbfdc729
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
         <div class="form_for_btn_new">
