@@ -26,6 +26,7 @@
           <textarea name="message" rows="15" cols="50" :placeholder="profileData.bio" class="textarea_form_for_aboutMe"
             v-model.trim="profileData.bio"></textarea>
           <div class="container_for_btn">
+            <my-button class="btn_save" v-on:click="this.resetProfile">Reset changes</my-button>
             <my-button class="btn_save" v-on:click="this.updateProfile">Save changes</my-button>
           </div>
         </div>
@@ -107,7 +108,6 @@ export default {
   methods: {
     async updateProfile() {
       try {
-        console.log(this)
         const response = await this.$api.users.updateProfile({
           username: this.profileData.username,
           bio: this.profileData.bio
@@ -136,6 +136,14 @@ export default {
         }
       } catch (error) {
         console.log(error.message);
+      }
+    },
+
+    resetProfile() {
+      this.profileData = {
+        username: this.user.username,
+        bio: this.user.bio,
+        pfpPreview: this.user.pfp_url
       }
     },
 
@@ -243,6 +251,7 @@ export default {
   //border: 1px solid red;
   justify-content: right;
   display: flex;
+  gap: 1rem;
 }
 
 .btn_save {
