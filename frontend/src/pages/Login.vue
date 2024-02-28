@@ -40,7 +40,7 @@
 import { email, required, minLength } from 'vuelidate/lib/validators'
 import { exportTypedArrayMethod } from "core-js/internals/array-buffer-view-core";
 import axios from 'axios'
-
+import { loginRest } from "@/api/api";
 export default {
   name: 'login',
   data() {
@@ -60,6 +60,12 @@ export default {
   methods: {
     async login() {
       try {
+        // loginRest(this.username, this.password)
+        //     .then((response) =>
+        //         this.$emit("onAuth", { ...response.data, secret: this.password })
+        //     )
+        //     .catch((error) => console.log("Login error", error));
+
         const response = await this.$api.auth.login({
           user: {
             email: this.user.email,
@@ -78,8 +84,9 @@ export default {
       } catch (error) {
         console.log(error.message);
       }
-    }
-  }
+    },
+  },
+
 }
 </script>
 

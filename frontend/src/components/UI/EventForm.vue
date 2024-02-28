@@ -1,5 +1,6 @@
 <template>
-  <router-link style="text-decoration: none" :to="{ name: 'eventsMain', params: {id: this.id} }">
+<!--  -->
+  <router-link style="text-decoration: none" :to="{ name: 'voting', params: {id: this.id} }">
     <div class="event_form" id="event-form">
       <div class="body_event" id="body_event">
         <div class="title_event" id="title-event">{{ this.title }}</div>

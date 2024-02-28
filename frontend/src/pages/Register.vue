@@ -40,6 +40,7 @@
 
 <script>
 // import axios from "@axios";
+import { signupRest  } from "@/api/api";
 export default {
   data() {
     return {
@@ -52,6 +53,18 @@ export default {
   },
   methods: {
     async register() {
+      // signupRest(
+      //     this.username,
+      //     this.password,
+      //     this.email,
+      //     this.first_name,
+      //     this.last_name
+      // )
+      //     .then((response) =>
+      //         this.$emit("onAuth", { ...response.data, secret: this.password })
+      //     )
+      //     .catch((error) => console.log("Sign up error", error));
+
       try {
         await this.$api.auth.signUp({
           user: {
