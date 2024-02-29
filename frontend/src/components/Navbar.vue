@@ -12,18 +12,18 @@
         <div class="ellipse_nav_logo"></div>
       </router-link>
 
-        <nav class="nav_menu" v-if="show">
-          <ul>
-            <li><router-link class="main_menu_text" :to="{ name: 'home' }">Home</router-link></li>
-            <li><a href="#" class="main_menu_text">Events <i class='bx bx-chevron-down'></i></a>
-              <ul>
-                <li><router-link :to="{ name: 'newEvents' }">New events</router-link></li>
-                <li><router-link :to="{ name: 'currentEvents' }">Current events </router-link></li>
-              </ul>
-            </li>
-            <li><router-link class="main_menu_text" :to="{ name: 'about'}" >About</router-link></li>
-          </ul>
-        </nav>
+      <nav class="nav_menu" v-if="show">
+        <ul>
+          <li><router-link class="main_menu_text" :to="{ name: 'home' }">Home</router-link></li>
+          <li><a href="#" class="main_menu_text">Events <i class='bx bx-chevron-down'></i></a>
+            <ul>
+              <li><router-link :to="{ name: 'newEvents' }">New events</router-link></li>
+              <li><router-link :to="{ name: 'currentEvents' }">Current events </router-link></li>
+            </ul>
+          </li>
+          <li><router-link class="main_menu_text" :to="{ name: 'about'}" >About</router-link></li>
+        </ul>
+      </nav>
     </div>
 
     <div class="nav_right">

@@ -6,5 +6,9 @@ export default function (instance) {
 		createEvent(payload) {
 			return instance.post("events", payload);
 		},
+		getOne(id) {
+			return instance.get(`events/${id}`);
+			// return instance.get('events/${id}');
+		}
 	};
 }
