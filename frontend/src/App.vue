@@ -8,23 +8,23 @@
 </template>
 
 <script>
-  import Navbar from "@/components/Navbar.vue";
-  export default {
-    components: {Navbar},
-    data() {
-      return {
-        currentPageMeta: { state: 'main' }
-      };
+import Navbar from "@/components/Navbar.vue";
+export default {
+  components: {Navbar},
+  data() {
+    return {
+      currentPageMeta: { state: 'main' }
+    };
+  },
+  computed: {
+    showNavbar() {
+      return this.currentPageMeta.state === 'main';
     },
-    computed: {
-      showNavbar() {
-        return this.currentPageMeta.state === 'main';
-      },
-      updateCurrentPage() {
-        this.currentPageMeta.state = this.$route.meta.state || 'empty';
-      }
-    },
-  }
+    updateCurrentPage() {
+      this.currentPageMeta.state = this.$route.meta.state || 'empty';
+    }
+  },
+}
 </script>
 
 <style>

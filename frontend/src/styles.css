@@ -18,3 +18,7 @@
 
     --title-color: #cfcfcf;
 }
+
+input:focus {
+    outline: none;
+}

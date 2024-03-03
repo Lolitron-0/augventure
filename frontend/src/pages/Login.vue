@@ -60,11 +60,11 @@ export default {
   methods: {
     async login() {
       try {
-        // loginRest(this.username, this.password)
-        //     .then((response) =>
-        //         this.$emit("onAuth", { ...response.data, secret: this.password })
-        //     )
-        //     .catch((error) => console.log("Login error", error));
+        loginRest(this.username, this.password)
+            .then((response) =>
+                this.$emit("onAuth", { ...response.data, secret: this.password })
+            )
+            .catch((error) => console.log("Login error", error));
 
         const response = await this.$api.auth.login({
           user: {

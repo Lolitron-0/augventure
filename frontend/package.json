@@ -4,25 +4,54 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "axios": "^1.6.7",
     "core-js": "^3.8.3",
+    "firebase": "^10.8.1",
+    "form-data": "latest",
     "materialize-css": "^1.0.0-rc.2",
+    "react-chat-engine-pretty": "^0.1.8",
+    "veaury": "^2.3.15",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuelidate": "^0.7.7",
-    "vuex": "^4.0.0",
-    "form-data": "latest"
+    "vuex": "^4.0.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "^5.0.8"
+    "@vue/cli-service": "^5.0.8",
+    "@vue/compiler-sfc": "^3.4.21",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.22.0",
+    "node-sass": "^9.0.0",
+    "sass-loader": "^14.1.1"
+  },
+  "rules": {
+    "no-unused-vars": "off"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {
+      "no-unused-vars": "off"
+    }
   },
   "browserslist": [
     "> 1%",
