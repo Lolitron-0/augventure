@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, onSnapshot } from "firebase/database";
+import { getDatabase } from "firebase/database";
 
 const config = {
     apiKey: "AIzaSyB6Het2lTpoQOzwAV1IeFoun8OnmpDgZPI",
@@ -14,4 +14,4 @@ const config = {
 const app = initializeApp(config);
 const db = getDatabase(app);
 
-export { db, onSnapshot };
+export { db };

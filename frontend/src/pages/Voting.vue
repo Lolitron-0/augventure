@@ -1,43 +1,54 @@
 <template>
   <div class="back">
     <div class="profile">
-      <div class="container_for_navbar">
-        <img :src="events.picture_url" alt="" class="ellipse_logo"/>
-        <div class="title_event">{{ events.title }}</div>
-        <i class='bx bx-dots-horizontal-rounded icon_dotes' id="dotes-icon" v-if="show" @click="Show" key="dotes"></i>
-        <div class="description_event" v-else>{{ events.description }}</div>
+      <div class="container-for-navbar">
+        <img :src="events.picture_url" alt="" class="ellipse-logo"/>
+        <div class="title-event">{{ events.title }}</div>
+        <i class='bx bx-dots-horizontal-rounded icon-dots' id="dots-icon" v-if="show" @click="Show" key="dots"></i>
+        <div class="description-event" v-else>{{ events.description }}</div>
       </div>
 
-      <div class="container_for_blocks_profile">
-        <div class="sprint_history">
-          <div class="title_for_sprint_history">Sprint history</div>
-          <div class="container_for_sprints">
-<!--            здесь будет дерево спринтов-->
+      <div class="container-for-blocks-profile">
+        <div class="sprint-history">
+          <div class="title-for-sprint-history">Sprint history</div>
+          <div class="container-for-sprints">
+            <!-- здесь будет дерево спринтов -->
           </div>
         </div>
 
-        <div class="voting_chat">
-          <div class="title_for_voting_chat" v-if="events.state === 'in_progress'">Voting in progress...</div>
-          <div class="title_for_voting_chat" v-else>Voting results</div>
+        <div class="voting-chat">
+          <div class="title-for-voting-chat" v-if="events.state === 'in_progress'">Voting in progress...</div>
+          <div class="title-for-voting-chat" v-else>Voting results</div>
 
-          <div class="chat_messages">
-            <div
-                v-for="message in this.messages"
-                :key="message.id"
-                :class="((message.username === this.user.username) ? 'message current_user' : 'message')">
-              <div class="message_inner">
-                <div class="username">{{ message.username }}</div>
-                <div class="content">{{ message.content }}</div>
+          <div class="chat-messages" ref="messageContainer">
+            <div class="message-container" >
+              <div
+                  v-for="(message, index) in messages"
+                  :key="index"
+                  :class="getMessageClasses(message)"
+              >
+                <div class="message-content">
+                  <div class="username">{{ message.username }}</div>
+                  <div class="text-with-avatar">
+                    <img v-if="message.avatar !== this.user.pfp_url" :src="message.avatar" alt="" class="avatar"/>
+                    <div class="message-text">{{ message.content }}</div>
+                    <img v-if="message.avatar === this.user.pfp_url" :src="message.avatar" alt="" class="avatar"/>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <form class="form_send_messege" @submit.prevent="SendMessage">
-
-            <input type="text" v-model="inputMessage" class="input_from_for_send_messege" placeholder="Messege">
-            <input type="submit" class="send_btn" value="Send">
-<!--            <i class='bx bx-send icon_send' @click=""></i>-->
-<!--            <my-button type="submit" class="send_btn"></my-button>-->
+          <form class="form-send-message" @submit.prevent="SendMessage">
+            <input
+                type="text"
+                v-model="inputMessage"
+                class="input-for-send-message"
+                placeholder="Message"
+            >
+            <button type="submit" class="send-btn">
+              <i class='bx bx-send icon-send' @click="SendMessage"></i>
+            </button>
           </form>
 
         </div>
@@ -48,10 +59,10 @@
 
 <script>
 import MyButton from "@/components/UI/MyButton.vue";
-import { ref, push } from "firebase/database";
-import { db, onSnapshot } from "@/pages/db";
+import { ref, push, onValue } from "firebase/database";
+import { db } from "@/pages/db";
 export default {
-  components: {MyButton},
+  components: { MyButton },
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
     return {
@@ -60,13 +71,13 @@ export default {
       descriptionVisible: false,
       show: true,
       inputMessage: "",
-      messages: {}
+      messages: {},
+      ID: this.$route.params.id
     }
   },
   async beforeMount() {
     try {
-      const ID = this.$route.params.id;
-      const ev = await this.$api.events.getOne(ID);
+      const ev = await this.$api.events.getOne(this.ID);
       this.events = ev.data.event
 
     } catch (error) {
@@ -74,6 +85,12 @@ export default {
     }
   },
   methods: {
+    getMessageClasses(message) {
+      return {
+        'message-right': message.username === this.user.username,
+        'message-left': message.username !== this.user.username,
+      };
+    },
     toggleDescription() {
       this.descriptionVisible = !this.descriptionVisible;
     },
@@ -81,7 +98,7 @@ export default {
       this.show = !this.show;
     },
     SendMessage() {
-      const messagesRef = ref(db, "messages");
+      const messagesRef = ref(db, "message_" + this.ID);
 
       if (this.inputMessage === "" || this.inputMessage === null) {
         return;
@@ -89,49 +106,44 @@ export default {
 
       const message = {
         username: this.user.username,
-        content: this.inputMessage
+        content: this.inputMessage,
+        avatar: this.user.pfp_url
       }
 
       push(messagesRef, message);
       this.inputMessage = "";
+
     }
   },
-  mounted() {
-    const messagesRef = ref(db, "messages");
+  async mounted() {
+    try {
 
-    onSnapshot(messagesRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log('data', data)
-      let messages = {};
+      const messagesRef = ref(db, "message_" + this.ID);
 
-      Object.keys(data).forEach(key => {
-        messages[key] = {
-          id: key,
-          username: data[key].username,
-          content: data[key].content
-        };
+      onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          this.messages = Object.values(data);
+
+          this.$nextTick(() => {
+            const messageContainer = this.$refs.messageContainer;
+            if (messageContainer) {
+              messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+          });
+        }
       });
-
-      this.messages = messages;
-    });
-  }
-
+    } catch (error) {
+      console.log("Failed to fetch messages:", error);
+    }
+  },
 }
 </script>
 
 <style scoped>
 @import "@/styles.css";
 
-
-hr {
-  margin-top: 5px;
-  background-color: var(--border-light-gray-color);
-  padding: .3px;
-  border: var(--border-light-gray-color);
-}
-
 .back {
-  /* background-color: #0d1117; */
   background-color: var(--background-app-color);
   position: fixed;
   width: 100vw;
@@ -140,42 +152,39 @@ hr {
   padding: 80px 5% 24px 5%;
   overflow-y: auto;
   overflow-x: hidden;
-
 }
 
 .profile {
   position: absolute;
-  //border: 1px solid red;
   width: 85vw;
-  height: 100%;
+  height: 91vh;
 }
-.container_for_blocks_profile {
+
+.container-for-blocks-profile {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 83vh;
 }
-.sprint_history {
+
+.sprint-history {
   position: absolute;
   left: 0;
   border: 2px solid var(--border-light-gray-color);
   border-radius: 5px;
   width: 25%;
   height: 80vh;
-  //padding: 2%;
 }
 
-.voting_chat {
+.voting-chat {
   position: absolute;
   left: 28%;
   border: 2px solid var(--border-light-gray-color);
   border-radius: 5px;
   width: 72%;
   height: 80vh;
-  //padding: 0 10px 10px 10px;
 }
 
-.container_for_navbar {
-  //border: 1px solid red;
+.container-for-navbar {
   top: 0;
   width: 100%;
   position: relative;
@@ -190,7 +199,7 @@ hr {
   margin-bottom: 15px;
 }
 
-.title_for_sprint_history {
+.title-for-sprint-history {
   color: var(--text-wight-color);
   width: 100%;
   height: 40px;
@@ -205,7 +214,7 @@ hr {
   border-top-right-radius: 5px;
 }
 
-.title_for_voting_chat {
+.title-for-voting-chat {
   color: var(--text-wight-color);
   width: 100%;
   font-size: 18px;
@@ -220,7 +229,7 @@ hr {
   border-top-right-radius: 5px;
 }
 
-.ellipse_logo {
+.ellipse-logo {
   height: 90%;
   border: 1px solid #858585;
   box-sizing: border-box;
@@ -230,23 +239,22 @@ hr {
   aspect-ratio: 1;
 }
 
-.title_event {
+.title-event {
   font-size: 18px;
 }
 
-.title_event::first-letter {
+.title-event::first-letter {
   text-transform: uppercase;
 }
 
-.description_event {
-
+.description-event {
 }
 
-.icon_dotes {
+.icon-dots {
   font-size: 22px;
 }
 
-.form_send_messege {
+.form-send-message {
   position: absolute;
   width: 100%;
   height: 40px;
@@ -256,7 +264,7 @@ hr {
   bottom: 0;
 }
 
-.input_from_for_send_messege {
+.input-for-send-message {
   width: calc(100% - 60px);
   font-size: 16px;
   color: var(--text-wight-color);
@@ -269,84 +277,121 @@ hr {
   align-items: center;
   margin-right: 5px;
   border-radius: 5px;
+  resize: vertical;
 }
 
-.send_btn {
-  width: 35px;
-  height: 35px;
-  right: 0;
+.send-btn {
+  right: 10px;
   position: absolute;
   justify-content: center;
   align-items: center;
   border: none;
-  //color: var(--text-wight-color);
+  background: none;
+  cursor: pointer;
 }
-.icon_send {
+
+.icon-send {
   position: absolute;
   font-size: 35px;
-  //height: 35px;
   color: var(--text-wight-color);
   right: 10px;
   justify-content: center;
   align-items: center;
   transition: .5s;
   cursor: pointer;
-  //background-color: #cfcfcf;
 }
 
-.icon_send:hover {
+.icon-send:hover {
   color: var(--text-turquoise-color);
 }
 
-
-
-
-.chat_messages {
-  position: absolute;
+.chat-messages {
+  height: calc(100% - 80px);
   width: 100%;
   top: 40px;
-  height: calc(100% - 40px);
-  background-color: var(--background-app-color);
-  padding: 30px;
-  //flex: 1 1 100%;
+  position: absolute;
+  overflow-y: auto;
 }
 
-.chat_messages .message {
+.chat-messages::-webkit-scrollbar {
+  width: 0;  /* Ширина полосы прокрутки */
+  height: 0; /* Высота полосы прокрутки (горизонтальная полоса) */
+}
+
+.message-container {
+  padding: 10px;
+  //flex: 1;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: 10px;
+}
+
+.message-content {
   display: flex;
-  margin-bottom: 15px;
+  flex-direction: column;
 }
 
-.chat_messages .message .message_inner .username {
-  color: #888;
-  font-size: 16px;
+.username {
+  color: grey;
   margin-bottom: 5px;
-  padding: 0 15px;
 }
 
-.chat_messages .message .message_inner .content {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #f3f3f3;
-  border-radius: 999px;
-  color: #333;
-  font-size: 18px;
-  line-height: 1.2em;
-  text-align: left;
+.text-with-avatar {
+  display: flex;
+  align-items: flex-start;
 }
 
-.chat_messages .message.current_user {
-  margin-top: 30px;
+.message-text {
+  padding: 8px;
+  border-radius: 10px;
+  color: black;
+  word-wrap: break-word;
+  //overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.message-right {
+  display: flex;
   justify-content: flex-end;
-  text-align: right;
+  margin-bottom: 10px;
 }
 
-.chat_messages .message.current_user .message_inner {
-  max-width: 75%;
+.message-left {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
 }
 
-.chat_messages .message.current_user .message_inner .content {
-  color: #fff;
-  font-weight: 600;
-  background-color: #ea526f;
+.message-right .avatar {
+  order: 2;
+  margin-left: 10px;
+}
+
+.message-left .avatar {
+  order: 0;
+  margin-right: 10px;
+}
+
+.message-right .message-text {
+  background-color: #2ecc71;
+  margin-left: 10px;
+}
+
+.message-left .message-text {
+  background-color: #ffffff;
+  margin-right: 10px;
+}
+
+.username.message-right {
+  order: 1;
+}
+
+.username.message-left {
+  order: -1;
 }
 </style>
