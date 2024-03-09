@@ -18,13 +18,20 @@ import EventForm from "@/components/UI/EventForm.vue";
 
 export default {
   components: {EventForm, EventNavbar},
+  
+  data() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return {
+      user: user,
+      events: [],
+    }
+  },
   async beforeMount() {
     try {
       const events = await this.$api.events.filterEvents({
         "filter": [ // or array
           [ // and array
-            ["state", "in", ["in_progress", "scheduled"]],
-            ["author_id", "=", this.user.id]
+            ["state", "in", ["in_progress", "scheduled"]]
           ]
         ]
       });

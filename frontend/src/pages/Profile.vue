@@ -122,7 +122,6 @@ hr {
   max-height: 256px;
   border: solid 1px var(--border-light-gray-color);
   box-sizing: border-box;
-  background-color: #0e73bd;
   cursor: pointer;
   border-radius: 50%;
   aspect-ratio: 1;

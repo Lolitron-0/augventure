@@ -207,7 +207,7 @@ export default {
   max-height: 256px;
   border: solid 1px #858585;
   box-sizing: border-box;
-  background-color: #0e73bd;
+  /* background-color: #0e73bd; */
   cursor: pointer;
   border-radius: 50%;
 }
@@ -319,7 +319,7 @@ export default {
   height: 90%;
   border: 1px solid #858585;
   box-sizing: border-box;
-  background-color: #0e73bd;
+  /* background-color: #0e73bd; */
   cursor: pointer;
   border-radius: 50%;
   aspect-ratio: 1;
