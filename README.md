@@ -1,9 +1,25 @@
 # augventure
 A platform for collaborative content creation with the audience.
 
-The platform helps creators respond to audience requests and receive feedback. The audience chooses the path of development of the project and feels that they belong to the final product.
+Web platform which helps creators respond to audience requests and receive feedback. The audience chooses the path of development of the project and feels that they belong to the final product.
 
-Платформа помогает создателям реагировать на запросы аудитории и получать обратную связь. Аудитория выбирает путь развития проекта и чувствует свою причастность к конечному продукту.
+Веб-платформа, помогающая создателям реагировать на запросы аудитории и получать обратную связь. Аудитория выбирает путь развития проекта и чувствует свою причастность к конечному продукту.
+
+## Содержание
+...
+
+## Концепт
+Для авторов контента существует масса способов получения фидбека от аудитории: комментарии, стримы, сервисы подписки, но что если объединить процесс создания контента и взаимодействие с аудиторией? 
+Такой подход частично реализован стриминговыми платформами, однако живое взаимодействие подойдет не для всех видов творчества (например, литература и рисование) и не всем авторам. 
+Веб-платформа **augventure** позволит авторам реагировать на запросы аудитории и получать обратную связь в более масштабных проектах из большего спектра форматов.
+\
+\
+![Concept](https://github.com/Lolitron-0/augventure/assets/67783125/9e3b9602-c0cb-4922-83e5-0ca734200e0a) 
+
+## Архитектура
+Для проекта использовалась классическая трехслойная архитектура. На диаграмме представлена схема взаимодействия контейнеров. \
+\
+![Containers](https://github.com/Lolitron-0/augventure/assets/67783125/e757c2d4-98cf-43c5-b131-633b3680015d)
 
 ## Локальный запуск
 Для развертывания сервиса необходимы [Docker](https://docs.docker.com/engine/install/) и [Docker Compose](https://docs.docker.com/compose/).
@@ -20,3 +36,4 @@ The platform helps creators respond to audience requests and receive feedback. T
      * **backend:80** - адрес бэкенда
      * **frontend:3000** - адрес Vue приложения (фронтенд)
      * **db:3306** - адрес базы данных
+
