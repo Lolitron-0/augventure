@@ -1,10 +1,6 @@
 # augventure
 A platform for collaborative content creation with the audience.
 
-Web platform which helps creators respond to audience requests and receive feedback. The audience chooses the path of development of the project and feels that they belong to the final product.
-
-Веб-платформа, помогающая создателям реагировать на запросы аудитории и получать обратную связь. Аудитория выбирает путь развития проекта и чувствует свою причастность к конечному продукту.
-
 ## Содержание
 ...
 
@@ -18,7 +14,7 @@ Web platform which helps creators respond to audience requests and receive feedb
 Такой вариант взаимодействия может быть масштабирован на любой вид творчества: от написания музыки до создания видеоигр, а также легко расширяется монетизацией для авторов. 
 \
 \
-![Concept](https://github.com/Lolitron-0/augventure/assets/67783125/9e3b9602-c0cb-4922-83e5-0ca734200e0a) 
+![Concept](https://github.com/Lolitron-0/augventure/assets/67783125/c2be787d-64ba-442b-b803-0b396988aa53)
 
 ## Архитектура
 Для проекта использовалась классическая трехслойная архитектура. На диаграмме представлена схема взаимодействия контейнеров, развертывающихся через [Docker compose](https://docs.docker.com/compose/). \
@@ -29,6 +25,11 @@ Web platform which helps creators respond to audience requests and receive feedb
 \
 Серверная часть использует C++ фреймворк [Drogon](https://drogon.org). Входящий запрос обрабатывается контроллером, где разбивается на более мелкие CRUD запросы, которые отправляются контейнеру базы данных [MariaDB](https://mariadb.org).
 Также при развертывании бэкенд контейнера запускается отдельный поток планировщика, который делает регулярные запросы к базе данных и обновляет ресурсы, состояние которых привязано к UTC-меткам.  
+
+## Другие ресурсы
+- [Postman документация](https://documenter.getpostman.com/view/31966860/2s9YsMABU5) для реализованных запросов.
+- Видео демонстрация доступного фронтенда (10.03.2024)
+- Видео демонстрация всех запросов
 
 ## Локальный запуск
 Для развертывания сервиса необходимы [Docker](https://docs.docker.com/engine/install/) и [Docker Compose](https://docs.docker.com/compose/).
