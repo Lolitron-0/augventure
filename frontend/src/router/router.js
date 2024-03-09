@@ -9,9 +9,7 @@ import Notifications from '@/pages/Notifications.vue'
 import Updates from '@/pages/Updates.vue'
 import NewEvents from "@/pages/NewEvents.vue";
 import CurrentEvents from "@/pages/CurrentEvents.vue";
-import Sprints from "@/pages/Sprints.vue";
 import Voting from "@/pages/Voting.vue";
-import EventsMain from "@/pages/EventsMain.vue";
 import Settings from "@/pages/Settings.vue";
 import Archive from "@/pages/Archive.vue"
 import MyEvents from "@/pages/MyEvents.vue"
@@ -80,25 +78,6 @@ const routes = [
     component: CurrentEvents
   },
   {
-    path: '/voting',
-    name: 'Voting',
-    meta: { state: 'main' },
-    component: Voting
-  },
-  { // todo
-    path: '/eventsMain',
-    name: 'eventsMain',
-    meta: { state: 'main' },
-    component: EventsMain
-  },
-  {
-    path: '/sprints',
-    name: 'sprints',
-    meta: { state: 'main' },
-    component: Sprints
-  },
-
-  {
     path: '/profile/myEvents',
     name: 'myEvents',
     meta: { state: 'main' },
@@ -123,23 +102,12 @@ const routes = [
     component: Settings
   },
   {
-    path: '/events/current/eventsMain',
-    name: 'eventsMain',
-    meta: { state: 'main' },
-    component: EventsMain
-  },
-  {
-    path: '/events/current/voting',
+    path: '/events/current/:id',
     name: 'voting',
     meta: { state: 'main' },
     component: Voting
   },
-  {
-    path: '/events/current/sprints',
-    name: 'sprints',
-    meta: { state: 'main' },
-    component: Sprints
-  },
+
   // {
   //   path: '*',
   //   name: 'notFound',

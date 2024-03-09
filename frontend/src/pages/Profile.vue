@@ -11,7 +11,7 @@
         </div>
         <div class="container_for_event_forms">
           <event-form v-for="(event, index) in events" :key="index" :title="event.title" :description="event.description"
-            :state="event.state" :likes="event.likes" />
+            :state="event.state" :likes="event.likes" :id="event.id"/>
         </div>
       </div>
     </div>
@@ -53,7 +53,8 @@ export default {
           title: entry.event.title,
           description: descString,
           state: entry.event.state,
-          likes: 6
+          likes: 6,
+          id: entry.event.id,
         })
       }
     } catch (error) {

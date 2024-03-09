@@ -5,22 +5,8 @@
         <event-navbar></event-navbar>
       </div>
       <div class="form_for_eventForm">
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
-        <event-form class="eventForm"></event-form>
+        <event-form v-for="(event, index) in events" :key="index" :title="event.title" :description="event.description"
+                    :state="event.state" :likes="event.likes" :id="event.id"/>
       </div>
     </div>
   </div>
@@ -31,7 +17,34 @@ import EventNavbar from "@/components/UI/EventNavbar.vue";
 import EventForm from "@/components/UI/EventForm.vue";
 
 export default {
-  components: {EventForm, EventNavbar}
+  components: {EventForm, EventNavbar},
+  async beforeMount() {
+    try {
+      const events = await this.$api.events.filterEvents({
+        "filter": [ // or array
+          [ // and array
+            ["state", "in", ["in_progress", "scheduled"]],
+            ["author_id", "=", this.user.id]
+          ]
+        ]
+      });
+      for (const entry of events.data) {
+        let descString = entry.event.description
+        if (descString.length > 30) {
+          descString = descString.slice(0, 30) + "..."
+        }
+        this.events.push({
+          title: entry.event.title,
+          description: descString,
+          state: entry.event.state,
+          likes: 6,
+          id: entry.event.id,
+        })
+      }
+    } catch (error) {
+      console.log('failed:', error);
+    }
+  }
 
 }
 </script >

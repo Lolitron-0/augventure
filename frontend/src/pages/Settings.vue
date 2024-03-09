@@ -316,17 +316,13 @@ export default {
 }
 
 .ellipse_logo {
-  width: 150px;
-  height: 150px;
-  position: absolute;
-  left: 15px;
-  border: solid 1px var(--border-light-gray-color);
+  height: 90%;
+  border: 1px solid #858585;
   box-sizing: border-box;
   background-color: #0e73bd;
-  /* cursor: pointer; */
+  cursor: pointer;
   border-radius: 50%;
-  padding-left: 15px;
-
+  aspect-ratio: 1;
 }
 
 .TextBlock_in_container {
