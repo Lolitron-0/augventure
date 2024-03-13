@@ -3,6 +3,7 @@
 
 backend/config.json
 backend/models/model.json
+frontend/package-lock.json
 
 ### C ###
 # Prerequisites

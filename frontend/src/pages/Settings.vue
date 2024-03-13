@@ -1,18 +1,18 @@
 <template>
   <div class="back">
     <div class="settings">
-      <info-block-for-profile v-bind:nickname.sync="user.username" :bio="user.bio" :photo="user.pfp_url"/>
+      <info-block-for-profile v-bind:nickname.sync="user.username" :bio="user.bio" :photo="user.pfp_url" />
       <div class="body">
         <profile-navbar class="profileNavbar"></profile-navbar>
 
         <div class="form_picture">
           <p class="picture_text">Profile picture</p>
           <div class="form_for_picture">
-            <input type="file" id="file" accept="image/png, image/gif, image/jpeg"
-                   name="logo_for_profile" class="input_form_for_picture">
-            <img :src="user.pfp_url" alt="" class="ellipse_logo"/>
+            <input type="file" id="pfp-input" accept="image/png, image/gif, image/jpeg" name="logo_for_profile"
+              class="input_form_for_picture" @change="changePfpPreview">
+            <img :src="profileData.pfpPreview" alt="" class="ellipse_logo" />
             <div class="TextBlock_in_container">
-              <label for="file" class="label_for_picture">
+              <label for="pfp-input" class="label_for_picture">
                 <p class="text_in_containerPicture">Download</p>
               </label>
               <p class="text_in_containerPicture">Remove</p>
@@ -22,10 +22,11 @@
 
         <div class="block_about_private_information">
           <input type="text" class="input_form_for_name" :placeholder="profileData.username"
-                 v-model.trim="profileData.username">
-          <textarea name="message" rows="15" cols="50" :placeholder="profileData.bio"
-                    class="textarea_form_for_aboutMe" v-model.trim="profileData.bio"></textarea>
+            v-model.trim="profileData.username">
+          <textarea name="message" rows="15" cols="50" :placeholder="profileData.bio" class="textarea_form_for_aboutMe"
+            v-model.trim="profileData.bio"></textarea>
           <div class="container_for_btn">
+            <my-button class="btn_save" v-on:click="this.resetProfile">Reset changes</my-button>
             <my-button class="btn_save" v-on:click="this.updateProfile">Save changes</my-button>
           </div>
         </div>
@@ -91,7 +92,7 @@ import profile from "@/pages/Profile.vue";
 import FormData from 'form-data'
 
 export default {
-  components: {InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar},
+  components: { InfoBlockForProfile, EmailForm, MyButton, EventForm, ProfileNavbar },
 
   data() {
     let user = JSON.parse(localStorage.getItem('user'));
@@ -100,13 +101,13 @@ export default {
       profileData: {
         username: user.username,
         bio: user.bio,
+        pfpPreview: user.pfp_url
       }
     }
   },
   methods: {
     async updateProfile() {
       try {
-        console.log(this)
         const response = await this.$api.users.updateProfile({
           username: this.profileData.username,
           bio: this.profileData.bio
@@ -118,8 +119,9 @@ export default {
         console.log(error.message);
       }
       try {
-        if (document.getElementById("file").files.length) {
-          let file = document.getElementById("file").files[0];
+        const pfpInput = document.getElementById("pfp-input")
+        if (pfpInput.files.length) {
+          let file = pfpInput.files[0];
           let data = new FormData();
           data.append('file', file, file.name);
           const response = await this.$api.users.uploadPFP(data, {
@@ -136,6 +138,22 @@ export default {
         console.log(error.message);
       }
     },
+
+    resetProfile() {
+      this.profileData = {
+        username: this.user.username,
+        bio: this.user.bio,
+        pfpPreview: this.user.pfp_url
+      }
+    },
+
+    changePfpPreview(event) {
+      let fileReader = new FileReader();
+      fileReader.readAsDataURL(document.getElementById("pfp-input").files[0]);
+      fileReader.onload = (frEvent) => {
+        this.profileData.pfpPreview = frEvent.target.result;
+      };
+    }
   },
 }
 </script>
@@ -157,7 +175,7 @@ export default {
 
 .settings {
   position: absolute;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   width: 85vw;
   height: 80vh;
 }
@@ -166,7 +184,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  //border: 1px solid #31a0a8;
+  /* border: 1px solid #31a0a8; */
   width: 25%;
   height: 80vh;
   padding: 2%;
@@ -176,7 +194,7 @@ export default {
   position: absolute;
   top: 0;
   left: 25%;
-  //border: 1px solid #cfcfcf;
+  /* border: 1px solid #cfcfcf; */
   width: 75%;
   padding: 0 10px 50px 10px;
 }
@@ -197,7 +215,7 @@ export default {
 .profile_nickname {
   margin-top: 10px;
   color: #0e73bd;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   font-size: 22px;
 }
 
@@ -205,7 +223,8 @@ export default {
   margin-bottom: 20px;
 }
 
-.input_form_for_name, .input_form_for_surname {
+.input_form_for_name,
+.input_form_for_surname {
   padding: 0 10px;
   color: var(--text-wight-color);
   width: 100%;
@@ -229,9 +248,10 @@ export default {
 
 .container_for_btn {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   justify-content: right;
   display: flex;
+  gap: 1rem;
 }
 
 .btn_save {
@@ -251,7 +271,7 @@ export default {
 
 .form_picture {
   width: 100%;
-  //border: 1px solid #31a0a8;
+  /* border: 1px solid #31a0a8; */
   border-bottom: 1px solid var(--border-dark-gray-color);
   padding-bottom: 15px;
   margin-top: 15px;
@@ -280,14 +300,14 @@ export default {
   width: 0;
   height: 0;
   position: absolute;
-  //background-color: #858585;
+  /* background-color: #858585; */
   opacity: 0;
   z-index: -1;
   cursor: pointer;
 }
 
 .label_for_picture {
-  //background-color: #cfcfcf;
+  /* background-color: #cfcfcf; */
   justify-content: space-between;
   align-items: center;
   display: flex;
@@ -307,8 +327,8 @@ export default {
 
 .TextBlock_in_container {
   color: var(--text-wight-color);
-  //border: 1px solid red;
-  width:  80%;
+  /* border: 1px solid red; */
+  width: 80%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -329,7 +349,7 @@ export default {
 
 .block_about_email {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   border-bottom: 1px solid var(--border-dark-gray-color);
   padding-bottom: 15px;
   margin-bottom: 15px;
@@ -354,7 +374,7 @@ export default {
 .container_for_btn_addEmail {
   margin-top: 10px;
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   display: flex;
   justify-content: right;
 }
@@ -370,12 +390,13 @@ export default {
 
 .block_about_password {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   padding-bottom: 5px;
   border-bottom: 1px solid #24292F;
 }
 
-.new_password_title, .forget_password_title {
+.new_password_title,
+.forget_password_title {
   color: var(--text-wight-color);
   font-size: 18px;
   margin-bottom: 10px;
@@ -394,7 +415,7 @@ export default {
 
 .block_for_btn_savePassword {
   width: 100%;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   display: flex;
   justify-content: right;
   margin-bottom: 10px;
@@ -431,7 +452,7 @@ export default {
   justify-content: center;
   padding: 15px 0;
   flex-direction: column;
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   gap: 15px;
 }
 
@@ -511,7 +532,7 @@ export default {
 }*/
 @media (max-width: 992px) {
   .info {
-    //border: 1px solid #31a0a8;
+    /* border: 1px solid #31a0a8; */
     width: 0;
     height: 0;
     opacity: 0;
@@ -519,12 +540,13 @@ export default {
 
   .body {
     left: 0;
-    //border: 1px solid #cfcfcf;
+    /* border: 1px solid #cfcfcf; */
     width: 100%;
     padding: 0 0 50px 0;
   }
 
-  .btn_addEmail, .btn_savePassword,
+  .btn_addEmail,
+  .btn_savePassword,
   .btn_save {
     width: 180px;
   }
@@ -541,7 +563,9 @@ export default {
 }
 
 @media (max-width: 800px) {
-  .btn_addEmail, .btn_savePassword,
+
+  .btn_addEmail,
+  .btn_savePassword,
   .btn_save {
     width: 180px;
   }
