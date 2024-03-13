@@ -239,6 +239,7 @@ export default {
   resize: vertical;
   overflow: auto;
   padding: 0 10px;
+  outline: none;
 }
 
 

@@ -8,7 +8,6 @@ export default function (instance) {
 		},
 		getOne(id) {
 			return instance.get(`events/${id}`);
-			// return instance.get('events/${id}');
 		}
 	};
 }

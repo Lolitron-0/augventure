@@ -12,11 +12,18 @@
         <div class="sprint-history">
           <div class="title-for-sprint-history">Sprint history</div>
           <div class="container-for-sprints">
-            <!-- здесь будет дерево спринтов -->
+            <!-- здесь будет дерево спринтов
+            -->
+            <sprint
+                v-for="(sprint, index) in sprints" :key="index"
+                v-if="index <= this.countSprint"
+                :state="sprint.state"
+                class="sprint"
+            />
           </div>
         </div>
 
-        <div class="voting-chat">
+        <div v-if="show2" class="voting-chat">
           <div class="title-for-voting-chat" v-if="events.state === 'in_progress'">Voting in progress...</div>
           <div class="title-for-voting-chat" v-else>Voting results</div>
 
@@ -31,7 +38,18 @@
                   <div class="username">{{ message.username }}</div>
                   <div class="text-with-avatar">
                     <img v-if="message.avatar !== this.user.pfp_url" :src="message.avatar" alt="" class="avatar"/>
+<!--                    <div v-if="message.avatar === this.user.pfp_url" class="like">-->
+<!--                      <i class='bx bxs-like icon_like'></i>-->
+<!--                      {{  }}-->
+<!--                    </div>-->
                     <div class="message-text">{{ message.content }}</div>
+                    <div v-if="message.avatar !== this.user.pfp_url" class="like" @click="likeCounter">
+                      <i class='bx bxs-like icon_like'></i>
+                      <div class="count_likes"> {{ message.likes }} </div>
+                    </div>
+                    <div v-if="message.avatar !== this.user.pfp_url" class="end_sprint" @click="changeShow2">
+                      <i class='bx bxs-party icon_end_sprint'></i>
+                    </div>
                     <img v-if="message.avatar === this.user.pfp_url" :src="message.avatar" alt="" class="avatar"/>
                   </div>
                 </div>
@@ -52,6 +70,14 @@
           </form>
 
         </div>
+        <div v-else class="voting-chat2">
+          <i class='bx bx-arrow-back icon_arrow' @click="changeShow2"></i>
+          <textarea name="message" rows="15" cols="50" class="textarea_form_for_sprint" required></textarea>
+          <div class="container_for_btn">
+            <my-button class="btn_complete_sprint" @click="completeSprint">Continue event</my-button>
+            <my-button class="btn_complete_event" @click="completeEvent">Complete the event</my-button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -61,18 +87,24 @@
 import MyButton from "@/components/UI/MyButton.vue";
 import { ref, push, onValue } from "firebase/database";
 import { db } from "@/pages/db";
+import Sprint from "@/components/UI/Sprint.vue";
 export default {
-  components: { MyButton },
+  components: {Sprint, MyButton },
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
+    const countSprint = parseInt(localStorage.getItem('countSprint')) || 0;
     return {
       user: user,
       events: {},
       descriptionVisible: false,
       show: true,
+      show2: true,
       inputMessage: "",
+      likes: 0,
       messages: {},
-      ID: this.$route.params.id
+      ID: this.$route.params.id,
+      sprints: {},
+      countSprint: countSprint,
     }
   },
   async beforeMount() {
@@ -85,6 +117,33 @@ export default {
     }
   },
   methods: {
+    changeShow2() {
+      this.show2 = !this.show2
+    },
+    likeCounter() {
+      const messagesRef = ref(db, "message_" + this.ID);
+
+      this.messages.likes += 1;
+    },
+    completeSprint() {
+      // Логика для завершения спринта
+      const nextSprint = this.sprints.find(sprint => sprint.state === 'voting');
+      if (nextSprint) {
+        nextSprint.state = 'ended';
+      }
+      this.countSprint += 1;
+      localStorage.setItem('countSprint', this.countSprint.toString());
+    },
+    // async showSprint() {
+    //   try {
+    //     const list_sprint = await this.$api.events.listSprints();
+    //     console.log("list_sprint", list_sprint)
+    //     // this.sprints = ev
+    //
+    //   } catch (error) {
+    //     console.log('failed:', error);
+    //   }
+    // },
     getMessageClasses(message) {
       return {
         'message-right': message.username === this.user.username,
@@ -107,7 +166,8 @@ export default {
       const message = {
         username: this.user.username,
         content: this.inputMessage,
-        avatar: this.user.pfp_url
+        avatar: this.user.pfp_url,
+        likes: this.likes
       }
 
       push(messagesRef, message);
@@ -135,6 +195,15 @@ export default {
       });
     } catch (error) {
       console.log("Failed to fetch messages:", error);
+    }
+
+    try {
+      const list_sprint = await this.$api.sprints.listSprints();
+      console.log("list_sprint", list_sprint)
+      this.sprints = list_sprint.data
+
+    } catch (error) {
+      console.log('failed:', error);
     }
   },
 }
@@ -173,8 +242,31 @@ export default {
   border-radius: 5px;
   width: 25%;
   height: 80vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+.container-for-sprints {
+  //position: absolute;
+  overflow-y: auto;
+  //border: 1px solid red;
+  width: 100%;
+  height: calc(100% - 40px);
+  margin-top: 40px;
+}
+.container-for-sprints::-webkit-scrollbar {
+  width: 0;  /* Ширина полосы прокрутки */
+  height: 0; /* Высота полосы прокрутки (горизонтальная полоса) */
+}
+
+.sprint {
+  position: absolute;
+  margin-bottom: calc(index * 50px);
+  bottom: 0;
+  left: 50px;
+}
 .voting-chat {
   position: absolute;
   left: 28%;
@@ -393,5 +485,99 @@ export default {
 
 .username.message-left {
   order: -1;
+}
+
+.icon_like {
+  color: var(--text-wight-color);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.icon_end_sprint {
+  color: var(--text-wight-color);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.icon_like:hover, .icon_end_sprint:hover {
+  color: var(--text-turquoise-color);
+}
+
+.like {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.count_likes {
+  color: var(--text-wight-color);
+}
+
+.icon_arrow {
+  color: var(--text-wight-color);
+  font-size: 24px;
+  margin-top: 20px;
+  margin-left: 20px;
+  position: absolute;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: .3s;
+}
+.icon_arrow:hover {
+  color: var(--text-turquoise-color);
+}
+.textarea_form_for_sprint {
+  background-color: var(--background-app-color);
+  border: 1px solid var(--border-light-gray-color);
+  //position: absolute;
+  width: 80%;
+  color: var(--text-wight-color);
+  resize: none;
+  overflow: auto;
+  height: 75%;
+  margin-top: 60px;
+  margin-bottom: 20px;
+  padding: 10px;
+  outline: none;
+  margin-left: 10%;
+}
+
+.textarea_form_for_sprint::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.container_for_btn {
+  //position: absolute;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  //border: 1px solid red;
+  //gap: 30px;
+}
+
+.btn_complete_sprint, .btn_complete_event {
+  width: 200px;
+  height: 40px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 300;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-wight-color);
+  font-size: 16px;
+  //position: absolute;
+}
+
+.voting-chat2 {
+  position: absolute;
+  left: 28%;
+  border: 2px solid var(--border-light-gray-color);
+  border-radius: 5px;
+  width: 72%;
+  height: 80vh;
+  display: block;
+  justify-content: center;
 }
 </style>
