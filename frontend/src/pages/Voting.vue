@@ -12,13 +12,11 @@
         <div class="sprint-history">
           <div class="title-for-sprint-history">Sprint history</div>
           <div class="container-for-sprints">
-            <!-- здесь будет дерево спринтов
-            -->
+
             <sprint
-                v-for="(sprint, index) in sprints" :key="index"
-                v-if="index <= this.countSprint"
-                :state="sprint.state"
-                class="sprint"
+                v-for="(sprint, index) in this.sprints" :key="index"
+                :state="index === 0 ? 'voting' : 'ended'"
+                :data="sprint.data"
             />
           </div>
         </div>
@@ -88,11 +86,24 @@ import MyButton from "@/components/UI/MyButton.vue";
 import { ref, push, onValue } from "firebase/database";
 import { db } from "@/pages/db";
 import Sprint from "@/components/UI/Sprint.vue";
+function formatDate(date) {
+  const hrs0 = '0' + date.getUTCHours()
+  const mins0 = '0' + date.getUTCMinutes()
+  const secs0 = '0' + date.getUTCSeconds()
+  const hrs = hrs0.substring(hrs0.length-2)
+  const mins = mins0.substring(mins0.length-2)
+  const secs = secs0.substring(secs0.length-2)
+  return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} ${hrs}:${mins}:${secs}`
+}
 export default {
   components: {Sprint, MyButton },
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
-    const countSprint = parseInt(localStorage.getItem('countSprint')) || 0;
+
+    const eventSprintsKey = "sprints_" + this.$route.params.id;
+    const eventCountSprintKey = "countSprint_" + this.$route.params.id;
+    const countSprint = parseInt(localStorage.getItem(eventCountSprintKey)) || 0;
+    const sprints = JSON.parse(localStorage.getItem(eventSprintsKey)) || [];
     return {
       user: user,
       events: {},
@@ -103,8 +114,10 @@ export default {
       likes: 0,
       messages: {},
       ID: this.$route.params.id,
-      sprints: {},
+      sprints: sprints,
       countSprint: countSprint,
+      eventSprintsKey: eventSprintsKey,
+      eventCountSprintKey: eventCountSprintKey,
     }
   },
   async beforeMount() {
@@ -126,24 +139,14 @@ export default {
       this.messages.likes += 1;
     },
     completeSprint() {
-      // Логика для завершения спринта
-      const nextSprint = this.sprints.find(sprint => sprint.state === 'voting');
-      if (nextSprint) {
-        nextSprint.state = 'ended';
-      }
-      this.countSprint += 1;
-      localStorage.setItem('countSprint', this.countSprint.toString());
+      this.sprints.unshift({data: formatDate(new Date(new Date().getTime() - 1000))});
+      localStorage.setItem(this.eventSprintsKey, JSON.stringify(this.sprints));
+
+      this.countSprint +=  1;
+      localStorage.setItem(this.eventCountSprintKey, this.countSprint.toString());
+
+      this.show2 = !this.show2
     },
-    // async showSprint() {
-    //   try {
-    //     const list_sprint = await this.$api.events.listSprints();
-    //     console.log("list_sprint", list_sprint)
-    //     // this.sprints = ev
-    //
-    //   } catch (error) {
-    //     console.log('failed:', error);
-    //   }
-    // },
     getMessageClasses(message) {
       return {
         'message-right': message.username === this.user.username,
@@ -197,14 +200,14 @@ export default {
       console.log("Failed to fetch messages:", error);
     }
 
-    try {
-      const list_sprint = await this.$api.sprints.listSprints();
-      console.log("list_sprint", list_sprint)
-      this.sprints = list_sprint.data
-
-    } catch (error) {
-      console.log('failed:', error);
-    }
+    // try {
+    //   const list_sprint = await this.$api.sprints.listSprints();
+    //   console.log("list_sprint", list_sprint)
+    //   this.sprints = list_sprint.data.this.ID
+    //
+    // } catch (error) {
+    //   console.log('failed:', error);
+    // }
   },
 }
 </script>
@@ -238,6 +241,7 @@ export default {
 .sprint-history {
   position: absolute;
   left: 0;
+  top: 0;
   border: 2px solid var(--border-light-gray-color);
   border-radius: 5px;
   width: 25%;
@@ -245,28 +249,23 @@ export default {
 
   display: flex;
   flex-direction: column;
-  align-items: center;
+  //align-items: center;
 }
 
 .container-for-sprints {
   //position: absolute;
   overflow-y: auto;
-  //border: 1px solid red;
   width: 100%;
   height: calc(100% - 40px);
   margin-top: 40px;
-}
-.container-for-sprints::-webkit-scrollbar {
-  width: 0;  /* Ширина полосы прокрутки */
-  height: 0; /* Высота полосы прокрутки (горизонтальная полоса) */
+  padding-top: 40px;
 }
 
-.sprint {
-  position: absolute;
-  margin-bottom: calc(index * 50px);
-  bottom: 0;
-  left: 50px;
+.container-for-sprints::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
+
 .voting-chat {
   position: absolute;
   left: 28%;
@@ -470,7 +469,7 @@ export default {
 }
 
 .message-right .message-text {
-  background-color: #2ecc71;
+  background-color: var(--message-green-color);
   margin-left: 10px;
 }
 
