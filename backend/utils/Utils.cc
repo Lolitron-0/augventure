@@ -53,6 +53,8 @@ void filterUserData(Json::Value& userData)
     using namespace drogon_model::augventure_db;
     userData.removeMember(Users::Cols::_auth_code);
     //userData.removeMember(Users::Cols::_id);
+    if(userData[Users::Cols::_pfp_url].isNull())
+        userData[Users::Cols::_pfp_url] = drogon::app().getUploadPath().substr(1) + "/" + "defaultPfp.png";
     userData.removeMember(Users::Cols::_password);
 }
 

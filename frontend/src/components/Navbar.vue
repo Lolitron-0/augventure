@@ -174,7 +174,7 @@ export default {
   height: 30px;
   border: solid 1px var(--border-light-gray-color);
   box-sizing: border-box;
-  background-color: #0e73bd;
+  background-color: #31a0a8;
   cursor: pointer;
   border-radius: 100%;
   margin-right: 20px;

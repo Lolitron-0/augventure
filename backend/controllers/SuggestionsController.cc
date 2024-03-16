@@ -157,6 +157,7 @@ void SuggestionsController::get(
     std::function<void(const HttpResponsePtr&)>&& callback)
 {
     auto callbackPtr{ MAKE_CALLBACK_HEAP_PTR(callback) };
+
     auto sortingParams{ req->parameters().find("sort") };
     int8_t sortByVotes{ 0 };
     if (sortingParams != req->parameters().end())
@@ -178,8 +179,17 @@ void SuggestionsController::get(
         req->setParameter("sort", sortParamsResString);
     }
 
+    Json::Reader reader;
+    Json::Value body;
+    reader.parse(req->getOptionalParameter<std::string>("filter").value_or(""),
+                 body);
+
+    auto bodyRequest{ HttpRequest::newHttpJsonRequest(body) };
+    bodyRequest->setParameter(
+        "sort", req->getOptionalParameter<std::string>("sort").value_or(""));
+
     SuggestionsControllerBase::get(
-        req,
+        bodyRequest,
         [callbackPtr, sortByVotes](auto resp)
         {
             if (resp->statusCode() != k200OK || resp->jsonObject()->empty())
