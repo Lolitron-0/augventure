@@ -39,7 +39,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  //border: 1px solid #31a0a8;
+  /* border: 1px solid #31a0a8; */
   width: 25%;
   height: 80vh;
   padding: 2%;
@@ -49,7 +49,7 @@ export default {
   width: 90%;
   border: 1px solid #858585;
   box-sizing: border-box;
-  background-color: #0e73bd;
+  /* background-color: #0e73bd; */
   cursor: pointer;
   border-radius: 50%;
   aspect-ratio: 1;
@@ -58,14 +58,14 @@ export default {
 .profile_nickname {
   margin-top: 10px;
   color: var(--profile-nickname);
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   font-size: 22px;
 }
 
 .user_info {
   margin-top: 10px;
   color: var(--user-info);
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   display: flex;
   gap: 20%;
   justify-content: center;
@@ -74,7 +74,7 @@ export default {
 .user_description {
   margin-top: 10px;
   color: var(--user-description);
-  //border: 1px solid red;
+  /* border: 1px solid red; */
   font-size: 14px;
 }
 
@@ -113,7 +113,7 @@ export default {
 
   .profile_nickname {
     margin-left: 0;
-    //border: 1px solid red;
+    /* border: 1px solid red; */
     top: 20%;
     font-size: 20px;
   }
@@ -123,7 +123,7 @@ export default {
   }
 
   .user_info {
-    //border: 1px solid red;
+    /* border: 1px solid red; */
     margin-top: 0;
     gap: 25px;
     display: flex;
@@ -135,7 +135,7 @@ export default {
     margin-top: 0;
     padding: 5px;
     color: var(--user-description);
-    //border: 1px solid red;
+    /* border: 1px solid red; */
     font-size: 14px;
     flex: 1;
   }

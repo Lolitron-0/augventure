@@ -46,8 +46,8 @@ export default {
       });
       for (const entry of events.data) {
         let descString = entry.event.description
-        if (descString.length > 30) {
-          descString = descString.slice(0, 30) + "..."
+        if (descString.length > 40) {
+          descString = descString.slice(0, 40) + "..."
         }
         this.events.push({
           title: entry.event.title,
@@ -122,7 +122,6 @@ hr {
   max-height: 256px;
   border: solid 1px var(--border-light-gray-color);
   box-sizing: border-box;
-  background-color: #0e73bd;
   cursor: pointer;
   border-radius: 50%;
   aspect-ratio: 1;

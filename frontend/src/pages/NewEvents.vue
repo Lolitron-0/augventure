@@ -39,13 +39,15 @@
         <div class="container_for_status">
           <h3 class="status_text">Status</h3>
           <label class="status_event">
-            <input type="radio" name="status" value="now" class="real_radio" required>
+            <input type="radio" name="status" value="now" class="real_radio" required
+              v-model.trim="creation_data.start">
             <span class="custom_radio"></span>
             <i class='bx bxs-stopwatch time_now_vector'></i>
             <p class="text_for_state_form">The event will start immediately after the creation is completed</p>
           </label>
           <label class="status_event">
-            <input type="radio" name="status" value="later" class="real_radio" required>
+            <input type="radio" name="status" value="later" class="real_radio" required
+              v-model.trim="creation_data.start">
             <span class="custom_radio"></span>
             <i class='bx bx-time-five time_later_vector'></i>
             <p class="text_for_state_form">The event will start later</p>
@@ -70,9 +72,9 @@ function formatDate(date) {
   const hrs0 = '0' + date.getUTCHours()
   const mins0 = '0' + date.getUTCMinutes()
   const secs0 = '0' + date.getUTCSeconds()
-  const hrs = hrs0.substring(hrs0.length-2)
-  const mins = mins0.substring(mins0.length-2)
-  const secs = secs0.substring(secs0.length-2)
+  const hrs = hrs0.substring(hrs0.length - 2)
+  const mins = mins0.substring(mins0.length - 2)
+  const secs = secs0.substring(secs0.length - 2)
   return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} ${hrs}:${mins}:${secs}`
 }
 
@@ -86,16 +88,26 @@ export default {
         title: '',
         description: '',
         start: formatDate(new Date(new Date().getTime() - 1000)),
-        state: 'in_progress'
       },
       initial_post:
       {
         text_content: ''
+      },
+      creation_data:
+      {
+        start: "now"
       }
     }
   },
   methods: {
     async createEvent() {
+      if (this.creation_data.start === "now")
+        this.event.start = formatDate(new Date(new Date().getTime() - 1000));
+      else
+        this.event.start = formatDate(new Date(new Date().getTime() + 10000));
+        
+      console.log(this.event.start);
+
       try {
         const response = await this.$api.events.createEvent({
           event: this.event,
@@ -334,4 +346,5 @@ export default {
   .text_for_state_form {
     font-size: 15px;
   }
-}</style>
+}
+</style>

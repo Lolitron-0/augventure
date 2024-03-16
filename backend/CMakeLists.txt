@@ -28,6 +28,8 @@ set(SOURCES
     ${FILTER_SRC}
 )
 
+configure_file(images/defaultPfp.png uploads/defaultPfp.png COPYONLY)
+
 include_directories(thirdparty/jwt-cpp/include)
 
 add_executable(${PROJECT_NAME} ${SOURCES})

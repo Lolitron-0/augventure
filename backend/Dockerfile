@@ -17,7 +17,7 @@ WORKDIR /app
 COPY . .
 
 WORKDIR build
-RUN cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja .. && cmake --build . --parallel 5
+RUN cmake -DCMAKE_BUILD_TYPE=Release -G Ninja .. && cmake --build . --parallel 5
 
 CMD ./augventure
 # WORKDIR ..
