@@ -16,7 +16,7 @@
             <sprint
                 v-for="(sprint, index) in this.sprints" :key="index"
                 :state="index === 0 ? 'voting' : 'ended'"
-                :data="sprint.data"
+                :data="sprint.start"
             />
           </div>
         </div>
@@ -70,7 +70,15 @@
         </div>
         <div v-else class="voting-chat2">
           <i class='bx bx-arrow-back icon_arrow' @click="changeShow2"></i>
-          <textarea name="message" rows="15" cols="50" class="textarea_form_for_sprint" required></textarea>
+          <textarea
+              name="message"
+              rows="15" cols="50"
+              class="textarea_form_for_sprint"
+              v-model="sprintMessage"
+              required
+          >
+
+          </textarea>
           <div class="container_for_btn">
             <my-button class="btn_complete_sprint" @click="completeSprint">Continue event</my-button>
             <my-button class="btn_complete_event" @click="completeEvent">Complete the event</my-button>
@@ -100,10 +108,10 @@ export default {
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
 
-    const eventSprintsKey = "sprints_" + this.$route.params.id;
-    const eventCountSprintKey = "countSprint_" + this.$route.params.id;
-    const countSprint = parseInt(localStorage.getItem(eventCountSprintKey)) || 0;
-    const sprints = JSON.parse(localStorage.getItem(eventSprintsKey)) || [];
+    // const eventSprintsKey = "sprints_" + this.$route.params.id;
+    // const eventCountSprintKey = "countSprint_" + this.$route.params.id;
+    // const countSprint = parseInt(localStorage.getItem(eventCountSprintKey)) || 0;
+    // const sprints = JSON.parse(localStorage.getItem(eventSprintsKey)) || [];
     return {
       user: user,
       events: {},
@@ -111,20 +119,28 @@ export default {
       show: true,
       show2: true,
       inputMessage: "",
-      likes: 0,
-      messages: {},
+      sprintMessage: "",
+      messages: [],
       ID: this.$route.params.id,
-      sprints: sprints,
-      countSprint: countSprint,
-      eventSprintsKey: eventSprintsKey,
-      eventCountSprintKey: eventCountSprintKey,
+      sprints: [],
+      sprints_id: 0,
+      // sprints: sprints,
+      // countSprint: countSprint,
+      // eventSprintsKey: eventSprintsKey,
+      // eventCountSprintKey: eventCountSprintKey,
     }
   },
   async beforeMount() {
     try {
       const ev = await this.$api.events.getOne(this.ID);
       this.events = ev.data.event
+      this.sprints = ev.data.sprints
 
+      console.log("this.sprints", this.sprints)
+      for (const sprint of this.sprints) {
+        this.sprints_id = sprint.id
+        console.log("id", sprint.id)
+      }
     } catch (error) {
       console.log('failed:', error);
     }
@@ -138,15 +154,6 @@ export default {
 
       this.messages.likes += 1;
     },
-    completeSprint() {
-      this.sprints.unshift({data: formatDate(new Date(new Date().getTime() - 1000))});
-      localStorage.setItem(this.eventSprintsKey, JSON.stringify(this.sprints));
-
-      this.countSprint +=  1;
-      localStorage.setItem(this.eventCountSprintKey, this.countSprint.toString());
-
-      this.show2 = !this.show2
-    },
     getMessageClasses(message) {
       return {
         'message-right': message.username === this.user.username,
@@ -159,35 +166,76 @@ export default {
     Show() {
       this.show = !this.show;
     },
-    SendMessage() {
-      const messagesRef = ref(db, "message_" + this.ID);
+    async SendMessage() {
+      try {
+        if (this.inputMessage === "" || this.inputMessage === null) {
+          return;
+        }
 
-      if (this.inputMessage === "" || this.inputMessage === null) {
-        return;
+        const response = await this.$api.suggestions.createSuggestion({
+          suggestion: {sprint_id: this.sprints_id},
+          content: {text_content: this.inputMessage}
+        })
+
+        this.inputMessage = "";
+        console.log('Сообщение успешно создано:', response.data)
+
+        console.log("message", this.messages)
+      } catch (error) {
+        console.error('Ошибка при создании сообщения:', error)
+      }
+    },
+    async completeSprint() {
+      try {
+        const response = await this.$api.events.finishImplementingEvent({
+          content: this.sprintMessage,
+          is_last_sprint: true
+        })
+        this.sprintMessage = "";
+
+        console.log('Спринт успешно создан:', response.data)
+        this.show2 = !this.show2
+      } catch (error) {
+        console.error('Ошибка при создании спринта:', error)
       }
 
-      const message = {
-        username: this.user.username,
-        content: this.inputMessage,
-        avatar: this.user.pfp_url,
-        likes: this.likes
+      try {
+        const ev = await this.$api.events.getOne(this.ID);
+        this.events = ev.data.event
+        this.sprints = ev.data.sprints
+
+        for (const sprint of this.sprints) {
+          this.sprints_id = sprint.id
+        }
+      } catch (error) {
+        console.log('failed:', error);
       }
+    },
 
-      push(messagesRef, message);
-      this.inputMessage = "";
-
-    }
   },
   async mounted() {
     try {
+      const suggestions = await this.$api.suggestions.filterSuggestion({
+        "filter": [
+          [
+            ["sprint_id", "=", this.sprints_id]
+          ]
+        ]
+      });
+      for (const entry of suggestions.data) {
 
-      const messagesRef = ref(db, "message_" + this.ID);
+        console.log("suggestions", entry)
 
-      onValue(messagesRef, (snapshot) => {
-        const data = snapshot.val();
+        this.messages.push({
+          content: entry.post.text_content,
+          sprint_id: entry.sprint_id,
+          username: entry.author.username,
+          avatar: entry.author.pfp_url,
+          likes: entry.votes,
+        })
+        const data = this.messages.content
+
         if (data) {
-          this.messages = Object.values(data);
-
           this.$nextTick(() => {
             const messageContainer = this.$refs.messageContainer;
             if (messageContainer) {
@@ -195,19 +243,10 @@ export default {
             }
           });
         }
-      });
+      }
     } catch (error) {
-      console.log("Failed to fetch messages:", error);
+      console.log('failed:', error);
     }
-
-    // try {
-    //   const list_sprint = await this.$api.sprints.listSprints();
-    //   console.log("list_sprint", list_sprint)
-    //   this.sprints = list_sprint.data.this.ID
-    //
-    // } catch (error) {
-    //   console.log('failed:', error);
-    // }
   },
 }
 </script>

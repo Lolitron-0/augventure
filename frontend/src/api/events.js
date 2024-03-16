@@ -8,6 +8,9 @@ export default function (instance) {
 		},
 		getOne(id) {
 			return instance.get(`events/${id}`);
+		},
+		finishImplementingEvent(eventId, payload) {
+			return instance.patch(`events/${eventId}/finish_implementing`, payload);
 		}
 	};
 }
