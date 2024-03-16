@@ -42,8 +42,7 @@ A platform for collaborative content creation with the audience.
 
 ## Другие ресурсы
 - [Postman документация](https://documenter.getpostman.com/view/31966860/2s9YsMABU5) для реализованных запросов.
-- Видео демонстрация доступного фронтенда (10.03.2024)
-- Видео демонстрация всех запросов
+- [Видео демонстрация (10.03.2024)](https://disk.yandex.ru/i/ceWe2wsPYQn8lw)
 
 ## Локальный запуск
 Для развертывания сервиса необходимы [Docker](https://docs.docker.com/engine/install/) и [Docker Compose](https://docs.docker.com/compose/).
