@@ -28,27 +28,34 @@
           <div class="chat-messages" ref="messageContainer">
             <div class="message-container" >
               <div
-                  v-for="(message, index) in messages"
-                  :key="index"
-                  :class="getMessageClasses(message)"
+                  v-for="(message, index) in eventMessages[this.ID]"
+                  :key="message.id"
+                  :class="getMessageClasses(message, this.user)"
               >
                 <div class="message-content">
                   <div class="username">{{ message.username }}</div>
                   <div class="text-with-avatar">
-                    <img v-if="message.avatar !== this.user.pfp_url" :src="message.avatar" alt="" class="avatar"/>
-<!--                    <div v-if="message.avatar === this.user.pfp_url" class="like">-->
-<!--                      <i class='bx bxs-like icon_like'></i>-->
-<!--                      {{  }}-->
-<!--                    </div>-->
+                    <img v-if="message.author_id !== this.user.id" :src="message.avatar" alt="" class="avatar"/>
+
                     <div class="message-text">{{ message.content }}</div>
-                    <div v-if="message.avatar !== this.user.pfp_url" class="like" @click="likeCounter">
-                      <i class='bx bxs-like icon_like'></i>
+
+                    <div v-if="message.author_id !== this.user.id" class="like">
+                      <div>
+                        <i @click="likeCounter(index, message.id)" class='bx bxs-like icon_like'></i>
+                        <i @click="dislikeCounter(index, message.id)" class='bx bxs-dislike icon_like'></i>
+                      </div>
                       <div class="count_likes"> {{ message.likes }} </div>
                     </div>
-                    <div v-if="message.avatar !== this.user.pfp_url" class="end_sprint" @click="changeShow2">
+                    <!-- @click="changeShow2"-->
+                    <div v-if="message.author_id !== this.user.id && this.user.id === this.events.author_id"
+                         class="end_sprint"
+
+                         @click="openConfirmationModal(index)"
+                    >
                       <i class='bx bxs-party icon_end_sprint'></i>
                     </div>
-                    <img v-if="message.avatar === this.user.pfp_url" :src="message.avatar" alt="" class="avatar"/>
+
+                    <img v-if="message.author_id === this.user.id" :src="message.avatar" alt="" class="avatar"/>
                   </div>
                 </div>
               </div>
@@ -67,9 +74,20 @@
             </button>
           </form>
 
+          <!-- Модальное окно подтверждения -->
+          <div class="modal" v-if="showModal">
+            <div class="modal-content">
+              <div class="block_for_modal_text">
+                <p class="text_for_modal_window">Finish the sprint?</p>
+              </div>
+              <div class="modal-buttons">
+                <my-button class="btn_modal_window" @click="determineTheWinner">Yes</my-button>
+                <my-button class="btn_modal_window" @click="closeModal">Сancel</my-button>
+              </div>
+            </div>
+          </div>
         </div>
         <div v-else class="voting-chat2">
-          <i class='bx bx-arrow-back icon_arrow' @click="changeShow2"></i>
           <textarea
               name="message"
               rows="15" cols="50"
@@ -80,8 +98,8 @@
 
           </textarea>
           <div class="container_for_btn">
-            <my-button class="btn_complete_sprint" @click="completeSprint">Continue event</my-button>
-            <my-button class="btn_complete_event" @click="completeEvent">Complete the event</my-button>
+            <my-button class="btn_complete_sprint" @click="finishImplementing(false)">Continue event</my-button>
+            <my-button class="btn_complete_event" @click="finishImplementing(true)">Complete the event</my-button>
           </div>
         </div>
       </div>
@@ -108,10 +126,6 @@ export default {
   data() {
     const user = JSON.parse(localStorage.getItem('user'));
 
-    // const eventSprintsKey = "sprints_" + this.$route.params.id;
-    // const eventCountSprintKey = "countSprint_" + this.$route.params.id;
-    // const countSprint = parseInt(localStorage.getItem(eventCountSprintKey)) || 0;
-    // const sprints = JSON.parse(localStorage.getItem(eventSprintsKey)) || [];
     return {
       user: user,
       events: {},
@@ -120,14 +134,12 @@ export default {
       show2: true,
       inputMessage: "",
       sprintMessage: "",
-      messages: [],
+      eventMessages: {},
       ID: this.$route.params.id,
       sprints: [],
       sprints_id: 0,
-      // sprints: sprints,
-      // countSprint: countSprint,
-      // eventSprintsKey: eventSprintsKey,
-      // eventCountSprintKey: eventCountSprintKey,
+      showModal: false,
+      selectedIndex: null,
     }
   },
   async beforeMount() {
@@ -136,11 +148,55 @@ export default {
       this.events = ev.data.event
       this.sprints = ev.data.sprints
 
+      console.log("user", this.user)
       console.log("this.sprints", this.sprints)
       for (const sprint of this.sprints) {
         this.sprints_id = sprint.id
         console.log("id", sprint.id)
+
+        break
       }
+
+      try {
+        console.log("filterSuggestion", this.sprints_id)
+        const suggestions = await this.$api.suggestions.filterSuggestion({
+          "filter": [
+            [
+              ["sprint_id", "=", this.sprints_id]
+            ]
+          ]
+        });
+
+        this.eventMessages[this.ID] = [];
+        for (const entry of suggestions.data) {
+          this.eventMessages[this.ID].push({
+            id: entry.id,
+            content: entry.post.text_content,
+            sprint_id: entry.sprint_id,
+            username: entry.author.username,
+            avatar: entry.author.pfp_url,
+            likes: entry.votes,
+            author_id: entry.author_id,
+          })
+          const data = this.eventMessages[this.ID]
+
+          console.log("suggestions", entry)
+          console.log("this.messages", this.eventMessages[this.ID])
+
+          if (data) {
+            this.scrollToBottom();
+          }
+        }
+      } catch (error) {
+        console.log('failed:', error);
+      }
+
+      const storedMessages = localStorage.getItem('chatMessages');
+      if (storedMessages) {
+        this.eventMessages[this.ID] = JSON.parse(storedMessages);
+      }
+
+      this.scrollToBottom()
     } catch (error) {
       console.log('failed:', error);
     }
@@ -149,15 +205,73 @@ export default {
     changeShow2() {
       this.show2 = !this.show2
     },
-    likeCounter() {
-      const messagesRef = ref(db, "message_" + this.ID);
+    async likeCounter(index, id) {
+      const message = this.eventMessages[this.ID][index];
+      if (message.likedByUser !== "like") {
+        if (message.likedByUser === "dislike") {
+          message.likes += 2; // Увеличиваем на 2, так как изначально уменьшалось на 1
+        } else {
+          message.likes += 1;
+        }
+        message.likedByUser = "like";
+        localStorage.setItem('chatMessages', JSON.stringify(this.eventMessages[this.ID]));
 
-      this.messages.likes += 1;
+        try {
+          const response = await this.$api.suggestions.voteSuggestion(id, {
+            vote_value: message.likes
+          });
+
+          console.log('Лайк успешно добавлен:', response.data);
+        } catch (error) {
+          console.error('Ошибка при добавлении лайка:', error);
+        }
+      }
+
+      const iconLike = document.querySelectorAll('.icon_like');
+      iconLike.forEach((icon, i) => {
+        if (i === index) {
+          icon.classList.add('active');
+        } else {
+          icon.classList.remove('active');
+        }
+      });
     },
-    getMessageClasses(message) {
+
+    async dislikeCounter(index, id) {
+      const message = this.eventMessages[this.ID][index];
+      if (message.likedByUser !== "dislike") {
+        if (message.likedByUser === "like") {
+          message.likes -= 2; // Уменьшаем на 2, так как изначально увеличивалось на 1
+        } else {
+          message.likes -= 1;
+        }
+        message.likedByUser = "dislike";
+        localStorage.setItem('chatMessages', JSON.stringify(this.eventMessages[this.ID]));
+
+        try {
+          const response = await this.$api.suggestions.voteSuggestion(id, {
+            vote_value: message.likes
+          });
+
+          console.log('Дизлайк успешно добавлен:', response.data);
+        } catch (error) {
+          console.error('Ошибка при добавлении дизлайка:', error);
+        }
+      }
+
+      const iconDislike = document.querySelectorAll('.icon_dislike');
+      iconDislike.forEach((icon, i) => {
+        if (i === index) {
+          icon.classList.add('active');
+        } else {
+          icon.classList.remove('active');
+        }
+      });
+    },
+    getMessageClasses(message, user) {
       return {
-        'message-right': message.username === this.user.username,
-        'message-left': message.username !== this.user.username,
+        'message-right': message.username === user.username,
+        'message-left': message.username !== user.username,
       };
     },
     toggleDescription() {
@@ -166,10 +280,22 @@ export default {
     Show() {
       this.show = !this.show;
     },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const messageContainer = this.$refs.messageContainer;
+        if (messageContainer) {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+      });
+    },
     async SendMessage() {
       try {
         if (this.inputMessage === "" || this.inputMessage === null) {
           return;
+        }
+
+        if (!this.eventMessages[this.ID]) {
+          this.eventMessages[this.ID] = [];
         }
 
         const response = await this.$api.suggestions.createSuggestion({
@@ -177,19 +303,51 @@ export default {
           content: {text_content: this.inputMessage}
         })
 
+        this.eventMessages[this.ID].push({
+          id: response.data.id,
+          author_id: this.user.id,
+          content: this.inputMessage,
+          username: this.user.username,
+          avatar: this.user.pfp_url,
+          likes: 0,
+          sprint_id: this.sprint_id,
+        });
+
+        localStorage.setItem('chatMessages', JSON.stringify(this.eventMessages[this.ID]));
+
         this.inputMessage = "";
-        console.log('Сообщение успешно создано:', response.data)
+        console.log('Сообщение успешно создано:', response)
+
+        this.scrollToBottom();
 
         console.log("message", this.messages)
       } catch (error) {
         console.error('Ошибка при создании сообщения:', error)
       }
     },
-    async completeSprint() {
+    async determineTheWinner() {
+      if (this.selectedIndex !== null) {
+        this.changeShow2();
+        this.closeModal();
+
+        try {
+          const response = await this.$api.events.finishVoting(this.ID, {
+            suggestion_winner_id: [this.selectedIndex]
+          })
+          this.sprintMessage = "";
+
+          console.log('Победитель успешно выбран:', response.data)
+          this.show2 = !this.show2
+        } catch (error) {
+          console.error('Ошибка при определении победителя:', error)
+        }
+      }
+    },
+    async finishImplementing(bool) {
       try {
-        const response = await this.$api.events.finishImplementingEvent({
-          content: this.sprintMessage,
-          is_last_sprint: true
+        const response = await this.$api.events.finishImplementingEvent(this.ID, {
+          content: {text_content: this.sprintMessage},
+          is_last_sprint: bool
         })
         this.sprintMessage = "";
 
@@ -211,48 +369,32 @@ export default {
         console.log('failed:', error);
       }
     },
+    openConfirmationModal(index) {
+      this.selectedIndex = index;
+      this.showModal = true;
+    },
+
+    closeModal() {
+      this.showModal = false;
+      this.selectedIndex = null;
+    },
 
   },
   async mounted() {
-    try {
-      const suggestions = await this.$api.suggestions.filterSuggestion({
-        "filter": [
-          [
-            ["sprint_id", "=", this.sprints_id]
-          ]
-        ]
-      });
-      for (const entry of suggestions.data) {
 
-        console.log("suggestions", entry)
-
-        this.messages.push({
-          content: entry.post.text_content,
-          sprint_id: entry.sprint_id,
-          username: entry.author.username,
-          avatar: entry.author.pfp_url,
-          likes: entry.votes,
-        })
-        const data = this.messages.content
-
-        if (data) {
-          this.$nextTick(() => {
-            const messageContainer = this.$refs.messageContainer;
-            if (messageContainer) {
-              messageContainer.scrollTop = messageContainer.scrollHeight;
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.log('failed:', error);
-    }
   },
 }
 </script>
 
 <style scoped>
 @import "@/styles.css";
+.icon_like.active {
+  color: #31a0a8; /* Цвет для активного лайка */
+}
+
+.icon_dislike.active {
+  color: #31a0a8; /* Цвет для активного дизлайка */
+}
 
 .back {
   background-color: var(--background-app-color);
@@ -617,5 +759,62 @@ export default {
   height: 80vh;
   display: block;
   justify-content: center;
+}
+
+
+/* Стили для модального окна */
+.modal {
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: var(--navbar-color);
+  padding: 20px;
+  border-radius: 5px;
+
+}
+
+.block_for_modal_text {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.text_for_modal_window {
+  font-size: 18px;
+  color: var(--text-wight-color);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn_modal_window {
+  width: 100px;
+  height: 30px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 300;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-wight-color);
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.btn_modal_window:last-child {
+  margin-right: 0;
+  margin-left: 10px;
 }
 </style>

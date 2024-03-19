@@ -11,6 +11,9 @@ export default function (instance) {
 		},
 		finishImplementingEvent(eventId, payload) {
 			return instance.patch(`events/${eventId}/finish_implementing`, payload);
-		}
+		},
+		finishVoting(eventId, payload) {
+			return instance.patch(`events/${eventId}/finish_voting`, payload);
+		},
 	};
 }
